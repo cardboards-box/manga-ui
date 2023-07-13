@@ -1,0 +1,105 @@
+$ctrl-bg: var(--bg-color-accent);
+input, textarea, select {
+    background-color: var(--ctrl-bg);
+    color: var(--color);
+    padding: 10px;
+    border-radius: var(--brd-radius);
+    outline: none;
+    border: 1px solid var(--ctrl-bg);
+    font-family: var(--font-family);
+    transition: all 250ms;
+
+    option {
+        font-family: var(--font-family);
+        background-color: #171130;
+        margin: 5px;
+        padding: 5px;
+    }
+
+    &:focus { border-color: var(--color-primary); }
+    &[type="color"] { width: 100%; }
+
+    &:disabled {
+        cursor: not-allowed;
+        color: var(--color-muted);
+        border-color: var(--bg-color);
+    }
+}
+
+textarea {
+    resize: none;
+    height: 150px;
+}
+
+input:read-only:not([type='color']):not([type='range']) {
+    cursor: not-allowed;
+    color: var(--color-muted);
+    border-color: var(--bg-color);
+}
+
+.control {
+    display: flex;
+    flex-flow: column;
+    margin-top: var(--margin);
+    overflow: hidden;
+
+    label { 
+        margin-bottom: var(--margin); 
+        &.no-bot { margin-bottom: 3px; }
+    }
+
+    &.group, .group {
+        display: flex;
+        flex-flow: row;
+        background-color: var(--ctrl-bg);
+        border-radius: var(--brd-radius);
+        border: 1px solid var(--ctrl-bg);
+        overflow: hidden;
+
+        .fill { flex: 1; }
+        label { margin: auto 5px; }
+
+        input, button, select {
+            background-color: transparent;
+            border: none;
+        }
+
+        input:not(.fill), 
+        select:not(.fill) {
+            min-width: 100px;
+        }
+
+        button, a {
+            display: flex;
+            align-items: center;
+        }
+
+        &:focus-within { border-color: var(--color-primary); }
+        .sep { border-left: 1px solid var(--ctrl-bg); }
+    }
+
+    .note {
+        color: var(--color-muted);
+        font-size: 12px;
+    }
+
+    &.checkbox {
+        flex-flow: row;
+        align-items: center;
+
+        label {
+            margin-bottom: 0;
+            margin-right: var(--margin);
+        }
+    }
+
+    &.no-top { margin-top: 3px; }
+
+    &.in-line {
+        flex-flow: row;
+
+        label { margin: auto 5px; }
+        input, textarea, select { flex: 1; }
+        .group { flex: 1; }
+    }
+}

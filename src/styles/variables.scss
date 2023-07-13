@@ -1,0 +1,37 @@
+$primary-color: #726ae4;
+$primary-color-trans: rgba( lighten( $primary-color, 20% ), 0.8 );
+
+:root {
+    --bg-color: rgba(12, 9, 12, 1);
+    --bg-color-accent: rgba(0, 0, 0, 0.25);
+    --bg-color-accent-darkish: rgba(0, 0, 0, 0.45);
+    --bg-color-accent-dark: rgba(0, 0, 0, 0.75);
+    --bg-color-offset: #302e42;
+
+    --color: #dcddde;
+    --color-success: rgb(0, 255, 0);
+    --color-primary: #{$primary-color};
+    --color-primary-trans: #{$primary-color-trans};
+    --color-secondary: rgba(0, 174, 240, 1);
+    --color-secondary-tran: rgba(0, 174, 240, 0.25);
+    --color-secondary-dark: rgb(0, 95, 133);
+    --color-actual-warning: rgba(252, 83, 5, 0.705);
+    --color-warning: rgb(255, 61, 61);
+    --color-muted: #555;
+
+    --nav-width: 250px;
+    --font-family: 'Roboto';
+    --mobile-limit: 1050px;
+    --margin: 0.75rem;
+    --bg-image: linear-gradient(to right bottom, #1953aa, #693594, #57195c, #1a10a0, #171130);
+    --bg-image-position: center;
+    --bg-image-size: cover;
+    --bg-image-repeat: no-repeat;
+    --bg-image-filter: ;
+
+
+    --ctrl-bg: var(--bg-color-accent);
+    --full-width: min(100vw, 100%);
+    --full-height: min(100vh, 100%);
+    --brd-radius: 5px;
+}

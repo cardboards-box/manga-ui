@@ -1,2 +1,4 @@
-# manga-ui
-The Nuxt3 project for the https://manga.index-0.com project
+# cardboardbox-anime-vue
+The rewrite of the cardboardbox-anime UI with Nuxt3
+
+You can check it out [here](https://manga.index-0.com). 

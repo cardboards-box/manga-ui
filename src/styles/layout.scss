@@ -1,0 +1,109 @@
+.max-width {
+    max-width: min(1050px, 98vw);
+    width: 100%;
+    margin: 0 auto;
+}
+
+.fill-parent {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+}
+
+.flex {
+    display: flex;
+    flex-flow: row;
+    color: var(--color);
+    position: relative;
+    scrollbar-color: var(--bg-color-offset) transparent;
+
+    .fill { flex: 1; }
+    .center-vert { margin-top: auto; margin-bottom: auto; }
+    .center-horz { margin-left: auto; margin-right: auto; }
+    .center { margin: auto;  }
+    .pad-left { margin-left: auto; }
+    .pad-right { margin-right: auto; }
+    .pad-top { margin-top: auto; }
+    .pad-bottom { margin-bottom: auto; }
+
+    .margin-top {
+        margin-top: var(--margin);
+    }
+
+    .content {
+        display: flex;
+        flex-flow: row;
+    }
+
+    &.row {
+        flex-flow: column;
+
+        .content {
+            flex-flow: column;
+        }
+    }
+
+    &.scroll, .scroll { overflow: auto; }
+    &.scroll-y, .scroll-y { overflow-y: auto !important; }
+    &.scroll-x, .scroll-x { overflow-x: auto; }
+    &.overflow { overflow: hidden; }
+    &.center-items { align-items: center; }
+
+    .scroll-header {
+        position: sticky;
+        top: 0;
+        left: 0;
+    }
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+
+    .span { grid-column: span 2; }
+
+    &.by-2 {
+
+        .cell:nth-child(even) { 
+            text-align: right;
+            justify-content: end; 
+        }
+    }
+    &.by-3, &.responsive { 
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        
+        .span { grid-column: span 3; }
+        .cell {
+            &:nth-child(3n+3) {
+                text-align: right;
+                justify-content: end;
+            }
+            &:nth-child(3n+2) {
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    }
+    &.by-4 { 
+        grid-template-columns: repeat(4, minmax(0, 1fr)); 
+        .span {  grid-column: span 4; }
+    }
+
+    &.by-auto {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .grid.responsive {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .grid.responsive,
+    .grid.by-2 {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+}
