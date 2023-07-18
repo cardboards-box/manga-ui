@@ -4,21 +4,21 @@
         <p class="fill">Chapters</p>
         <p>Sort</p>
         <div class="btn-group no-top">
-            <IconBtn 
+            <IconBtn
                 :icon="s.icon"
                 v-for="s in sorts"
                 :link="url(s.key)"
                 :other-classes="s.key === actSort ? 'active' : ''"
             />
         </div>
-        <IconBtn 
+        <IconBtn
             icon="sort"
             :rotate="actAsc ? 0 : 180"
             :flip="!actAsc"
             :link="url(undefined, !actAsc)"
         />
-        <IconBtn 
-            @click="collapseToggle" 
+        <IconBtn
+            @click="collapseToggle"
             :icon="allCollapsed ? 'remove' : 'add'"
         />
     </header>
@@ -35,7 +35,7 @@ import { MangaVolumed, Progress, VolumeSort } from '~/models';
 const props = defineProps<{
     sort?: VolumeSort;
     asc?: boolean;
-    manga?: MangaVolumed;
+    manga?: MangaVolumed | null;
     reloading?: boolean;
     progress?: Progress;
 }>();
@@ -78,7 +78,7 @@ const collapseToggle = () => {
         min-height: 50px;
 
         p {
-            margin: auto 5px;
+            margin: auto 10px;
         }
     }
 }

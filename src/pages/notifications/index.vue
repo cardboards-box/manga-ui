@@ -2,8 +2,17 @@
 <div class="max-width">
     <Error v-if="!currentUser" message="You need to be logged in to manage push notifications"/>
     <Error v-else-if="notificationState === 'unsupported'" message="Push notifications are not supported in your browser"/>
-    <div v-else-if="notificationState === 'granted'" class="center">
+    <div v-else-if="notificationState === 'granted'" class="center flex row">
         <h1>Manage your push notifications!</h1>
+        <IconBtn
+            other-classes="center"
+            text="Show Code"
+            icon="notifications"
+            color="primary"
+            @click="() => enableNotifications()"
+        />
+        <input type="text" v-model="token" />
+        <input type="text" v-model="ua" />
     </div>
     <div v-else class="center flex row">
         <h1>Push Notifications</h1>
@@ -33,14 +42,16 @@ const { currentUser } = useAuthApi();
 const { resolveToken, notificationState } = useFirebase();
 
 const isAvabilable = ('serviceWorker' in navigator) && ('PushManager' in window);
+const token = ref('');
+const ua = ref(navigator.userAgent.toString());
 
 const disableNotifications = async () => {
 
 };
 
 const enableNotifications = async () => {
-    const token = await resolveToken();
-    console.log('Found token', { token });
+    token.value = await resolveToken();
+    console.log('Found token', { token: token.value });
 };
 
 const updateSubscription = (sub: PushSubscription) => {

@@ -27,7 +27,7 @@ const toggle = () => props.volume.collapse = !props.volume.collapse;
     display: flex;
     flex-flow: column;
     margin-top: 10px;
-    margin: 10px 10px 0 10px;
+    margin: 10px 0 0 0;
     padding: 10px;
     position: relative;
     background-color: var(--bg-color-accent);
