@@ -2,123 +2,125 @@
 <Loading v-if="pending" />
 <Error v-else-if="error" :message="error?.message" />
 <div v-else class="manga-details flex fill-parent scroll-y">
-    <div v-if="manga" class="manga-header flex row">
-        <Cover :manga="manga" type="background" width="100%" height="400px" />
-        <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
-        <div class="buttons flex center-horz">
-            <IconBtn 
-                v-if="resumeUrl" 
-                breakpoint 
-                :link="resumeUrl" 
-                icon="play_arrow" 
-                text="Resume" 
-                color="shade" 
-            />
-            <IconBtn 
-                v-if="isRandom" 
-                breakpoint 
-                @click="nextRandom" 
-                icon="shuffle" 
-                text="Next Random Manga"
-                color="shade" 
-            />
-            <IconBtn 
-                v-if="stats && currentUser" 
-                breakpoint 
-                :fill="isFavourite" 
-                @click="toggleFavourite"
-                :loading="reloading" 
-                icon="star" 
-                :text="isFavourite ? 'Unfavourite' : 'Favourite'" 
-                color="shade" 
-            />
-            <IconBtn 
-                v-if="progress && currentUser" 
-                :loading="reloading" 
-                @click="resetProgress" 
-                breakpoint 
-                icon="delete"
-                text="Reset Progress" 
-                color="shade" 
-            />
-            <IconBtn 
-                v-if="currentUser" 
-                :loading="reloading" 
-                @click="reloadSource" 
-                breakpoint 
-                icon="sync"
-                text="Reload Source" 
-                color="shade" 
-            />
-            <IconBtn 
-                @click="copyUrl" 
-                breakpoint 
-                icon="content_copy" 
-                text="Copy Manga Url" 
-                color="shade" 
-            />
-            <IconBtn
-                v-if="currentUser"
-                @click="toggleReadAll"
-                breakpoint
-                :loading="reloading"
-                :icon="progress && progress.read.length > 0 ? 'visibility_off' : 'visibility'"
-                :text="progress && progress.read.length > 0 ? 'Mark all as Unread' : 'Mark all as Read'"
-                color="shade" 
-            />
+    <div class="manga-offset-width flex">
+        <div v-if="manga" class="manga-header flex row">
+            <Cover :manga="manga" type="background" width="100%" height="400px" />
+            <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
+            <div class="buttons flex center-horz">
+                <IconBtn
+                    v-if="resumeUrl"
+                    breakpoint
+                    :link="resumeUrl"
+                    icon="play_arrow"
+                    text="Resume"
+                    color="shade"
+                />
+                <IconBtn
+                    v-if="isRandom"
+                    breakpoint
+                    @click="nextRandom"
+                    icon="shuffle"
+                    text="Next Random Manga"
+                    color="shade"
+                />
+                <IconBtn
+                    v-if="stats && currentUser"
+                    breakpoint
+                    :fill="isFavourite"
+                    @click="toggleFavourite"
+                    :loading="reloading"
+                    icon="star"
+                    :text="isFavourite ? 'Unfavourite' : 'Favourite'"
+                    color="shade"
+                />
+                <IconBtn
+                    v-if="progress && currentUser"
+                    :loading="reloading"
+                    @click="resetProgress"
+                    breakpoint
+                    icon="delete"
+                    text="Reset Progress"
+                    color="shade"
+                />
+                <IconBtn
+                    v-if="currentUser"
+                    :loading="reloading"
+                    @click="reloadSource"
+                    breakpoint
+                    icon="sync"
+                    text="Reload Source"
+                    color="shade"
+                />
+                <IconBtn
+                    @click="copyUrl"
+                    breakpoint
+                    icon="content_copy"
+                    text="Copy Manga Url"
+                    color="shade"
+                />
+                <IconBtn
+                    v-if="currentUser"
+                    @click="toggleReadAll"
+                    breakpoint
+                    :loading="reloading"
+                    :icon="progress && progress.read.length > 0 ? 'visibility_off' : 'visibility'"
+                    :text="progress && progress.read.length > 0 ? 'Mark all as Unread' : 'Mark all as Read'"
+                    color="shade"
+                />
+            </div>
+            <div class="drawers">
+                <Drawer title="Progress" v-if="stats && progress && currentVersion">
+                    <p>
+                        <b>Chapter: </b>
+                        <span v-if="currentVersion.volume">Vol. {{ currentVersion.volume }}&nbsp;</span> Ch. {{
+                            currentVersion.ordinal }} - {{ currentVersion.title }}
+                    </p>
+                    <p>
+                        <b>Progress: </b>
+                        {{ stats.chapterProgress }}%
+                    </p>
+                    <p>
+                        <b>Page Progress: </b>
+                        {{ stats.pageProgress }}%
+                    </p>
+                    <p>
+                        <b>Last Read On: </b>
+                        <Date :date="progress.updatedAt.toString()" />
+                    </p>
+                    <p>
+                        <b>Favourite: </b>
+                        {{ isFavourite ? 'Yes' : 'No' }}
+                    </p>
+                    <p>
+                        <b>Completed: </b>
+                        {{ stats.completed ? 'Yes' : 'No' }}
+                    </p>
+                </Drawer>
+                <Drawer title="Description" v-if="manga.description">
+                    <Markdown :content="manga.description" />
+                </Drawer>
+                <Drawer title="More Details">
+                    <div class="tags">
+                        <span>Alternate Titles</span>
+                        <span v-for="tag in manga.altTitles">{{ tag }}</span>
+                    </div>
+                    <div class="tags in-line">
+                        <span>Tags </span>
+                        <span v-if="manga.nsfw" class="warning">Nsfw</span>
+                        <NuxtLink v-for="tag in manga.tags" :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
+                    </div>
+                    <div class="tags in-line">
+                        <span>Details </span>
+                        <span v-for="tag in manga.attributes">
+                            <b>{{ tag.name }}</b>: {{ tag.value }}
+                        </span>
+                    </div>
+                </Drawer>
+            </div>
         </div>
-        <div class="drawers">
-            <Drawer title="Progress" v-if="stats && progress && currentVersion">
-                <p>
-                    <b>Chapter: </b>
-                    <span v-if="currentVersion.volume">Vol. {{ currentVersion.volume }}&nbsp;</span> Ch. {{
-                        currentVersion.ordinal }} - {{ currentVersion.title }}
-                </p>
-                <p>
-                    <b>Progress: </b>
-                    {{ stats.chapterProgress }}%
-                </p>
-                <p>
-                    <b>Page Progress: </b>
-                    {{ stats.pageProgress }}%
-                </p>
-                <p>
-                    <b>Last Read On: </b>
-                    <Date :date="progress.updatedAt.toString()" />
-                </p>
-                <p>
-                    <b>Favourite: </b>
-                    {{ isFavourite ? 'Yes' : 'No' }}
-                </p>
-                <p>
-                    <b>Completed: </b>
-                    {{ stats.completed ? 'Yes' : 'No' }}
-                </p>
-            </Drawer>
-            <Drawer title="Description" v-if="manga.description">
-                <Markdown :content="manga.description" />
-            </Drawer>
-            <Drawer title="More Details">
-                <div class="tags">
-                    <span>Alternate Titles</span>
-                    <span v-for="tag in manga.altTitles">{{ tag }}</span>
-                </div>
-                <div class="tags in-line">
-                    <span>Tags </span>
-                    <span v-if="manga.nsfw" class="warning">Nsfw</span>
-                    <NuxtLink v-for="tag in manga.tags" :to="'/search/all?include=' + tag">{{ tag }}</NuxtLink>
-                </div>
-                <div class="tags in-line">
-                    <span>Details </span>
-                    <span v-for="tag in manga.attributes">
-                        <b>{{ tag.name }}</b>: {{ tag.value }}
-                    </span>
-                </div>
-            </Drawer>
-        </div>
-    </div>
 
-    <VolumeList :sort="sort" :asc="asc" :manga="data" :progress="progress" />
+        <VolumeList :sort="sort" :asc="asc" :manga="data" :progress="progress" />
+    </div>
 </div>
 </template>
 
@@ -276,6 +278,12 @@ $bg-color: var(--bg-color-accent);
 .manga-details {
     position: unset;
 
+    .manga-offset-width {
+        flex: 1;
+        max-width: 1450px;
+        margin: 0 auto;
+    }
+
     .manga-header {
         position: relative;
         margin: 5px;
@@ -383,6 +391,10 @@ $bg-color: var(--bg-color-accent);
 @media only screen and (max-width: 1050px) {
     .manga-details {
         flex-flow: column;
+
+        .manga-offset-width {
+            flex-flow: column;
+        }
 
         .manga-header {
             width: unset;

@@ -36,7 +36,7 @@ export const useFilterHelpter = () => {
                 target.attributes[i].include = false;
                 continue;
             }
-            
+
             target.attributes[i].values = val.split(',');
         }
     }
@@ -61,7 +61,7 @@ export const useFilterHelpter = () => {
                 case 'boolean': output[key] = value; continue;
             }
 
-            if (typeof value !== 'string' && 
+            if (typeof value !== 'string' &&
                 Array.isArray(value) &&
                 value.length > 0) {
                 output[key] = value.join(',');
@@ -77,7 +77,7 @@ export const useFilterHelpter = () => {
         let at = <any>target;
 
         for(const key in defs) {
-            const value = query[key]?.toString();
+            const value = query[key]?.toString()?.toLowerCase();
             const def = defs[key];
             if (key === 'attributes') {
                 handleAttrsDeser(at, <any>query);

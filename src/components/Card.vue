@@ -1,8 +1,8 @@
 <template>
 <div class="manga" v-if="mdata" :class="actStyle">
-    <Cover 
-        type="link" 
-        :manga="mdata.manga" 
+    <Cover
+        type="link"
+        :manga="mdata.manga"
     />
     <div class="details masked-overflow">
         <div class="title">
@@ -16,14 +16,14 @@
         <template v-if="mdata.stats">
             <div class="source" v-if="mdata.progress">
                 <span>
-                    <b>Progress: </b>&nbsp; 
+                    <b>Progress: </b>&nbsp;
                     {{ mdata.stats.chapterProgress }}%&nbsp;
                     - <Date :date="mdata.progress.updatedAt.toString()" />
                 </span>
             </div>
             <div class="source">
                 <span>
-                    <b>Latest Chapter: </b>&nbsp; 
+                    <b>Latest Chapter: </b>&nbsp;
                     <Date :date="mdata.stats.latestChapter?.toString()" />
                 </span>
             </div>
@@ -34,10 +34,10 @@
         <div class="tags">
             <div class="header">Tags: </div>
             <div class="tag nsfw" v-if="mdata.manga.nsfw">{{ mdata.rating ?? 'NSFW' }}</div>
-            <NuxtLink 
-                class="tag" 
-                v-for="tag of mdata.manga.tags" 
-                :to="'/search/all?include=' + tag"
+            <NuxtLink
+                class="tag"
+                v-for="tag of mdata.manga.tags"
+                :to="'/search/all?include=' + tag.toLowerCase()"
             >
                 {{ tag }}
             </NuxtLink>
@@ -48,14 +48,14 @@
     </div>
 </div>
 <div class="manga" v-if="sdata" :class="actStyle">
-    <Cover 
-        type="link" 
+    <Cover
+        type="link"
         :url="sdata.manga.cover"
         :link="'/import?url=' + encodeURIComponent(sdata.manga.url)"
     />
     <div class="details masked-overflow">
         <div class="title">
-            <NuxtLink 
+            <NuxtLink
                 :to="'/import?url=' + encodeURIComponent(sdata.manga.url)"
             >
                 {{ sdata.manga.title }}
@@ -65,11 +65,11 @@
             <b>Source: </b>&nbsp;{{ sdata.manga.source }}
         </div>
         <div class="source" v-if="sdata.foundVia">
-            <b>Found Via:</b>&nbsp; 
+            <b>Found Via:</b>&nbsp;
             {{ sdata.foundVia.text }} (
                 <span title="Confidence Compute Score">
                     CS: {{ sdata.foundVia.compute.toFixed(2) }}%
-                </span>, 
+                </span>,
                 <span title="Exact Match">
                     EM: {{ sdata.foundVia.exactMatch }}
                 </span>
@@ -82,10 +82,10 @@
         <div class="tags">
             <div class="header">Tags: </div>
             <div class="tag nsfw" v-if="sdata.manga.nsfw">NSFW</div>
-            <NuxtLink 
-                class="tag" 
-                v-for="tag of sdata.manga.tags" 
-                :to="'/search/all?include=' + tag"
+            <NuxtLink
+                class="tag"
+                v-for="tag of sdata.manga.tags"
+                :to="'/search/all?include=' + tag.toLowerCase()"
             >
                 {{ tag }}
             </NuxtLink>
@@ -98,9 +98,9 @@
 </template>
 
 <script setup lang="ts">
-import { 
-    BaseResult, Chapter, ImageSearchManga, Manga, 
-    Stats, MatchResult, Progress, ProgressExt, 
+import {
+    BaseResult, Chapter, ImageSearchManga, Manga,
+    Stats, MatchResult, Progress, ProgressExt,
     VisionResult, ListStyle
 } from '~/models';
 const { listStyle } = useAppSettings();
@@ -200,7 +200,7 @@ function determineCardData(): MangaData | undefined {
     if (!manga) return undefined;
     const data = ('id' in manga) ? manga : manga.manga;
 
-    if (!manga || 'id' in manga) return { 
+    if (!manga || 'id' in manga) return {
         manga: data,
         rating: data.attributes.find(t => t.name === 'Content Rating')?.value
     };
@@ -285,7 +285,7 @@ function determineCardData(): MangaData | undefined {
                 border: 1px solid var(--bg-color-offset);
                 border-radius: 3px;
 
-                &.nsfw { 
+                &.nsfw {
                     background-color: var(--color-warning);
                     text-transform: capitalize;
                 }
@@ -349,7 +349,7 @@ function determineCardData(): MangaData | undefined {
                 overflow: hidden;
                 text-shadow: 0px 0px 4px #000;
 
-                a { 
+                a {
                     font-weight: bold;
                     color: #fff;
                 }
