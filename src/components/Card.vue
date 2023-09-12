@@ -7,7 +7,7 @@
     <div class="details masked-overflow">
         <div class="title">
             <NuxtLink :to="'/manga/' + mdata.manga.id">
-                {{ mdata.manga.title }}
+                {{ mdata.manga.displayTitle ?? mdata.manga.title }}
             </NuxtLink>
             <Icon :fill="!!mdata.icon.fill" v-if="mdata.icon">
                 {{ mdata.icon.text }}

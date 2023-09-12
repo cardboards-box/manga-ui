@@ -5,7 +5,7 @@
     <div class="manga-offset-width flex">
         <div v-if="manga" class="manga-header flex row">
             <Cover :manga="manga" type="background" width="100%" height="400px" />
-            <a class="title" :href="manga.url" target="_blank">{{ manga.title }}</a>
+            <a class="title" :href="manga.url" target="_blank">{{ manga.displayTitle ?? manga.title }}</a>
             <div class="buttons flex center-horz">
                 <IconBtn
                     v-if="resumeUrl"
@@ -67,6 +67,14 @@
                     :text="progress && progress.read.length > 0 ? 'Mark all as Unread' : 'Mark all as Read'"
                     color="shade"
                 />
+                <IconBtn
+                    v-if="currentUser && currentUser.roles.indexOf('Admin') !== -1"
+                    :link="`/manga/${id}/admin`"
+                    breakpoint
+                    icon="edit"
+                    text="Edit"
+                    color="shade"
+                />
             </div>
             <div class="drawers">
                 <Drawer title="Progress" v-if="stats && progress && currentVersion">
@@ -102,6 +110,7 @@
                 <Drawer title="More Details">
                     <div class="tags">
                         <span>Alternate Titles</span>
+                        <span v-if="manga.displayTitle">{{ manga.title }}</span>
                         <span v-for="tag in manga.altTitles">{{ tag }}</span>
                     </div>
                     <div class="tags in-line">

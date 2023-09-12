@@ -1,5 +1,5 @@
-import { 
-    Chapter, Filter, Filters, 
+import {
+    Chapter, Filter, Filters,
     Manga, MangaWithChapters, Stats,
     Paginated, Progress, ProgressExt,
     VolumeChapter, Volume, ImageSearch,
@@ -13,7 +13,7 @@ import { AsyncData } from "nuxt/app";
 type Worked = { worked: boolean };
 
 export const useMangaApi = () => {
-    const { get, del, post, download } = useApiHelper();
+    const { get, del, post, download, put } = useApiHelper();
     const { blurPornCovers } = useAppSettings();
 
     const fetch = (id: number | string) => {
@@ -39,7 +39,7 @@ export const useMangaApi = () => {
         if (!process.client)
             watch(() => request.data.value, () => cache.value = request.data.value);
         return request;
-    } 
+    }
 
     const random = () => get<MangaWithChapters>(`manga/random`);
 
@@ -67,7 +67,7 @@ export const useMangaApi = () => {
     const groupVolumes = (chapters: Chapter[], p?: Progress | ProgressExt, s?: Stats) => {
         let progress = p ? ('manga' in p ? p.progress : p) : undefined;
         let stats = s || (p && 'manga' in p ? p.stats : undefined);
-        
+
         let read = true;
         let groups: Volume[] = [];
 
@@ -139,9 +139,9 @@ export const useMangaApi = () => {
     const shouldBlur = (manga?: Manga) => {
         return (
             !!manga?.attributes
-                ?.find(t => 
-                    t.name === 'Content Rating' && 
-                    t.value === 'pornographic') 
+                ?.find(t =>
+                    t.name === 'Content Rating' &&
+                    t.value === 'pornographic')
             || manga?.provider === 'nhentai'
         ) && blurPornCovers.value
     };
@@ -168,6 +168,10 @@ export const useMangaApi = () => {
         return get<Paginated<ProgressExt>>(`manga/since/${date.toISOString()}`, { page, size });
     }
 
+    const setDisplayTitle = (id: string | number, title?: string) => {
+        return put<void>(`manga/display-title`, { id: id.toString(), title });
+    }
+
     return {
         fetch,
         random,
@@ -191,6 +195,7 @@ export const useMangaApi = () => {
         volumed,
         strip,
         markAsRead,
-        since
+        since,
+        setDisplayTitle
     };
 };

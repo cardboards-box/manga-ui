@@ -12,6 +12,8 @@ export interface Manga extends DbObject {
     description: string;
     nsfw: boolean;
     referer?: string;
+    displayTitle?: string;
+    uploader?: number;
 
     attributes: {
         name: string;

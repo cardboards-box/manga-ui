@@ -32,7 +32,7 @@ export default defineNuxtConfig({
     ],
     runtimeConfig: {
         public: {
-            apiUrl: 'https://cba-api.index-0.com',
+            apiUrl: 'https://localhost:7240', //'https://cba-api.index-0.com',
             appId: 'fd9ea511-ad01-4ba4-ad3d-bc4dee7f53f6',
             authUrl: 'https://auth.index-0.com',
             baseUrl: baseUrl,
@@ -44,6 +44,7 @@ export default defineNuxtConfig({
         '~/components/general/tabs',
         '~/components/buttons',
         '~/components/volume-card',
+        '~/components/sao',
         '~/components'
     ],
     modules: [

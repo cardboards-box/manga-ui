@@ -27,6 +27,8 @@
 
 .text-center { text-align: center; }
 .shadow { text-shadow: 0 0 4px #000; }
+.mute { color: var(--color-muted) !important; }
+.mute-light { color: var(--color-muted-light) !important;}
 
 .icon-btn {
     display: flex;
@@ -72,8 +74,8 @@
 }
 
 .markdown {
-    p, h1, h2, h3, h4, h5, h6 { 
-        margin: 0; 
+    p, h1, h2, h3, h4, h5, h6 {
+        margin: 0;
 
         code {
             background-color: var(--def-color);

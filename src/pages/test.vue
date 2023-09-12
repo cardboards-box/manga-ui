@@ -2,13 +2,13 @@
 <div class="max-width">
 <Tabs>
     <Tab title="Buttons" icon="smart_button">
-        <div 
+        <div
             class="fill-parent"
-            v-swipe 
+            v-swipe
             @swipe-left="() => swipe('left')"
             @swipe-right="() => swipe('right')"
-            @swipe-up="() => swipe('up')"
-            @swipe-down="() => swipe('down')"
+            @swipe-up="() => { swipe('up'); swipedDown = false }"
+            @swipe-down="() => { swipe('down'); swipedDown = true }"
             @tap="(ev: any) => swipe('tap', ev)"
             @click="onClick"
         >
@@ -75,7 +75,7 @@
                     color="warning"
                     disabled
                 />
-                
+
                 <IconBtn
                     text="Hello world"
                     link="/test"
@@ -83,7 +83,7 @@
                     disabled
                 />
 
-                
+
                 <IconBtn
                     text="Hello world"
                     color="warning"
@@ -94,6 +94,8 @@
 
                 <IconBtn color="shade" />
             </div>
+
+            <sao-button-list :active="swipedDown" />
         </div>
     </Tab>
     <Tab title="Input Groups" icon="keyboard">
@@ -108,7 +110,7 @@
         >
             <InputGroup
                 v-model="search"
-                placeholder="Search for your next binge" 
+                placeholder="Search for your next binge"
                 :stuck="stuck"
             >
                 <template #input>
@@ -145,6 +147,7 @@ const selected = ref(options[0]);
 const search = ref('');
 const { data, pending, refresh } = await randomNum(20);
 const todos = ref(['laundry', 'cooking', 'testing code', 'fucking the loli']);
+const swipedDown = ref(false);
 
 const reload = () => {
     pending.value = true;

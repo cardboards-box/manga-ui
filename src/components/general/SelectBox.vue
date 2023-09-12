@@ -1,17 +1,18 @@
 <template>
-<div class="select-styled" :class="{ 'transparent': transparent, 'fill': fill }">
-    <select v-model="value" :disabled="disabled" :aria-disabled="disabled">
+<div class="select-styled" :class="{ 'transparent': isTrue(transparent), 'fill': isTrue(fill) }">
+    <select v-model="value" :disabled="isTrue(disabled)" :aria-disabled="isTrue(disabled)">
         <slot />
     </select>
 </div>
 </template>
 
 <script setup lang="ts">
+import { booleanishext, isTrue } from '~/models';
 const props = defineProps<{
     modelValue: unknown;
-    disabled?: boolean;
-    transparent?: boolean;
-    fill?: boolean
+    disabled?: booleanishext;
+    transparent?: booleanishext;
+    fill?: booleanishext
 }>();
 
 const emits = defineEmits<{

@@ -18,17 +18,6 @@
     scrollbar-color: var(--bg-color-offset) transparent;
 
     .fill { flex: 1; }
-    .center-vert { margin-top: auto; margin-bottom: auto; }
-    .center-horz { margin-left: auto; margin-right: auto; }
-    .center { margin: auto;  }
-    .pad-left { margin-left: auto; }
-    .pad-right { margin-right: auto; }
-    .pad-top { margin-top: auto; }
-    .pad-bottom { margin-bottom: auto; }
-
-    .margin-top {
-        margin-top: var(--margin);
-    }
 
     .content {
         display: flex;
@@ -56,6 +45,19 @@
     }
 }
 
+.center-vert { margin-top: auto; margin-bottom: auto; }
+.center-horz { margin-left: auto; margin-right: auto; }
+.center { margin: auto;  }
+.pad-left { margin-left: auto; }
+.pad-right { margin-right: auto; }
+.pad-top { margin-top: auto; }
+.pad-bottom { margin-bottom: auto; }
+
+.margin-top { margin-top: var(--margin); }
+.margin-right { margin-right: var(--margin); }
+.margin-left { margin-left: var(--margin); }
+.margin-bottom { margin-bottom: var(--margin); }
+
 .grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -65,14 +67,14 @@
 
     &.by-2 {
 
-        .cell:nth-child(even) { 
+        .cell:nth-child(even) {
             text-align: right;
-            justify-content: end; 
+            justify-content: end;
         }
     }
-    &.by-3, &.responsive { 
+    &.by-3, &.responsive {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        
+
         .span { grid-column: span 3; }
         .cell {
             &:nth-child(3n+3) {
@@ -85,8 +87,8 @@
             }
         }
     }
-    &.by-4 { 
-        grid-template-columns: repeat(4, minmax(0, 1fr)); 
+    &.by-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         .span {  grid-column: span 4; }
     }
 
