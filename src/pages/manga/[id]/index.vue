@@ -178,7 +178,7 @@ const resumeUrl = computed(() =>
         ? `/manga/${manga.value?.id}/${progress.value.mangaChapterId}?page=${(progress.value.pageIndex ?? 0) + 1}`
         : undefined
 );
-const title = computed(() => manga.value?.title ?? 'Manga Not Found');
+const title = computed(() => manga.value?.displayTitle ?? manga.value?.title ?? 'Manga Not Found');
 const description = computed(() => manga.value?.description ?? 'Find your next binge on MangaBox!');
 const cover = computed(() => proxy(manga.value?.cover ?? 'https://cba.index-0.com/assets/broken.webp'));
 

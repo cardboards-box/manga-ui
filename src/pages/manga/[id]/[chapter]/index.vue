@@ -1,56 +1,56 @@
 <template>
 <Error v-if="error" :message="error?.message" />
-<div v-else 
-    class="page-wrapper flex fill-parent" 
+<div v-else
+    class="page-wrapper flex fill-parent"
     :class="{ 'open': navOpen, 'over': pageMenuOver }"
 >
-    <main 
+    <main
         class="fill flex"
         v-swipe
         @tap="pageClick"
         @swipe-left="forward"
         @swipe-right="backward"
-        ref="clickarea" 
-        :class="pageStyle" 
+        ref="clickarea"
+        :class="pageStyle"
         v-if="!external"
     >
         <Loading v-if="pending" />
-        <template 
+        <template
             v-else-if="pageStyle === PageStyle.SinglePageFit"
         >
-            <div 
-                class="image" 
-                :style="{ 
-                    'background-image': `url(${pageUrl})`, 
-                    'filter': imageFilter 
-                }" 
+            <div
+                class="image"
+                :style="{
+                    'background-image': `url(${pageUrl})`,
+                    'filter': imageFilter
+                }"
             />
             <img class="hidden" v-if="nextPageImage" :src="nextPageImage" />
         </template>
 
         <template v-else-if="pageStyle === PageStyle.LongStrip">
-            <img 
-                v-for="image of pageUrls" 
-                :src="image" 
-                :style="{ 'filter': imageFilter }" 
+            <img
+                v-for="image of pageUrls"
+                :src="image"
+                :style="{ 'filter': imageFilter }"
             />
         </template>
 
         <template v-else-if="pageStyle === PageStyle.DoublePage">
-            <div 
-                class="image" 
-                :style="{ 
-                    'background-image': `url(${pageUrl})`, 
+            <div
+                class="image"
+                :style="{
+                    'background-image': `url(${pageUrl})`,
                     'filter': imageFilter
-                }" 
+                }"
             />
-            <div 
-                class="image" 
-                v-if="nextPageImage" 
-                :style="{ 
-                    'background-image': `url(${nextPageImage})`, 
+            <div
+                class="image"
+                v-if="nextPageImage"
+                :style="{
+                    'background-image': `url(${nextPageImage})`,
                     'filter': imageFilter
-                }" 
+                }"
             />
         </template>
 
@@ -60,8 +60,8 @@
         </template>
 
         <div class="progress-bar" :class="progressBar">
-            <NuxtLink 
-                v-for="(_, i) of pageUrls" 
+            <NuxtLink
+                v-for="(_, i) of pageUrls"
                 :to="genLink('Page', i + 1)"
                 :class="{ 'active': i < page }"
                 class="progress"
@@ -70,43 +70,43 @@
 
         <ClientOnly>
         <div class="tutorial" v-if="showTutorial">
-            <div 
+            <div
                 class="region flex"
                 v-for="reg in regions"
                 :class="reg.name"
-                :style="{ 
-                    'top': reg.y + '%', 
+                :style="{
+                    'top': reg.y + '%',
                     'left': reg.x + '%',
                     'width': reg.width + '%',
                     'height': reg.height + '%'
                 }"
             >
-                <div 
-                    class="center flex row pad margin" 
+                <div
+                    class="center flex row pad margin"
                     v-if="reg.name === 'center'"
                 >
                     <h2 class="pad">Tutorial:</h2>
                     <p class="pad">
                         Click here (in the center) to open the side bar!
                     </p>
-                    <button 
-                        class="icon-btn pad-left" 
+                    <button
+                        class="icon-btn pad-left"
                         @click="() => showTutorial = false"
                     >
                         <Icon>close</Icon>
                         <p>Close Tutorial</p>
                     </button>
                 </div>
-                <div 
-                    class="center pad rounded bg-accent" 
+                <div
+                    class="center pad rounded bg-accent"
                     v-else-if="reg.name === 'left'"
                 >
                     <p class="shadow">
                         Click anywhere here (on the red) to go back a page!
                     </p>
                 </div>
-                <div 
-                    class="center pad rounded bg-accent" 
+                <div
+                    class="center pad rounded bg-accent"
                     v-else-if="reg.name === 'right'"
                 >
                     <p class="shadow">
@@ -139,10 +139,10 @@
             <Tabs flip>
                 <Tab icon="info" scrollable keep-alive class-name="flex row">
                     <div class="settings-tab flex row">
-                        <img 
-                            v-if="manga?.cover" 
-                            :src="proxy(manga.cover, 'manga-cover', manga.referer)" 
-                            class="rounded" 
+                        <img
+                            v-if="manga?.cover"
+                            :src="proxy(manga.cover, 'manga-cover', manga.referer)"
+                            class="rounded"
                         />
                         <h3 v-if="manga?.title" class="margin-top">
                             {{ manga.title }}
@@ -163,8 +163,8 @@
                                 </a>
                             </p>
                             <p v-else-if="attr.name === 'Scanlation Discord'">
-                                <a 
-                                    :href="'https://discord.gg/' + attr.value" 
+                                <a
+                                    :href="'https://discord.gg/' + attr.value"
                                     target="_blank"
                                 >
                                     <b>Scanlation Discord</b>
@@ -177,21 +177,21 @@
 
                         <div class="control no-top">
                             <SelectBox v-model="chapterId">
-                                <option 
-                                    v-for="chap in chapters" 
+                                <option
+                                    v-for="chap in chapters"
                                     :value="chap.id"
                                 >
-                                    Ch. {{ chap.ordinal }} - {{ chap.title }}
+                                    <span v-if="chap.volume">Vol. {{ chap.volume }} -</span> Ch. {{ chap.ordinal }} - {{ chap.title }}
                                 </option>
                             </SelectBox>
                         </div>
-                        <div 
-                            class="control no-top" 
+                        <div
+                            class="control no-top"
                             v-if="pageStyle !== PageStyle.LongStrip && !external"
                         >
                             <SelectBox v-model="page">
-                                <option 
-                                    v-for="(_, index) in chapter?.pages" 
+                                <option
+                                    v-for="(_, index) in chapter?.pages"
                                     :value="index + 1"
                                 >
                                     Page: #{{ index + 1 }}
@@ -199,15 +199,15 @@
                             </SelectBox>
                         </div>
                         <div class="btn-group">
-                            <NuxtLink 
-                                :class="{ 'disabled': !hasPreviousChapter }" 
+                            <NuxtLink
+                                :class="{ 'disabled': !hasPreviousChapter }"
                                 :to="genLink('PrevChapter')"
                             >
                                 <Icon>skip_previous</Icon>
                             </NuxtLink>
-                            <NuxtLink 
-                                :class="{ 'disabled': !hasPreviousPage }" 
-                                :to="genLink('PrevPage')" 
+                            <NuxtLink
+                                :class="{ 'disabled': !hasPreviousPage }"
+                                :to="genLink('PrevPage')"
                                 v-if="pageStyle !== PageStyle.LongStrip"
                             >
                                 <Icon>navigate_before</Icon>
@@ -215,22 +215,22 @@
                             <NuxtLink :to="genLink('ChapterStart')">
                                 <Icon>restart_alt</Icon>
                             </NuxtLink>
-                            <NuxtLink 
-                                :class="{ 'disabled': !hasNextPage }" 
-                                :to="genLink('NextPage')" 
+                            <NuxtLink
+                                :class="{ 'disabled': !hasNextPage }"
+                                :to="genLink('NextPage')"
                                 v-if="pageStyle !== PageStyle.LongStrip"
                             >
                                 <Icon>navigate_next</Icon>
                             </NuxtLink>
-                            <NuxtLink 
-                                :class="{ 'disabled': !hasNextChapter }" 
+                            <NuxtLink
+                                :class="{ 'disabled': !hasNextChapter }"
                                 :to="genLink('NextChapter')"
                             >
                                 <Icon>skip_next</Icon>
                             </NuxtLink>
                         </div>
                         <div class="btn-group-vert">
-                            <button 
+                            <button
                                 @click="copyUrl(`manga/${id}/${chapterId}?page=${page}`)"
                             >
                                 <Icon>auto_stories</Icon>
@@ -248,8 +248,8 @@
                                 <Icon>home</Icon>
                                 <p>Manga Source Page</p>
                             </a>
-                            <button 
-                                :disabled="downloading" 
+                            <button
+                                :disabled="downloading"
                                 @click="downloadData(pageUrl)"
                             >
                                 <Icon :spin="downloading">
@@ -257,8 +257,8 @@
                                 </Icon>
                                 <p>Download Page</p>
                             </button>
-                            <button 
-                                :disabled="downloading" 
+                            <button
+                                :disabled="downloading"
                                 @click="downloadData(chapterUrl)"
                             >
                                 <Icon :spin="downloading">
@@ -266,7 +266,7 @@
                                 </Icon>
                                 <p>Download Chapter</p>
                             </button>
-                            <NuxtLink 
+                            <NuxtLink
                                 :to="`/manga/${id}/${chapterId}/strip?page=${page}`"
                             >
                                 <Icon>auto_fix</Icon>
@@ -276,8 +276,8 @@
                                 <Icon>restart_alt</Icon>
                                 <p>Restart Chapter</p>
                             </NuxtLink>
-                            <button 
-                                :disabled="bookmarking" 
+                            <button
+                                :disabled="bookmarking"
                                 @click="toggleBookmark"
                             >
                                 <Icon :spin="bookmarking">bookmark</Icon>
@@ -312,8 +312,8 @@
                         <div class="control">
                             <label class="no-bot">Progress Bar Style</label>
                             <SelectBox v-model="progressBar">
-                                <option 
-                                    v-for="style in PROGRESS_BAR_STYLES" 
+                                <option
+                                    v-for="style in PROGRESS_BAR_STYLES"
                                     :value="style"
                                 >
                                     {{ style }}
@@ -322,22 +322,22 @@
                         </div>
                         <div class="control">
                             <label class="no-bot">Scroll amount on key event</label>
-                            <input 
-                                type="number" 
-                                min="0" 
-                                max="1000" 
-                                step="10" 
-                                v-model="scrollAmount" 
+                            <input
+                                type="number"
+                                min="0"
+                                max="1000"
+                                step="10"
+                                v-model="scrollAmount"
                             />
                         </div>
                         <div class="control">
                             <label class="no-bot">Click Region Margin</label>
-                            <input 
-                                type="number" 
-                                min="5" 
-                                max="90" 
-                                step="5" 
-                                v-model="regionMargin" 
+                            <input
+                                type="number"
+                                min="5"
+                                max="90"
+                                step="5"
+                                v-model="regionMargin"
                             />
                         </div>
                         <div class="control">
@@ -358,10 +358,10 @@
                         </div>
                         <div class="control" v-if="filter === FilterStyle.Custom">
                             <label class="no-bot">Custom Filter</label>
-                            <input 
-                                type="text" 
-                                v-model="customFilter" 
-                                placeholder="Custom CSS filter" 
+                            <input
+                                type="text"
+                                v-model="customFilter"
+                                placeholder="Custom CSS filter"
                             />
                         </div>
                         <div class="control">
@@ -380,22 +380,22 @@
                         </div>
                     </div>
                 </Tab>
-                <Tab 
-                    v-if="bookmarks.length > 0" 
-                    icon="bookmark" 
-                    scrollable 
-                    keep-alive 
+                <Tab
+                    v-if="bookmarks.length > 0"
+                    icon="bookmark"
+                    scrollable
+                    keep-alive
                     class-name="flex row"
                 >
                     <template v-for="bookmark in bookmarks">
-                    <NuxtLink 
-                        class="bookmark" 
-                        v-for="p of bookmark.pages" 
+                    <NuxtLink
+                        class="bookmark"
+                        v-for="p of bookmark.pages"
                         :to="genLink('Page', p, bookmarkChapter(bookmark)?.id)"
                     >
-                        <img 
-                            :src="bookmarkImage(bookmark, p)" 
-                            :style="{ 'filter': imageFilter }" 
+                        <img
+                            :src="bookmarkImage(bookmark, p)"
+                            :style="{ 'filter': imageFilter }"
                         />
                         <div class="details">
                             <p>Ch. {{ bookmarkChapter(bookmark)?.ordinal }} Pg. {{ p }}</p>
@@ -411,10 +411,10 @@
 </template>
 
 <script setup lang="ts">
-import { 
-    PageStyle, PAGE_STYLES, 
-    PROGRESS_BAR_STYLES, 
-    FilterStyle, FILTER_STYLES, 
+import {
+    PageStyle, PAGE_STYLES,
+    PROGRESS_BAR_STYLES,
+    FilterStyle, FILTER_STYLES,
     Bookmark
 } from '~/models';
 
@@ -424,8 +424,8 @@ definePageMeta({
     layout: 'nohead'
 });
 
-type LinkTypes = 'NextChapter' | 'PrevChapter' | 
-    'NextPage' | 'PrevPage' | 
+type LinkTypes = 'NextChapter' | 'PrevChapter' |
+    'NextPage' | 'PrevPage' |
     'ChapterStart' | 'Page';
 interface Rect {
     x: number;
@@ -434,15 +434,15 @@ interface Rect {
     height: number;
     name: 'left' | 'right' | 'top' | 'bottom' | 'center';
 }
-    
+
 const DEFAULT_IMAGE = '/broken.png';
 
 const { proxy, download, throttle } = useApiHelper();
 const { pages, fetch, progress, resetPages: reset, bookmark } = useMangaApi();
 const route = useRoute();
-const { 
-        invertControls, forwardOnly, 
-    brightness, pageStyle, filterStyle: filter, 
+const {
+        invertControls, forwardOnly,
+    brightness, pageStyle, filterStyle: filter,
     customFilter, progressBarStyle: progressBar,
     scrollAmount, showTutorial,
     pageMenuOver, regionMargin
@@ -483,10 +483,10 @@ const { data, pending, error, refresh: refreshManga } = await fetch(id.value);
 const manga = computed(() => data.value?.manga);
 const chapters = computed(() => data.value?.chapters || []);
 const chapter = computed(() => chapters.value.find(t => t.id === chapterId.value));
-const pageUrls = computed(() => 
-    !manga.value || 
-    !chapter.value 
-        ? [] 
+const pageUrls = computed(() =>
+    !manga.value ||
+    !chapter.value
+        ? []
         : chapter.value.pages
             .map(t => proxy(t, 'manga-page', manga.value?.referer)));
 const pageUrl = computed(() => pageUrls.value[page.value - 1] || DEFAULT_IMAGE);
@@ -588,7 +588,7 @@ const doFetch = async (force: boolean) => {
     if (page.value > chapter.value.pages.length) {
         navigateTo(`/manga/${id.value}/${chapterId.value}?page=${chapter.value.pages.length}`);
         return;
-    } 
+    }
 
     if (page.value <= 0) {
         navigateTo(`/manga/${id.value}/${chapterId.value}?page=1`);
@@ -720,7 +720,7 @@ const copyUrl = (url: string) => {
     navigator.clipboard.writeText(`${window.location.protocol}//${window.location.host}/${url}`);
 }
 
-const bookmarkChapter = (mark: Bookmark) => 
+const bookmarkChapter = (mark: Bookmark) =>
     chapters.value.find(t => t.id === mark.mangaChapterId);
 
 const bookmarkImage = (mark: Bookmark, page: number) => {
@@ -744,10 +744,10 @@ const fullscreen = () => {
     const doc = <any>document;
 
     const isFullScreen = ((<any>window).fullScreen) || (
-            window.innerWidth == screen.width && 
+            window.innerWidth == screen.width &&
             window.innerHeight == screen.height
         ) || (
-            !window.screenTop && 
+            !window.screenTop &&
             !window.screenY
         );
 
@@ -784,17 +784,17 @@ const scrollUp = computed(() => throttle<void>(() => scroll(true), scrollThrottl
 
 const arrowKeyHandler = (ev: KeyboardEvent, down: boolean) => {
     const scrollabled = [
-        PageStyle.LongStrip, 
-        PageStyle.SinglePageFitToWidth, 
+        PageStyle.LongStrip,
+        PageStyle.SinglePageFitToWidth,
         PageStyle.SinglePageNaturalSize
     ].indexOf(pageStyle.value) !== -1;
-    
+
     switch(ev.key) {
         case 'ArrowLeft': if(!down) backward(); return;
         case 'ArrowRight': if(!down) forward();  return;
         case 'ArrowUp':
-            if (!scrollabled) { 
-                backward(); 
+            if (!scrollabled) {
+                backward();
                 return;
             }
 
@@ -802,8 +802,8 @@ const arrowKeyHandler = (ev: KeyboardEvent, down: boolean) => {
             return;
 
         case 'ArrowDown':
-            if (!scrollabled) { 
-                forward(); 
+            if (!scrollabled) {
+                forward();
                 return;
             }
 
@@ -1042,7 +1042,7 @@ $progress-height: 10px;
 
             button { height: 24px; }
 
-            a { 
+            a {
                 overflow: hidden;
                 overflow: hidden;
                 white-space: pre;

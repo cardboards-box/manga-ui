@@ -42,15 +42,10 @@
 import { VolumeSort } from '~/models';
 const {
     volumed,
-    favourite,
-    reload,
-    resetProgress: reset,
-    markAsRead,
     setDisplayTitle
 } = useMangaApi();
 
-const { proxy: proxyUrl, toPromise, clone } = useApiHelper();
-const { currentUser } = useAuthApi();
+const { toPromise } = useApiHelper();
 const route = useRoute();
 
 const rawLoading = ref(false);

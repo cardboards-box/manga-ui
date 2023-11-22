@@ -32,7 +32,7 @@ export default defineNuxtConfig({
     ],
     runtimeConfig: {
         public: {
-            apiUrl: 'https://cba-api.index-0.com',
+            apiUrl: 'https://cba-api.index-0.com', //'https://localhost:7240',
             appId: 'fd9ea511-ad01-4ba4-ad3d-bc4dee7f53f6',
             authUrl: 'https://auth.index-0.com',
             baseUrl: baseUrl,
