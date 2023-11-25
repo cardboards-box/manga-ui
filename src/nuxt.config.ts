@@ -1,7 +1,7 @@
 import webManifest from "./webmanifest";
 import FIREBASE_CONFIG from './firebase.config';
 
-const baseUrl = 'https://manga.index-0.com';
+const baseUrl = 'https://mangabox.app';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
