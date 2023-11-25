@@ -14,6 +14,7 @@ export interface Manga extends DbObject {
     referer?: string;
     displayTitle?: string;
     uploader?: number;
+    ordinalVolumeReset: boolean;
 
     attributes: {
         name: string;

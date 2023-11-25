@@ -172,6 +172,10 @@ export const useMangaApi = () => {
         return put<void>(`manga/display-title`, { id: id.toString(), title });
     }
 
+    const setOrdinalReset = (id: string | number, reset: boolean) => {
+        return put<void>(`manga/ordinal-reset`, { id: id.toString(), reset });
+    }
+
     return {
         fetch,
         random,
@@ -196,6 +200,8 @@ export const useMangaApi = () => {
         strip,
         markAsRead,
         since,
-        setDisplayTitle
+        setDisplayTitle,
+        setOrdinalReset,
+
     };
 };

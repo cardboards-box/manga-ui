@@ -32,6 +32,19 @@
                 />
             </div>
         </div>
+        <div class="title-select margin flex row rounded">
+            <div class="flex">
+                <CheckBox v-model="manga.ordinalVolumeReset" label="Chapter numbers reset between volumes" />
+                <p class="alt flex center-vert pad-left mute-light">This will fix some bad volumized requests</p>
+                <IconBtn
+                    icon="save"
+                    text="Save Oridnal Reset"
+                    color="primary"
+                    @click="saveReset"
+                    other-classes="margin-left"
+                />
+            </div>
+        </div>
 
     </div>
 </div>
@@ -42,7 +55,8 @@
 import { VolumeSort } from '~/models';
 const {
     volumed,
-    setDisplayTitle
+    setDisplayTitle,
+    setOrdinalReset,
 } = useMangaApi();
 
 const { toPromise } = useApiHelper();
@@ -65,6 +79,15 @@ const saveTitle = async () => {
 
     const title = selectedTitle.value.trim();
     await toPromise(setDisplayTitle(manga.value.id, title));
+    rawLoading.value = false;
+    await refresh();
+}
+
+const saveReset = async () => {
+    if (!manga.value) return;
+    rawLoading.value = true;
+
+    await toPromise(setOrdinalReset(manga.value.id, manga.value.ordinalVolumeReset));
     rawLoading.value = false;
     await refresh();
 }
