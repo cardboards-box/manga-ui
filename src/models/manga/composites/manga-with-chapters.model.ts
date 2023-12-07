@@ -31,10 +31,10 @@ export interface MangaVolume {
     collapse: boolean;
     read: boolean;
     inProgress: boolean;
-    chapters: MangaVolueChapter[]
+    chapters: MangaVolumeChapter[]
 }
 
-export interface MangaVolueChapter {
+export interface MangaVolumeChapter {
     read: boolean;
     readIndex?: number;
     pageIndex?: number;
