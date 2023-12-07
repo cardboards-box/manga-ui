@@ -44,7 +44,7 @@ export default defineNuxtConfig({
         '~/components/general/tabs',
         '~/components/buttons',
         '~/components/volume-card',
-        '~/components/sao',
+        '~/components/reader',
         '~/components'
     ],
     modules: [
