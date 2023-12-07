@@ -12,11 +12,6 @@ export type StyleOptions = string | string[] | undefined | null | {
     [key: string]: string | undefined | null;
 }
 
-
-export const isTrue = (value?: booleanish | booleanishext) => {
-    return value === '' || !!value;
-}
-
 export type Regions = 'top' | 'left' | 'bottom' | 'right' | 'center';
 
 export interface Rect {

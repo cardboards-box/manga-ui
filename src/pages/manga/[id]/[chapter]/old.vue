@@ -414,9 +414,9 @@
 import {
     PageStyle, PAGE_STYLES,
     PROGRESS_BAR_STYLES,
-    FilterStyle, FILTER_STYLES,
-    Bookmark
+    FilterStyle, FILTER_STYLES
 } from '~/models';
+import type { Bookmark } from '~/models';
 
 definePageMeta({
     pageTransition: false,

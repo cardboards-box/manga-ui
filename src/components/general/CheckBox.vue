@@ -1,5 +1,5 @@
 <template>
-    <label 
+    <label
         :tabindex="disabled ? -1 : 0"
         class="checkbox"
         role="checkbox"
@@ -12,13 +12,13 @@
         <slot name="pre" />
         <span class="wrap">
             <Icon>{{ value ? 'check_box' : 'check_box_outline_blank' }}</Icon>
-            <input 
-                type="checkbox" 
-                :id="id" 
+            <input
+                type="checkbox"
+                :id="id"
                 hidden
                 :disabled="disabled"
                 :modelValue="modelValue"
-                @update:modelValue="(e: any) => value = e.target.checked" 
+                @update:modelValue="(e: any) => value = e.target.checked"
             />
         </span>
         <span v-if="hasLabel">
@@ -29,38 +29,37 @@
 </template>
 
 <script setup lang="ts">
-    const slots = useSlots();
+const slots = useSlots();
 
-    interface Emits {
-        (e: 'update:modelValue', value: boolean): void;
-    }
+interface Emits {
+    (e: 'update:modelValue', value: boolean): void;
+}
 
-    interface Props {
-        label?: string;
-        modelValue: boolean;
-        disabled?: boolean;
-    }
+interface Props {
+    label?: string;
+    modelValue: boolean;
+    disabled?: boolean;
+}
 
-    const emit = defineEmits<Emits>();
-    const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
+const props = defineProps<Props>();
 
-    const id = ref(`chk-${Math.random().toString()}`);
-    const value = computed({
-        get() {
-            return props.modelValue;
-        },
-        set(value: boolean) {
-            emit("update:modelValue", value);
-        },
-    });
+const id = ref(`chk-${Math.random().toString()}`);
+const value = computed({
+    get() {
+        return props.modelValue;
+    },
+    set(value: boolean) {
+        emit("update:modelValue", value);
+    },
+});
 
-    const toggle = () => {
-        if (!props.disabled) { value.value = !value.value;  }
-    }
+const toggle = () => {
+    if (!props.disabled) { value.value = !value.value;  }
+}
 
-    const labelText = computed(() => props.label || slots.default);
-    const hasLabel = computed(() => !!labelText.value);
-
+const labelText = computed(() => props.label || slots.default);
+const hasLabel = computed(() => !!labelText.value);
 </script>
 
 <style lang="scss" scoped>

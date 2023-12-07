@@ -7,7 +7,7 @@
         />
         <h2 class="fill" :class="{ 'caps': capitalize }">{{ title }} ({{ items.length }})</h2>
 
-        <IconBtn 
+        <IconBtn
             v-if="allowReload"
             @click="() => $emit('reload')"
             icon="sync"
@@ -52,18 +52,18 @@
 </template>
 
 <script setup lang="ts">
-import { 
-    ProgressExt, Manga, 
-    MatchResult, VisionResult, 
-    BaseResult, ImageSearchManga, 
-    ListStyle 
+import type {
+    ProgressExt, Manga,
+    MatchResult, VisionResult,
+    BaseResult, ImageSearchManga
 } from '~/models';
+import { ListStyle } from '~/models';
 type MangaType = Manga | ProgressExt;
 type SearchType = MatchResult | VisionResult | BaseResult | ImageSearchManga;
 
 const { listStyle, fillPage } = useAppSettings();
 const stickyheader = ref<HTMLElement>();
-const emits = defineEmits<{ 
+const emits = defineEmits<{
     (e: 'onscrolled'): void;
     (e: 'reload'): void;
     (e: 'headerstuck', value: boolean): void;
@@ -109,9 +109,9 @@ const styles = [
 const onScroll = () => {
     const element = scroller.value;
     if (!element) return;
-    
-    const bottom = 
-        element.scrollTop + element.clientHeight 
+
+    const bottom =
+        element.scrollTop + element.clientHeight
         >= element.scrollHeight;
     if (!bottom) return;
 
@@ -122,7 +122,7 @@ const back = () => history.back();
 
 onMounted(() => {
     const observer = new IntersectionObserver(
-        ([e]) => { 
+        ([e]) => {
             e.target.toggleAttribute('stuck', e.intersectionRatio < 1);
             emits('headerstuck', e.intersectionRatio < 1);
         }, { threshold: 1 }
@@ -156,7 +156,7 @@ onMounted(() => {
             margin-top: 0;
             border: 0;
             background-color: transparent;
-            
+
             button {
 
                 &:not(:first-child):not(:last-child) {

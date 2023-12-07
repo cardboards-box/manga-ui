@@ -98,11 +98,12 @@
 </template>
 
 <script setup lang="ts">
-import {
+import type {
     BaseResult, Chapter, ImageSearchManga, Manga,
     Stats, MatchResult, Progress, ProgressExt,
-    VisionResult, ListStyle
+    VisionResult,
 } from '~/models';
+import { ListStyle } from '~/models';
 const { listStyle } = useAppSettings();
 
 interface Props {

@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { Chapter, Progress } from '~/models';
+import type { Chapter, Progress } from '~/models';
 
 const { toPromise } = useApiHelper();
 const { markAsRead } = useMangaApi();

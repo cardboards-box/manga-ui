@@ -4,11 +4,11 @@
         <span>{{ chapter.progress.toFixed(2) + '%' }}</span>
     </div>
     <div class="chapter">
-        <VolumeCard 
-            :chapter="first" 
-            :progress="progress" 
-            v-model="chapter.read" 
-            :open="chapter.open" 
+        <VolumeCard
+            :chapter="first"
+            :progress="progress"
+            v-model="chapter.read"
+            :open="chapter.open"
             @toggle-open="() => chapter.open = !chapter.open"
             :has-versions="false"
             :version="false"
@@ -20,21 +20,21 @@
         <span>{{ chapter.progress.toFixed(2) + '%' }}</span>
     </div>
     <div class="chapter">
-        <VolumeCard 
-            :chapter="first" 
-            :progress="progress" 
+        <VolumeCard
+            :chapter="first"
+            :progress="progress"
             v-model="chapter.read"
-            :open="chapter.open" 
+            :open="chapter.open"
             @toggle-open="() => chapter.open = !chapter.open"
             :has-versions="true"
             :version="false"
         />
         <template v-if="chapter.open">
-            <VolumeCard 
+            <VolumeCard
                 v-for="version in rest"
-                :chapter="version" 
-                :progress="progress" 
-                :read="chapter.read" 
+                :chapter="version"
+                :progress="progress"
+                :read="chapter.read"
                 :version="true"
                 :has-versions="false"
                 v-model="chapter.read"
@@ -46,10 +46,10 @@
 </template>
 
 <script setup lang="ts">
-import { MangaVolueChapter, Progress } from 'models';
+import type { MangaVolumeChapter, Progress } from '~/models';
 
 const props = defineProps<{
-    chapter: MangaVolueChapter;
+    chapter: MangaVolumeChapter;
     progress?: Progress;
 }>();
 

@@ -1,4 +1,4 @@
-import {
+import type {
     Manga, MangaVolumed,
     MangaVolume, MangaVolumeChapter,
     VolumeSort, Rect, Regions, Chapter

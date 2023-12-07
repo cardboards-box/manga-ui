@@ -157,7 +157,8 @@
 </template>
 
 <script setup lang="ts">
-import { FilterProp, ThemeFilter, THEME_DEFAULTS } from '~/models';
+import type { FilterProp, ThemeFilter } from '~/models';
+import { THEME_DEFAULTS } from '~/models';
 type Dic = { [key: string]: string };
 
 const {

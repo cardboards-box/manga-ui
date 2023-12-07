@@ -1,15 +1,15 @@
 <template>
-<NuxtLink 
+<NuxtLink
     v-if="link && !external"
     :to="!isDisabled ? link : undefined"
     :active-class="active"
-    class="btn" 
-    :class="classes" 
+    class="btn"
+    :class="classes"
     @click="() => $emit('click')"
     :style="styles"
     :title="text"
 >
-    <Icon 
+    <Icon
         :size="acIconSize"
         :fill="fill"
         :spin="isSpinning"
@@ -22,17 +22,17 @@
     </Icon>
     <p v-if="text">{{ text }}</p>
 </NuxtLink>
-<a 
-    v-else-if="link" 
+<a
+    v-else-if="link"
     target="_blank"
     :href="!isDisabled ? link : undefined"
-    class="btn" 
-    :class="classes" 
+    class="btn"
+    :class="classes"
     @click="() => $emit('click')"
     :style="styles"
     :title="text"
 >
-    <Icon 
+    <Icon
         :size="acIconSize"
         :fill="fill"
         :spin="isSpinning"
@@ -45,16 +45,16 @@
     </Icon>
     <p v-if="text">{{ text }}</p>
 </a>
-<button 
-    v-else 
-    class="btn" 
-    :class="classes" 
+<button
+    v-else
+    class="btn"
+    :class="classes"
     @click="() => $emit('click')"
     :style="styles"
     :disabled="isDisabled"
     :title="text"
 >
-    <Icon 
+    <Icon
         :size="acIconSize"
         :fill="fill"
         :spin="isSpinning"
@@ -70,7 +70,8 @@
 </template>
 
 <script setup lang="ts">
-type booleanish = boolean | 'true' | 'false';
+import type { booleanish } from '~/models';
+const { isTrue } = useUtils();
 
 const props = withDefaults(defineProps<{
     text?: string;
@@ -103,20 +104,20 @@ defineEmits<{
     (e: 'click'): void
 }>();
 
-const isSpinning = computed(() => props.spin || props.loading);
-const isDisabled = computed(() => props.disabled || props.loading);
+const isSpinning = computed(() => isTrue(props.spin) || isTrue(props.loading));
+const isDisabled = computed(() => isTrue(props.disabled) || isTrue(props.loading));
 const acIconSize = computed(() => props.iconSize);
-const acUnsize = computed(() => props.inline ? 'true' : props.unsize);
-const acColor = computed(() => props.inline ? 'inline': props.color);
+const acUnsize = computed(() => isTrue(props.inline) ? 'true' : props.unsize);
+const acColor = computed(() => isTrue(props.inline) ? 'inline': props.color);
 
 
 const classes = computed(() => [
     acColor.value,
-    props.inline ? 'inline' : '',
+    isTrue(props.inline) ? 'inline' : '',
     props.text ? 'has-text' : 'no-text',
     isDisabled.value ? 'disabled' : '',
-    props.padLeft ? 'pad-left' : '',
-    props.breakpoint ? 'breakpoint' : '',
+    isTrue(props.padLeft) ? 'pad-left' : '',
+    isTrue(props.breakpoint) ? 'breakpoint' : '',
     ...(typeof props.otherClasses === 'string' ? [ props.otherClasses ?? '' ] : props.otherClasses ?? [])
 ].join(' '));
 
@@ -154,7 +155,7 @@ $icon-height: calc(var(--icon-size) + #{$icon-padding * 2} + 2px);
         height: $icon-height;
     }
     &.has-text { padding: 5px 10px; }
-    &.primary, 
+    &.primary,
     &.secondary,
     &.danger,
     &.warning,
@@ -175,11 +176,11 @@ $icon-height: calc(var(--icon-size) + #{$icon-padding * 2} + 2px);
         margin: 0;
         padding: 0;
     }
-    &:hover:not(.disabled) { 
+    &:hover:not(.disabled) {
         cursor: pointer;
 
         &:not(.inline) {
-            background-color: var(--bg-color-accent); 
+            background-color: var(--bg-color-accent);
         }
 
         &.shade {
@@ -187,17 +188,17 @@ $icon-height: calc(var(--icon-size) + #{$icon-padding * 2} + 2px);
         }
     }
 
-    &.breakpoint { 
+    &.breakpoint {
         padding: $icon-padding;
         height: $icon-height;
 
-        p { 
+        p {
             display: none;
             margin: 0;
         }
     }
 
-    &.active { 
+    &.active {
         border-color: var(--color-primary);
     }
 }

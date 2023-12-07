@@ -1,7 +1,7 @@
-import { Chapter } from "./chapter.model";
-import { DbObject } from "../db-object.model";
-import { Manga } from "./manga.model";
-import { Stats } from "./composites/stats.model";
+import type { Chapter } from "./chapter.model";
+import type { DbObject } from "../db-object.model";
+import type { Manga } from "./manga.model";
+import type { Stats } from "./composites/stats.model";
 
 export interface Progress extends DbObject {
     profileId: number;

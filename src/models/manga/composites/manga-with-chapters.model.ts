@@ -1,8 +1,8 @@
-import { Bookmark } from "../bookmark.model";
-import { Chapter } from "../chapter.model";
-import { Manga } from "../manga.model";
-import { Progress } from "../progress.model";
-import { Stats } from "./stats.model";
+import type { Bookmark } from "../bookmark.model";
+import type { Chapter } from "../chapter.model";
+import type { Manga } from "../manga.model";
+import type { Progress } from "../progress.model";
+import type { Stats } from "./stats.model";
 
 export type VolumeSort = 'ordinal' | 'date' | 'language' | 'title' | 'read';
 

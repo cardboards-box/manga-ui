@@ -94,8 +94,6 @@
 
                 <IconBtn color="shade" />
             </div>
-
-            <sao-button-list :active="swipedDown" />
         </div>
     </Tab>
     <Tab title="Input Groups" icon="keyboard">

@@ -8,7 +8,7 @@
             v-model="search"
             @keyup.enter="doSearch()"
         />
-        <IconBtn 
+        <IconBtn
             icon="close"
             inline
             icon-size="16px"
@@ -46,7 +46,8 @@
 </template>
 
 <script setup lang="ts">
-import { booleanishext, isTrue } from '~/models';
+import type { booleanishext } from '~/models';
+const { isTrue } = useUtils();
 const slots = useSlots();
 
 const props = withDefaults(defineProps<{

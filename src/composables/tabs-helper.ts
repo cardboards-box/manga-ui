@@ -1,9 +1,3 @@
-import { 
-    reactive, ref, readonly, 
-    InjectionKey, provide, inject, 
-    Ref, onUnmounted, computed 
-} from 'vue'
-
 interface TabData {
   title?: string;
   icon?: string;
@@ -22,7 +16,7 @@ export const useTabs = () => {
 
   const registerTab = (identifier: symbol, tabData: TabData) => {
     tabs.set(identifier, tabData);
-    
+
     if (tabs.size === 1) {
         setActiveTab(identifier);
     }

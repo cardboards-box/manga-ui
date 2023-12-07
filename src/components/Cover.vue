@@ -1,27 +1,27 @@
 <template>
-<img 
-    v-if="itemType === 'img'" 
+<img
+    v-if="itemType === 'img'"
     :src="uri"
-    :class="{ 'porn': isPorn }" 
+    :class="{ 'porn': isPorn }"
     :style="actualStyles"
 />
 <div
     v-else-if="itemType === 'background'"
-    class="image" 
+    class="image"
     :style="actualStyles"
     :class="{ 'porn': isPorn }"
 />
-<NuxtLink 
+<NuxtLink
     v-else
     :to="actualLink"
-    class="image" 
+    class="image"
     :style="actualStyles"
     :class="{ 'porn': isPorn }"
 />
 </template>
 
 <script setup lang="ts">
-import { Manga } from '~/models';
+import type { Manga } from '~/models';
 
 type Styles = 'background' | 'img' | 'link';
 
@@ -42,7 +42,7 @@ const { proxy } = useApiHelper();
 const { shouldBlur } = useMangaApi();
 
 const url = computed(() => props.manga?.cover ?? props.url);
-const uri = computed(() => url.value 
+const uri = computed(() => url.value
     ? proxy(url.value, 'manga-cover', props.manga?.referer)
     : DEFAULT_IMAGE);
 
@@ -52,7 +52,7 @@ const itemType = computed(() => props.type || 'link');
 const actualStyles = computed(() => {
     const items: { [key: string]: string } = props.styles || {};
 
-    if ([ 'background', 'link'].includes(itemType.value)) { 
+    if ([ 'background', 'link'].includes(itemType.value)) {
         items['background-image'] = `url(${uri.value})`;
     }
     if (props.height !== undefined) items['min-height'] = items['max-height'] = props.height;

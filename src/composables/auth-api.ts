@@ -1,6 +1,4 @@
-import { AuthResponse, AuthUser } from "~/models";
-import { useApiHelper } from "./api-helpers";
-import { useSettingsHelper } from "./settings-helper";
+import type { AuthResponse, AuthUser } from "~/models";
 
 export const useAuthApi = () => {
     const { get } = useApiHelper();

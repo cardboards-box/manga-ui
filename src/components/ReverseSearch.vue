@@ -2,17 +2,17 @@
 <InputGroup
     v-model="value"
     :link="wrapedUrl"
-    placeholder="Image URL or Manga Title" 
+    placeholder="Image URL or Manga Title"
     :disabled="!wrapedUrl"
     :stuck="stuck"
 >
 <template #input>
-    <input 
-        type="file" 
-        class="file-input" 
+    <input
+        type="file"
+        class="file-input"
         accept="image/*"
-        @change="selected" 
-        ref="fileinput" 
+        @change="selected"
+        ref="fileinput"
     />
     <IconBtn
         icon="image"
@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { booleanishext } from '~/models';
+import type { booleanishext } from '~/models';
 
 interface Emits {
     (e: 'update:modelValue', value: string): void;
@@ -45,9 +45,9 @@ const value = computed({
     set: (value: string) => emits('update:modelValue', value)
 });
 
-const wrapedUrl = computed(() => 
-    value.value 
-        ? `/reverse?url=${encodeURIComponent(value.value)}` 
+const wrapedUrl = computed(() =>
+    value.value
+        ? `/reverse?url=${encodeURIComponent(value.value)}`
         : undefined
     );
 

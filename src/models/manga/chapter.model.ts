@@ -1,4 +1,4 @@
-import { DbObject } from "../db-object.model";
+import type { DbObject } from "../db-object.model";
 
 export interface Chapter extends DbObject {
     mangaId: number;

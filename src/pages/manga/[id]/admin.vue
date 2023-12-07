@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { VolumeSort } from '~/models';
+import type { VolumeSort } from '~/models';
 const {
     volumed,
     setDisplayTitle,

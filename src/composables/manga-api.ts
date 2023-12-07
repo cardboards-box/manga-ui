@@ -1,4 +1,4 @@
-import {
+import type {
     Chapter, Filter, Filters,
     Manga, MangaWithChapters, Stats,
     Paginated, Progress, ProgressExt,
@@ -6,9 +6,8 @@ import {
     States, MangaGraph, VolumeSort,
     MangaVolumed,
 } from "~/models";
-import { useApiHelper } from "./api-helpers";
 import { FetchError } from 'ofetch';
-import { AsyncData } from "nuxt/app";
+import type { AsyncData } from "nuxt/app";
 
 type Worked = { worked: boolean };
 

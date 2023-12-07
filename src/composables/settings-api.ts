@@ -1,8 +1,6 @@
-import { WritableComputedRef } from "nuxt/dist/app/compat/capi";
-import {
-    FilterStyle, ListStyle, PageStyle, ProgressBarStyle,
-    ThemeColor, SiteBackground, THEME_DEFAULTS
- } from "~/models";
+import type { WritableComputedRef } from "nuxt/dist/app/compat/capi";
+import type { ThemeColor, SiteBackground } from "~/models";
+import { FilterStyle, ListStyle, PageStyle, ProgressBarStyle, THEME_DEFAULTS } from '~/models';
 
 type Dic = { [key: string]: string };
 interface MangaSettings {

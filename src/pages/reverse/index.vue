@@ -1,12 +1,12 @@
 <template>
-<CardList 
+<CardList
     title="Reverse Image Lookup"
     :search="combined"
     :pending="pending"
     :noresults="!!results"
     @headerstuck="(v) => stuck = v"
 >
-    <ReverseSearch 
+    <ReverseSearch
         v-model="search"
         @file="searchFile"
         :stuck="stuck"
@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { ImageSearch } from '~/models';
+import type { ImageSearch } from '~/models';
 
 const route = useRoute();
 
@@ -27,29 +27,29 @@ const search = ref('');
 const pending = ref(false);
 const stuck = ref(false);
 const results = ref<ImageSearch | undefined>();
-const combined = computed(() => 
-    results.value 
+const combined = computed(() =>
+    results.value
         ? [
-            ...results.value.match, 
-            ...results.value.vision, 
+            ...results.value.match,
+            ...results.value.vision,
             ...results.value.textual
         ] : []);
 
 const first = computed(() => combined.value[0]);
 
 const title = computed(() =>  first.value?.manga?.title ?? 'Reverse Image Search');
-const description = computed(() => 
-    first.value?.manga.description 
+const description = computed(() =>
+    first.value?.manga.description
     ?? 'Reverse Image search Manga pages to find the manga source.');
-const cover = computed(() => 
-    first.value?.manga.cover 
-        ? proxy(first.value.manga.cover, 'manga-cover') 
+const cover = computed(() =>
+    first.value?.manga.cover
+        ? proxy(first.value.manga.cover, 'manga-cover')
         : 'https://manga.index-0.com/logo.png');
 
 const searchFile = async (file: File) => {
     pending.value = true;
     results.value = undefined;
-    results.value = await toPromise(reverseFile(file), true);
+    results.value = await toPromise(reverseFile(file), true) ?? undefined;
     pending.value = false;
 };
 
@@ -58,7 +58,7 @@ const searchUrl = async () => {
 
     pending.value = true;
     results.value = undefined;
-    results.value = await toPromise(reverseUrl(url.value, true));
+    results.value = await toPromise(reverseUrl(url.value, true)) ?? undefined;
     pending.value = false;
 }
 

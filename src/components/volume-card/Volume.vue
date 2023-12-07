@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { MangaVolume, Progress } from 'models';
+import type { MangaVolume, Progress } from '~/models';
 
 const props = defineProps<{
     volume: MangaVolume;

@@ -7,7 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import { booleanishext, isTrue } from '~/models';
+import type { booleanishext } from '~/models';
+const { isTrue } = useUtils();
 const props = defineProps<{
     modelValue: unknown;
     disabled?: booleanishext;

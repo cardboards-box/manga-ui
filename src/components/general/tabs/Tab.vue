@@ -1,8 +1,8 @@
 <template>
 <div class="tab" :class="{ 'active': isActive, dark }">
-    <div 
-        class="tab-panel" 
-        :class="[className, scrollable ? 'scroll' : '']" 
+    <div
+        class="tab-panel"
+        :class="[className, scrollable ? 'scroll' : '']"
         v-if="keepAlive || isActive"
     >
         <slot />
@@ -11,7 +11,6 @@
 </template>
 
 <script lang="ts" setup>
-import { toRef, reactive } from 'vue'
 interface TabData {
   title?: string;
   icon?: string;

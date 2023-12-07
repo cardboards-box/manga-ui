@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "npx nuxi clean && nuxt dev",
+    "dev": "npx nuxi cleanup && nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -16,7 +16,7 @@
     "@types/marked": "^4.3.0",
     "@types/node": "^18.16.3",
     "@vite-pwa/nuxt": "^0.0.7",
-    "nuxt": "^3.6.0",
+    "nuxt": "^3.8.2",
     "nuxt-purgecss": "^2.0.0",
     "sass": "^1.61.0",
     "sass-loader": "^13.2.2",

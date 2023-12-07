@@ -2,13 +2,13 @@
 <div class="control rounded pad bg-accent" :class="moreClasses">
     <label v-if="label">{{ label }}</label>
     <div class="group">
-        <input 
+        <input
             type="color"
             v-model="hex"
-            :style="{ 'background-color': hex }" 
+            :style="{ 'background-color': hex }"
         />
         <label>HEX</label>
-        <input 
+        <input
             type="text"
             v-model="hex"
             placeholder="HEX"
@@ -16,7 +16,7 @@
         />
         <template v-if="showAlpha">
             <label>Alpha</label>
-            <input 
+            <input
                 type="number"
                 min="0"
                 max="1"
@@ -45,8 +45,9 @@
 </template>
 
 <script setup lang="ts">
-import { booleanish, isTrue } from '~/models';
+import type { booleanish } from '~/models';
 import { ColorTranslator } from 'colortranslator';
+const { isTrue } = useUtils();
 
 const DEFAULT_COLOR = '#000000';
 

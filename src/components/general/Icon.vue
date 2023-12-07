@@ -20,7 +20,8 @@
 </template>
 
 <script setup lang="ts">
-import { booleanish, isTrue } from '~/models';
+import type { booleanish } from '~/models';
+const { isTrue } = useUtils();
 
 defineProps<{
     unsize?: booleanish,

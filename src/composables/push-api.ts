@@ -1,4 +1,4 @@
-import { Push } from '~/models';
+import type { Push } from '~/models';
 
 export const usePushApi = () => {
     const { get, del, post } = useApiHelper();

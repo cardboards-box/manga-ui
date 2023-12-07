@@ -99,7 +99,8 @@
 </template>
 
 <script setup lang="ts">
-import { Paginated, ProgressExt, Filter, AttributeType } from "~/models";
+import type { Paginated, ProgressExt, Filter } from "~/models";
+import { AttributeType } from "~/models";
 
 const advanced = ref(false);
 const headerStuck = ref(false);

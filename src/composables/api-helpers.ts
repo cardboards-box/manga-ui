@@ -1,6 +1,5 @@
-import { AsyncData } from "#app";
+import type { AsyncData } from "#app";
 import filesaver from 'file-saver';
-import { useSettingsHelper } from "./settings-helper";
 
 export type Params = { [key: string]: any; };
 
@@ -8,7 +7,7 @@ export const useApiHelper = () => {
     const { apiUrl, token } = useSettingsHelper();
 
     const wrapUrl = (url: string) => {
-        if (url.toLowerCase().indexOf('https://') !== -1 || 
+        if (url.toLowerCase().indexOf('https://') !== -1 ||
             url.toLowerCase().indexOf('http://') !== -1) return url;
 
         if (url.startsWith('/')) url = url.substring(1);
@@ -35,12 +34,12 @@ export const useApiHelper = () => {
     const clone = <T>(item: T) => <T>JSON.parse(JSON.stringify(item));
 
     function get<T>(url: string, params?: Params, lazy: boolean = false) {
-        const opts = {
+        const opts = <any>{
             params,
             headers: headers()
         };
 
-        if (lazy) 
+        if (lazy)
             return useLazyFetch<T>(wrapUrl(url), opts);
 
         return useFetch<T>(wrapUrl(url), opts);
@@ -81,7 +80,7 @@ export const useApiHelper = () => {
             method: 'DELETE'
         };
 
-        if (lazy) 
+        if (lazy)
             return useLazyFetch<T>(wrapUrl(url), opts);
 
         return useFetch<T>(wrapUrl(url), opts);
@@ -135,7 +134,7 @@ export const useApiHelper = () => {
         let throttled = false;
         return (arg: T) => {
             if (throttled) return;
-    
+
             fun(arg);
             throttled = true;
             setTimeout(() => {
@@ -174,7 +173,7 @@ export const useApiHelper = () => {
         }
         return "A long time ago";
     }
-    
+
     const dateFormatMicro = (inDate: string): string => {
         const date = Date.parse(inDate);
         const units = {

@@ -16,7 +16,8 @@
 
 <script setup lang="ts">
 import dayjs from 'dayjs';
-import { ListStyle, ProgressExt } from '~/models';
+import { ListStyle } from '~/models';
+import type { ProgressExt } from '~/models';
 const { fixBgImage, injectSettings, lastCheck } = useAppSettings();
 const { toPromise } = useApiHelper();
 const { bump, currentUser } = useAuthApi();

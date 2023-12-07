@@ -21,11 +21,12 @@
 </template>
 
 <script lang="ts" setup>
-import { booleanish, isTrue } from '~/models';
+import type { booleanish } from '~/models';
+const { isTrue } = useUtils();
 
 type Style = 'top' | 'bottom' | 'left' | 'right';
 
-const props = withDefaults(defineProps<{ 
+const props = withDefaults(defineProps<{
     position?: Style,
     noMargins?: booleanish
 }>(), { position: 'top' });
@@ -149,7 +150,7 @@ $darkbackground: var(--bg-color);
 
             .tab {
                 border-radius: $margin;
-                
+
                 &:first-child { border-bottom-left-radius: 0; }
                 &:last-child { border-bottom-right-radius: 0; }
             }
@@ -169,7 +170,7 @@ $darkbackground: var(--bg-color);
 
     &.right {
         flex-flow: row-reverse;
-        .tab-content .tab { 
+        .tab-content .tab {
             border-top-left-radius: $margin;
 
             &:first-child { border-top-right-radius: 0; }

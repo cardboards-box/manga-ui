@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { MangaVolumed, Progress, VolumeSort } from '~/models';
+import type { MangaVolumed, Progress, VolumeSort } from '~/models';
 
 const props = defineProps<{
     sort?: VolumeSort;
