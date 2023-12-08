@@ -42,6 +42,11 @@ type ErroredOutput = {
     error?: string;
 }
 
+type Params = {
+    sort: VolumeSort;
+    asc: boolean;
+}
+
 type LinkTypes =
     'NextChapter' | 'PrevChapter' |
     'ChapterStart' | 'ChapterEnd' |
@@ -49,14 +54,13 @@ type LinkTypes =
 
 export const useReaderHelper = () => {
     const route = useRoute();
-    const { volumed, pages } = useMangaApi();
+    const { volumed, pages, progress } = useMangaApi();
     const { regionMargin } = useAppSettings();
     const { token } = useSettingsHelper();
     const { proxy } = useApiHelper();
 
     const cache = useState<MangaVolumed | undefined>('reader-cache', () => undefined);
     const output = useState<ErroredOutput | undefined>('reader-manga', () => undefined);
-    const params = useState<{ sort: VolumeSort, asc: boolean }>('reader-params', () => ({ sort: 'ordinal', asc: true }));
     const unauthed = useState<boolean>('reader-unauthed', () => true);
     const retrigger = useState<boolean>('reader-retrigger', () => false);
     const loading = useState<boolean>('reader-loading', () => false);
@@ -94,16 +98,28 @@ export const useReaderHelper = () => {
         return output;
     }
 
-    const getManga = async (id: number | string, force: boolean) => {
+    const getManga = async (id: number | string, force: boolean, params?: Ref<Params>) => {
         if (!force && useCache(id, cache.value?.manga)) return cache.value!;
 
-        const { data, error: err } = await volumed(id, params);
+        unauthed.value = !process.client || !token.value;
+        const { data, error: err } = await volumed(id, params ?? ref({ sort: 'ordinal', asc: true }));
         if (err.value || !data.value) return undefined;
         cache.value = data.value;
         return {...data.value };
     }
 
+    const getProperChapterId = (volumed: MangaVolumed, chapterId: number): number => {
+        if (chapterId !== 0) return chapterId;
+        if (volumed.chapter?.id) return volumed.chapter.id;
+        if (volumed.volumes.length === 0) return -1;
+        if (volumed.volumes[0].chapters.length === 0) return -1;
+        if (volumed.volumes[0].chapters[0].versions.length === 0) return -1;
+        return volumed.volumes[0].chapters[0].versions[0].id;
+    }
+
     const getChapter = (volumed: MangaVolumed, chapterId: number): CurrentDetails | undefined => {
+        chapterId = getProperChapterId(volumed, chapterId);
+
         for(let v = 0; v < volumed.volumes.length; v++) {
             const volume = volumed.volumes[v];
 
@@ -192,17 +208,15 @@ export const useReaderHelper = () => {
     }
 
     const execute = async (inputIds?: Ids, force?: boolean): Promise<ErroredOutput> => {
-        const ids = inputIds ?? {
-            mangaId: route.params.id.toString(),
-            chapterId: +(route.params.chapter.toString() || '0'),
-            pageIndex: (+(route.query.page?.toString() || '1')) - 1
-        };
-        let pageIndex = ids.pageIndex;
-        const manga = await getManga(ids.mangaId, force ?? false);
-        unauthed.value = !process.client || !token.value;
+        let mangaId = inputIds?.mangaId ?? route.params.id.toString();
+        let chapterId = inputIds?.chapterId ?? +(route.params.chapter.toString() || '0');
+        let pageIndex = inputIds?.pageIndex ?? (+(route.query.page?.toString() || '1')) - 1;
+
+        const manga = await getManga(mangaId, force ?? false);
         if (!manga) return { error: 'Manga not found!' };
 
-        const data = getChapter(manga, ids.chapterId);
+        chapterId = getProperChapterId(manga, chapterId);
+        const data = getChapter(manga, chapterId);
         if (!data) return { error: 'Chapter not found!' };
 
         const [ pages, next, prev ] = await Promise.all([
@@ -217,7 +231,8 @@ export const useReaderHelper = () => {
 
         return {
             output: {
-                ...ids,
+                mangaId,
+                chapterId,
                 ...data,
                 pages,
                 next,
@@ -232,6 +247,9 @@ export const useReaderHelper = () => {
     const doExecute = async (force: boolean, ids?: Ids) => {
         loading.value = true;
         output.value = await execute(ids, force);
+        const data = output.value?.output;
+        if (data && process.client && token.value)
+            progress(data.manga.id, data.version.id, data.pageIndex);
         retrigger.value = !retrigger.value;
         loading.value = false;
         return output.value;
@@ -282,6 +300,7 @@ export const useReaderHelper = () => {
         retrigger,
         fetch: (ids?: Ids) => doExecute(false, ids),
         refresh: (ids?: Ids) => doExecute(true, ids),
+        getManga,
         unauthed,
         loading,
         regions,

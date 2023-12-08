@@ -55,16 +55,16 @@
 
                         <ReaderSelect :loading="loading" />
 
-                        <!-- <div class="btn-group">
+                        <div class="btn-group">
                             <NuxtLink
-                                :class="{ 'disabled': !hasPreviousChapter }"
-                                :to="genLink('PrevChapter')"
+                                :class="{ 'disabled': !prevChapterLink }"
+                                :to="prevChapterLink"
                             >
                                 <Icon>skip_previous</Icon>
                             </NuxtLink>
                             <NuxtLink
-                                :class="{ 'disabled': !hasPreviousPage }"
-                                :to="genLink('PrevPage')"
+                                :class="{ 'disabled': !prevPageLink }"
+                                :to="prevPageLink"
                                 v-if="pageStyle !== PageStyle.LongStrip"
                             >
                                 <Icon>navigate_before</Icon>
@@ -73,23 +73,21 @@
                                 <Icon>restart_alt</Icon>
                             </NuxtLink>
                             <NuxtLink
-                                :class="{ 'disabled': !hasNextPage }"
-                                :to="genLink('NextPage')"
+                                :class="{ 'disabled': !nextPageLink }"
+                                :to="nextPageLink"
                                 v-if="pageStyle !== PageStyle.LongStrip"
                             >
                                 <Icon>navigate_next</Icon>
                             </NuxtLink>
                             <NuxtLink
-                                :class="{ 'disabled': !data?.next }"
-                                :to="genLink('NextChapter')"
+                                :class="{ 'disabled': !nextChapterLink }"
+                                :to="nextChapterLink"
                             >
                                 <Icon>skip_next</Icon>
                             </NuxtLink>
-                        </div> -->
+                        </div>
                         <div class="btn-group-vert">
-                            <button
-                                @click="copyUrl(`manga/${id}/${chapterId}?page=${page}`)"
-                            >
+                            <button @click="copyUrl(`manga/${id}/${chapterId}?page=${page}`)">
                                 <Icon>auto_stories</Icon>
                                 <p>Copy Page Link</p>
                             </button>
@@ -105,27 +103,19 @@
                                 <Icon>home</Icon>
                                 <p>Manga Source Page</p>
                             </a>
-                            <button
-                                :disabled="downloading"
-                                @click="downloadData(pageUrl)"
-                            >
+                            <button :disabled="downloading" @click="downloadData(pageUrl)">
                                 <Icon :spin="downloading">
                                     {{ !downloading ? 'download' : 'sync' }}
                                 </Icon>
                                 <p>Download Page</p>
                             </button>
-                            <button
-                                :disabled="downloading"
-                                @click="downloadData(chapterUrl)"
-                            >
+                            <button :disabled="downloading" @click="downloadData(chapterUrl)">
                                 <Icon :spin="downloading">
                                     {{ !downloading ? 'download_for_offline' : 'sync' }}
                                 </Icon>
                                 <p>Download Chapter</p>
                             </button>
-                            <NuxtLink
-                                :to="`/manga/${id}/${chapterId}/strip?page=${page}`"
-                            >
+                            <NuxtLink :to="`/manga/${id}/${chapterId}/strip?page=${page}`">
                                 <Icon>auto_fix</Icon>
                                 <p>Create Strip</p>
                             </NuxtLink>
@@ -133,10 +123,7 @@
                                 <Icon>restart_alt</Icon>
                                 <p>Restart Chapter</p>
                             </NuxtLink>
-                            <button
-                                :disabled="bookmarking"
-                                @click="toggleBookmark"
-                            >
+                            <button :disabled="bookmarking" @click="toggleBookmark">
                                 <Icon :spin="bookmarking">bookmark</Icon>
                                 <p>Bookmark Page</p>
                             </button>
@@ -268,7 +255,7 @@
 
 <script setup lang="ts">
 import {
-    PAGE_STYLES,
+    PAGE_STYLES, PageStyle,
     PROGRESS_BAR_STYLES,
     FilterStyle, FILTER_STYLES
 } from '~/models';
@@ -319,6 +306,11 @@ const volume = computed(() => data.value?.volume);
 const chapterIndex = computed(() => data.value?.chapterIndex ?? 0);
 const chapter = computed(() => data.value?.version);
 const classes = computed(() => serClasses(props.class, { 'open': menuOpen.value }));
+
+const prevChapterLink = computed(() => genLink('PrevChapter'));
+const nextChapterLink = computed(() => genLink('NextChapter'));
+const prevPageLink = computed(() => genLink('PrevPage'));
+const nextPageLink = computed(() => genLink('NextPage'));
 
 const isLink = (url: string) => url.toLowerCase().startsWith('http');
 

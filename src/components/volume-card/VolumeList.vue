@@ -24,7 +24,7 @@
     </header>
     <Loading v-if="volumes.length === 0" />
     <template v-else>
-        <Volume v-for="(vol, index) in volumes" :volume="vol" :index="index" :progress="progress" />
+        <Volume v-for="(vol, index) in volumes" :volume="vol" :index="index" :progress="actProg" />
     </template>
 </main>
 </template>
@@ -45,6 +45,7 @@ const actAsc = computed(() => props.asc ?? true);
 
 const volumes = computed(() => props.manga?.volumes ?? []);
 const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
+const actProg = computed(() => props.progress ?? props.manga?.progress);
 
 const sorts : { key: VolumeSort, icon: string }[] = [
     { key: 'ordinal', icon: 'list' },

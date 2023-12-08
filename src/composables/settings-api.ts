@@ -100,6 +100,9 @@ export const useAppSettings = () => {
     const determineStyle = (theme: SiteBackground): { [key: string]: string } => {
         let map: Dic = {};
         const fallbackCustom = (value: string, custom?: string) => (value === 'custom' ? custom : value) ?? '';
+
+        if (!theme) return map;
+
         switch(theme.type) {
             case 'gradient':
                 const dir = theme.gradient.dir === 'deg' ? `${theme.gradient.degrees}deg` : theme.gradient.dir;

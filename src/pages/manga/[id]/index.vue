@@ -128,7 +128,7 @@
             </div>
         </div>
 
-        <VolumeList :sort="sort" :asc="asc" :manga="data" :progress="progress" />
+        <VolumeList :sort="sort" :asc="asc" :manga="data" />
     </div>
 </div>
 </template>
@@ -146,6 +146,7 @@ const {
 
 const { proxy: proxyUrl, toPromise, clone } = useApiHelper();
 const { currentUser } = useAuthApi();
+const { } = useMangaApi();
 const route = useRoute();
 
 const rawId = computed(() => route.params.id.toString());
@@ -167,7 +168,6 @@ const progress = computed(() => data.value?.progress);
 
 const proxy = (url: string) => proxyUrl(url, 'manga-cover', manga.value?.referer);
 
-const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
 const currentVolume = computed(() => volumes.value[data.value?.volumeIndex ?? 0]);
 const currentChapter = computed(() =>
     currentVolume.value?.chapters.find(t => t.progress !== null && t.progress !== undefined)
@@ -193,18 +193,6 @@ useServerSeoMeta({
     twitterCard: 'summary_large_image'
 });
 
-const toggleVolume = (index: number) => {
-    volumes.value[index].collapse = !volumes.value[index].collapse;
-}
-
-const volumeCollapsed = (index: number) => volumes.value[index].collapse;
-
-const collapseToggle = () => {
-    const collapse = allCollapsed.value;
-    for (let vol of volumes.value)
-        vol.collapse = collapse;
-};
-
 const toggleFavourite = async () => {
     if (!id.value) return;
     await toPromise(favourite(id.value));
@@ -216,11 +204,13 @@ const reloadSource = async () => {
     reloading.value = true;
 
     await toPromise(reload(manga.value));
-    await refetch();
     reloading.value = false;
+    await refetch();
 }
 
 const refetch = () => {
+    if (reloading.value) return Promise.resolve();
+
     if (rawData.value && data.value) {
         rawData.value.stats = undefined;
         rawData.value.progress = undefined;
@@ -234,6 +224,7 @@ const refetch = () => {
 const resetProgress = async () => {
     reloading.value = true;
     await toPromise(reset(id.value));
+    reloading.value = false;
     await refetch();
 }
 
@@ -248,15 +239,12 @@ const nextRandom = async () => {
     await refetch();
 }
 
-const url = (s?: VolumeSort, a?: boolean) => {
-    return `/manga/${id.value}?sort=${s ?? sort.value}&asc=${a ?? asc.value}`;
-}
-
 const toggleReadAll = async () => {
     if (!manga.value || !currentUser.value) return;
 
     reloading.value = true;
     await toPromise(markAsRead(id.value));
+    reloading.value = false;
     await refetch();
 }
 

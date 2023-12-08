@@ -17,6 +17,11 @@ onMounted(() => nextTick(() => setTimeout(async () => {
     if (!result) return;
 
     injectSettings();
+    if (!loginReturnUrl.value ||
+        loginReturnUrl.value.trim() === '/auth') {
+        navigateTo('/account');
+        return;
+    }
     navigateTo(loginReturnUrl.value || '/account');
 }, 300)));
 </script>
