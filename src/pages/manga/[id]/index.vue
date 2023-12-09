@@ -7,11 +7,11 @@
                 <Cover :manga="data.manga" type="background" width="100%" height="400px" />
                 <a class="title" :href="data.manga.url" target="_blank">{{ title }}</a>
                 <div class="drawers margin-top">
-                    <MangaProgress :manga="data" />
-                    <Drawer title="Description" v-if="description">
+                    <MangaProgress />
+                    <Drawer title="Description" v-if="description" default-closed>
                         <Markdown :content="description" />
                     </Drawer>
-                    <Drawer title="More Details">
+                    <Drawer title="More Details" default-closed>
                         <div class="tags">
                             <span>Alternate Titles</span>
                             <span v-if="data.manga.displayTitle">{{ data.manga.title }}</span>
