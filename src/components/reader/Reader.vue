@@ -187,7 +187,6 @@ const pageClick = (event: MouseEvent) => {
 
     const output = inRegions(event);
     if(output.includes('center')) {
-        console.log('Center Clicked');
         menuOpen.value = !menuOpen.value;
         return;
     }
