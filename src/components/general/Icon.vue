@@ -2,12 +2,7 @@
     <ClientOnly>
         <span
             class="material-symbols-outlined"
-            :class="{
-                'unsize': isTrue(unsize),
-                'fill-icon': isTrue(fill),
-                'spin': isTrue(spin),
-                'flip': isTrue(flip)
-            }"
+            :class="classes"
             :style="{
                 'font-size': size,
                 transform: `rotate(${rotate || 0}deg) scaleX(${flip ? -1 : 1})`,
@@ -20,18 +15,26 @@
 </template>
 
 <script setup lang="ts">
-import type { booleanish } from '~/models';
-const { isTrue } = useUtils();
+import type { ClassOptions, booleanish } from '~/models';
+const { isTrue, serClasses } = useUtils();
 
-defineProps<{
+const props = defineProps<{
     unsize?: booleanish,
     fill?: booleanish,
     spin?: booleanish,
     size?: string,
     rotate?: number | string,
     speed?: string,
-    flip?: booleanish
+    flip?: booleanish,
+    'class'?: ClassOptions
 }>();
+
+const classes = computed(() => serClasses(props.class, {
+    'unsize': isTrue(props.unsize),
+    'fill-icon': isTrue(props.fill),
+    'spin': isTrue(props.spin),
+    'flip': isTrue(props.flip)
+}));
 </script>
 
 <style lang="scss">
@@ -63,5 +66,8 @@ defineProps<{
     &.spin.flip {
         animation-name: spinflip;
     }
+
+    &.margin-left { margin-left: var(--margin) !important; }
+    &.margin-right { margin-right: var(--margin) !important; }
 }
 </style>

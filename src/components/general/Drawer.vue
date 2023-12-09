@@ -13,8 +13,14 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ title: string; }>();
-const open = ref(true);
+import type { booleanish } from '~/models';
+const { isTrue } = useUtils();
+
+const props = defineProps<{
+    title: string;
+    defaultClosed?: booleanish;
+}>();
+const open = ref(!isTrue(props.defaultClosed));
 </script>
 
 <style lang="scss" scoped>
@@ -51,12 +57,12 @@ $max-height: 80vh;
         }
     }
 
-    &.open { 
+    &.open {
         .title {
             border-bottom-color: $bg-color;
         }
 
-        .opener { 
+        .opener {
             max-height: $max-height;
         }
     }

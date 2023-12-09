@@ -46,7 +46,7 @@ export const useMangaApi = () => {
 
     const extended = (id: number | string) => get<ProgressExt>(`manga/${id}/extended`);
 
-    const volumed = (id: number | string, params: Ref<{ sort: VolumeSort, asc: boolean }>) => get<MangaVolumed>(`manga/volumed/${id}`, params, process.client);
+    const volumed = (id: number | string, params: Ref<{ sort: VolumeSort, asc: boolean }>) => get<MangaVolumed>(`manga/volumed/${id}`, params);
 
     const favourite = (id: number) => get<boolean>(`manga/${id}/favourite`, undefined, true);
 

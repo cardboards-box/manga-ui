@@ -10,7 +10,7 @@
     </NuxtLink>
     <span class="cell">
         <Icon>schedule</Icon>&nbsp;
-        <Date :date="chapter.createdAt.toString()" format="partial" />
+        <Date :date="chapter.createdAt.toString()" utc format="r" />
     </span>
     <div class="cell btns" v-if="hasButtons">
         <IconBtn
