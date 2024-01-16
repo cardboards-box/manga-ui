@@ -46,9 +46,12 @@ useServerSeoMeta({
     twitterCard: 'summary_large_image'
 });
 
-watch(() => route.query, () => refresh(), { deep: true });
-watch(() => route.params, () => refresh(), { deep: true });
-watch(() => currentUser.value, () => refresh(), { deep: true });
+onMounted(() => {
+    watch(() => route.query, () => refresh(), { deep: true });
+    watch(() => route.params, () => refresh(), { deep: true });
+    watch(() => currentUser.value, () => refresh(), { deep: true });
+});
+
 </script>
 
 <style scoped lang="scss">
