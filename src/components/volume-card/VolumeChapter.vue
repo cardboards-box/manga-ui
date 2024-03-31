@@ -12,7 +12,10 @@
             @toggle-open="() => chapter.open = !chapter.open"
             :has-versions="false"
             :version="false"
-        />
+            :has-slot="hasSlot"
+        >
+            <slot :chapter="first" />
+        </VolumeCard>
     </div>
 </div>
 <div class="more-chapters" v-else>
@@ -28,7 +31,10 @@
             @toggle-open="() => chapter.open = !chapter.open"
             :has-versions="true"
             :version="false"
-        />
+            :has-slot="hasSlot"
+        >
+            <slot :chapter="first" />
+        </VolumeCard>
         <template v-if="chapter.open">
             <VolumeCard
                 v-for="version in rest"
@@ -37,8 +43,11 @@
                 :read="chapter.read"
                 :version="true"
                 :has-versions="false"
+                :has-slot="hasSlot"
                 v-model="chapter.read"
-            />
+            >
+                <slot :chapter="version" />
+            </VolumeCard>
         </template>
     </div>
 </div>
@@ -46,11 +55,12 @@
 </template>
 
 <script setup lang="ts">
-import type { MangaVolumeChapter, Progress } from '~/models';
+import type { MangaVolumeChapter, Progress, booleanish } from '~/models';
 
 const props = defineProps<{
     chapter: MangaVolumeChapter;
     progress?: Progress;
+    hasSlot?: booleanish;
 }>();
 
 const first = computed(() => props.chapter.versions[0]);

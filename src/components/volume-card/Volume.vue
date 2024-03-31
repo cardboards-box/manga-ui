@@ -5,18 +5,27 @@
         <Icon>{{ !volume.collapse ? 'expand_less' : 'expand_more' }}</Icon>
     </header>
     <div class="volume-chapters">
-        <VolumeChapter v-for="chapter in volume.chapters" :chapter="chapter" :progress="progress" />
+        <VolumeChapter
+            v-for="chapter in volume.chapters"
+            :chapter="chapter"
+            :progress="progress"
+            v-slot="slotProps"
+            :has-slot="hasSlot"
+        >
+            <slot :chapter="slotProps.chapter" />
+        </VolumeChapter>
     </div>
 </div>
 </template>
 
 <script setup lang="ts">
-import type { MangaVolume, Progress } from '~/models';
+import type { MangaVolume, Progress, booleanish } from '~/models';
 
 const props = defineProps<{
     volume: MangaVolume;
     index: number;
     progress?: Progress;
+    hasSlot?: booleanish;
 }>();
 
 const toggle = () => props.volume.collapse = !props.volume.collapse;

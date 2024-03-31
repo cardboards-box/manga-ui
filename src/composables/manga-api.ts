@@ -175,6 +175,11 @@ export const useMangaApi = () => {
         return put<void>(`manga/ordinal-reset`, { id: id.toString(), reset });
     }
 
+    const softDelete = (mangaId: number, chapterId?: number) => {
+        const url = `manga/${mangaId}${chapterId ? `/${chapterId}` : ''}`;
+        return del<void>(url);
+    }
+
     return {
         fetch,
         random,
@@ -201,6 +206,6 @@ export const useMangaApi = () => {
         since,
         setDisplayTitle,
         setOrdinalReset,
-
+        softDelete,
     };
 };

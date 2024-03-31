@@ -30,7 +30,7 @@ const { currentUser } = useAuthApi();
 const { menuOpen } = useSettingsHelper();
 const { fetch, loading } = useReaderHelper();
 const { pageMenuOver } = useAppSettings();
-const { data, refresh, pending } = await useAsyncData(async () => await fetch());
+const { data, refresh, pending } = await useLazyAsyncData(async () => await fetch());
 const isLoading = computed(() => loading.value || pending.value);
 const output = computed(() => data.value?.output);
 const title = computed(() => `${output.value?.manga.title} | Ch. ${output.value?.version.ordinal}`);

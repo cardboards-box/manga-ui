@@ -70,8 +70,8 @@
 </template>
 
 <script setup lang="ts">
-import type { booleanish } from '~/models';
-const { isTrue } = useUtils();
+import type { ClassOptions, booleanish } from '~/models';
+const { isTrue, serClasses } = useUtils();
 
 const props = withDefaults(defineProps<{
     text?: string;
@@ -92,8 +92,9 @@ const props = withDefaults(defineProps<{
     breakpoint?: booleanish;
     loading?: booleanish;
     inline?: booleanish;
-    otherClasses?: string | string[];
+    otherClasses?: ClassOptions;
     flip?: booleanish;
+    'class'?: ClassOptions;
 }>(), {
     size: '16px',
     icon: 'home',
@@ -110,16 +111,14 @@ const acIconSize = computed(() => props.iconSize);
 const acUnsize = computed(() => isTrue(props.inline) ? 'true' : props.unsize);
 const acColor = computed(() => isTrue(props.inline) ? 'inline': props.color);
 
-
-const classes = computed(() => [
-    acColor.value,
-    isTrue(props.inline) ? 'inline' : '',
-    props.text ? 'has-text' : 'no-text',
-    isDisabled.value ? 'disabled' : '',
-    isTrue(props.padLeft) ? 'pad-left' : '',
-    isTrue(props.breakpoint) ? 'breakpoint' : '',
-    ...(typeof props.otherClasses === 'string' ? [ props.otherClasses ?? '' ] : props.otherClasses ?? [])
-].join(' '));
+const classes = computed(() => serClasses({
+    'inline': isTrue(props.inline),
+    'no-text': !props.text,
+    'has-text': !!props.text,
+    'disabled': isDisabled.value,
+    'pad-left': isTrue(props.padLeft),
+    'breakpoint': isTrue(props.breakpoint)
+}, props.otherClasses, props.class, acColor.value));
 
 const styles = computed(() => {
     const styles : { [key: string]: string } = {
@@ -175,6 +174,9 @@ $icon-height: calc(var(--icon-size) + #{$icon-padding * 2} + 2px);
         background-color: transparent;
         margin: 0;
         padding: 0;
+    }
+    &.margin-right {
+        margin-right: var(--margin) !important;
     }
     &:hover:not(.disabled) {
         cursor: pointer;

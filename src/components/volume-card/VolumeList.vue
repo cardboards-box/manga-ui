@@ -24,13 +24,22 @@
     </header>
     <Loading v-if="volumes.length === 0" />
     <template v-else>
-        <Volume v-for="(vol, index) in volumes" :volume="vol" :index="index" :progress="actProg" />
+        <Volume
+            v-for="(vol, index) in volumes"
+            :volume="vol"
+            :index="index"
+            :progress="actProg"
+            v-slot="slotProps"
+            :has-slot="hasSlot"
+        >
+            <slot :chapter="slotProps.chapter" :volume="vol" :index="index" :progress="actProg" />
+        </Volume>
     </template>
 </main>
 </template>
 
 <script setup lang="ts">
-import type { MangaVolumed, Progress, VolumeSort } from '~/models';
+import type { MangaVolumed, Progress, VolumeSort, booleanish } from '~/models';
 
 const props = defineProps<{
     sort?: VolumeSort;
@@ -38,6 +47,7 @@ const props = defineProps<{
     manga?: MangaVolumed | null;
     reloading?: boolean;
     progress?: Progress;
+    hasSlot?: booleanish;
 }>();
 
 const actSort = computed(() => props.sort ?? 'ordinal');

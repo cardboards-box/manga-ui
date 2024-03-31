@@ -1,5 +1,5 @@
 <template>
-<div class="volume-card" :class="{ 'version': version, 'no-buttons': !hasButtons }">
+<div class="volume-card" :class="{ 'version': version && !hasSlot, 'no-buttons': !hasButtons }">
     <NuxtLink :to="url" :class="{ 'active': isRead }" class="cell" :target="external ? '_black': ''" :title="external ? 'External Manga' : 'Read ' + title">
         <Icon v-if="external">ungroup</Icon>
         <Icon v-if="isRead">done_all</Icon>
@@ -14,30 +14,34 @@
     </span>
     <div class="cell btns" v-if="hasButtons">
         <IconBtn
-            other-classes="cell"
-            v-if="currentUser"
+            class="margin-right"
+            v-if="currentUser && !version"
+            inline
             :loading="loading"
             :icon="isRead ? 'visibility_off' : 'visibility'"
             @click="toggleRead"
         />
         <IconBtn
             v-if="hasVersions"
-            other-classes="cell"
+            class="margin-right"
             :loading="loading"
+            inline
             :icon="isOpen ? 'expand_less' : 'expand_more'"
             @click="() => $emit('toggle-open')"
         />
+        <slot />
     </div>
 </div>
 </template>
 
 <script setup lang="ts">
-import type { Chapter, Progress } from '~/models';
+import type { Chapter, Progress, booleanish } from '~/models';
 
 const { toPromise } = useApiHelper();
 const { markAsRead } = useMangaApi();
 
 const { currentUser } = useAuthApi();
+const { isTrue } = useUtils();
 
 const emits = defineEmits<{
     (e: 'toggle-open'): void;
@@ -51,6 +55,7 @@ const props = defineProps<{
     open?: boolean,
     hasVersions?: boolean
     modelValue: boolean;
+    hasSlot?: booleanish;
 }>();
 
 const loading = ref(false);
@@ -65,7 +70,8 @@ const url = computed(() => {
         base += `?page=${(props.progress.pageIndex ?? 0) + 1}`;
     return base;
 });
-const hasButtons = computed(() => !props.version && (!!currentUser.value || props.hasVersions));
+const hasSlot = computed(() => isTrue(props.hasSlot));
+const hasButtons = computed(() => hasSlot.value || (!props.version && (!!currentUser.value || props.hasVersions)));
 const title = computed(() => {
     let output = '';
     if (props.chapter.volume)

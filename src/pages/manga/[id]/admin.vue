@@ -1,6 +1,6 @@
 <template>
 <Loading v-if="pending" />
-<Error v-else-if="error" :message="error?.message" />
+<Error v-else-if="error" :message="error" />
 <div v-else-if="data && manga" class="manga-details flex fill-parent scroll-y">
     <div class="manga-offset-width flex row">
         <div class="manga-header flex row center-horz margin-top">
@@ -46,30 +46,48 @@
             </div>
         </div>
 
+        <div class="margin flex row">
+            <VolumeList
+                :manga="data"
+                :sort="params?.sort ?? 'ordinal'"
+                :asc="params?.asc ?? true"
+                v-slot="{ chapter }"
+                has-slot="true"
+            >
+                <IconBtn
+                    class="cell margin-right"
+                    icon="delete"
+                    color="danger"
+                    inline
+                    @click="softDelete(chapter)"
+                />
+            </VolumeList>
+        </div>
+
     </div>
 </div>
 <Error v-else message="Something went wrong :("/>
 </template>
 
 <script setup lang="ts">
-import type { VolumeSort } from '~/models';
+import type { Chapter } from '~/models';
+
 const {
-    volumed,
     setDisplayTitle,
     setOrdinalReset,
+    softDelete: deleteChapter
 } = useMangaApi();
 
 const { toPromise } = useApiHelper();
-const route = useRoute();
 
 const rawLoading = ref(false);
-const id = computed(() => +route.params.id.toString());
-const sort = computed(() => <VolumeSort | undefined>route.query?.sort?.toString() ?? 'ordinal');
-const asc = computed(() => (route.query?.asc?.toString()?.toLowerCase() ?? 'true') === 'true');
-const params = ref({ sort: sort.value, asc: asc.value });
-const { data, pending: reloading, error, refresh } = await volumed(id.value, params);
+const { data, error, pending: reloading, params, refresh } = useMangaCache();
+const { pending: isPending } = useAsyncData(async () => await refresh());
 const manga = computed(() => data.value?.manga);
-const pending = computed(() => rawLoading.value || reloading.value);
+const pending = computed(() => rawLoading.value || reloading.value || isPending.value);
+const title = computed(() => data.value?.manga.displayTitle ?? data.value?.manga.title ?? 'Manga Not Found');
+
+useHead({ title });
 
 const selectedTitle = ref('');
 
@@ -88,6 +106,15 @@ const saveReset = async () => {
     rawLoading.value = true;
 
     await toPromise(setOrdinalReset(manga.value.id, manga.value.ordinalVolumeReset));
+    rawLoading.value = false;
+    await refresh();
+}
+
+const softDelete = async (chapter: Chapter) => {
+    if (!manga.value) return;
+    rawLoading.value = true;
+
+    await toPromise(deleteChapter(manga.value.id, chapter.id));
     rawLoading.value = false;
     await refresh();
 }
