@@ -21,6 +21,8 @@ interface MangaSettings {
     fillPage: boolean;
     background: SiteBackground;
     lastCheck?: Date | null;
+    maxImageWidth?: number;
+    maxImageHeight?: number;
 }
 
 interface Settings {
@@ -45,6 +47,8 @@ type MangaSettingsKey = {
     fillPage: WritableComputedRef<boolean>;
     background: WritableComputedRef<SiteBackground>;
     lastCheck: WritableComputedRef<Date | undefined | null>;
+    maxImageWidth?: WritableComputedRef<number | undefined | null>;
+    maxImageHeight?: WritableComputedRef<number | undefined | null>;
 };
 
 const DEFAULTS: MangaSettings = {
@@ -64,13 +68,15 @@ const DEFAULTS: MangaSettings = {
     regionMargin: 30,
     fillPage: false,
     background: { ...THEME_DEFAULTS.themes[0] },
-    lastCheck: new Date()
+    lastCheck: new Date(),
+    maxImageHeight: undefined,
+    maxImageWidth: undefined
 }
 
 export const useAppSettings = () => {
     const { currentUser } = useAuthApi();
     const { post, debounce, clone } = useApiHelper();
-    const { getSetBool, getSetNumb, getSet, getSetDate, getSetJson } = useSettingsHelper();
+    const { getSetBool, getSetNumb, getSetNumbNull, getSet, getSetDate, getSetJson } = useSettingsHelper();
     const pauseUpdates = useState<boolean>(() => false);
 
     const settings = (() => {
@@ -91,7 +97,9 @@ export const useAppSettings = () => {
             regionMargin: getSetNumb('region-margin', DEFAULTS.regionMargin, () => commit()),
             fillPage: getSetBool('fill-page', DEFAULTS.fillPage, () => commit()),
             background: getSetJson<SiteBackground>('background', JSON.stringify(DEFAULTS.background), () => commitFix()),
-            lastCheck: getSetDate('last-check', null, () => commit())
+            lastCheck: getSetDate('last-check', null, () => commit()),
+            maxImageWidth: getSetNumbNull('max-image-width', undefined, () => commit()),
+            maxImageHeight: getSetNumbNull('max-image-height', undefined, () => commit())
         }
     })();
 

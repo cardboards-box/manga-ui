@@ -210,7 +210,7 @@
                         </div>
                         <div class="control">
                             <label class="no-bot">Image Brightness ({{ brightness }}%)</label>
-                            <input type="range" min="1" max="100" v-model="brightness" />
+                            <input type="range" min="1" max="100" step="1" v-model="brightness" />
                         </div>
                         <div class="btn-group-vert">
                             <button @click="fullscreen">

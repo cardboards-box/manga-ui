@@ -21,7 +21,10 @@
             <img class="hidden" v-if="nextPageUrl" :src="nextPageUrl" />
         </template>
 
-        <template v-else-if="pageStyle === PageStyle.LongStrip">
+        <template v-else-if="
+            pageStyle === PageStyle.LongStrip ||
+            pageStyle === PageStyle.LongStripNaturalSize ||
+            pageStyle === PageStyle.LongStripMaxSize">
             <img
                 v-for="image of pageUrls"
                 :src="image"

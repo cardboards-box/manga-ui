@@ -84,6 +84,24 @@ export const useSettingsHelper = () => {
         })
     };
 
+    const getSetNumbNull = (key: string, def: number | undefined, fn?: (val: number | undefined) => void) => {
+        const fetch = () => {
+            const value = getStore(key);
+            if (value === undefined || value === null) return undefined;
+            return +value;
+        }
+
+        const state = useState<number | undefined>(key,  () => fetch());
+        return computed({
+            get: () => state.value ?? fetch() ?? def,
+            set: (value: number | undefined) => {
+                state.value = value;
+                setStore(key, value?.toString());
+                if (fn) fn(value);
+            }
+        })
+    }
+
     const getSetArray = (key: string, def: string[], fn?: (val: string[]) => void) => {
         const fetch = () => getStore<string>(key)
             ?.toString()
@@ -132,6 +150,7 @@ export const useSettingsHelper = () => {
         getSetBool,
         getSet,
         getSetNumb,
+        getSetNumbNull,
         getSetArray,
         getSetJson,
         getSetDate,

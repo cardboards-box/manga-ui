@@ -18,6 +18,7 @@ input, textarea, select {
 
     &:focus { border-color: var(--color-primary); }
     &[type="color"] { width: 100%; }
+    &[type="range"] { padding: var(--margin) 0;}
 
     &:disabled {
         cursor: not-allowed;
@@ -43,8 +44,8 @@ input:read-only:not([type='color']):not([type='range']) {
     margin-top: var(--margin);
     overflow: hidden;
 
-    label { 
-        margin-bottom: var(--margin); 
+    label {
+        margin-bottom: var(--margin);
         &.no-bot { margin-bottom: 3px; }
     }
 
@@ -64,7 +65,7 @@ input:read-only:not([type='color']):not([type='range']) {
             border: none;
         }
 
-        input:not(.fill), 
+        input:not(.fill),
         select:not(.fill) {
             min-width: 100px;
         }

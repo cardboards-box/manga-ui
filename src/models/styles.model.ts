@@ -3,8 +3,11 @@ export enum PageStyle {
     SinglePageFitToWidth = 'single-page fit-to-width',
     SinglePageFitToHeight = 'single-page fit-to-height',
     SinglePageNaturalSize = 'single-page natural-size',
+    SinglePageMaxSize = 'single-page max-size',
     DoublePage = 'double-page',
-    LongStrip = 'long-strip'
+    LongStrip = 'long-strip',
+    LongStripNaturalSize = 'long-strip natural-size',
+    LongStripMaxSize = 'long-strip max-size',
 }
 
 export const PAGE_STYLES = [
@@ -12,8 +15,11 @@ export const PAGE_STYLES = [
     PageStyle.SinglePageFitToWidth,
     PageStyle.SinglePageFitToHeight,
     PageStyle.SinglePageNaturalSize,
+    //PageStyle.SinglePageMaxSize,
     PageStyle.DoublePage,
-    PageStyle.LongStrip
+    PageStyle.LongStrip,
+    PageStyle.LongStripNaturalSize,
+    //PageStyle.LongStripMaxSize,
 ]
 
 export enum ProgressBarStyle {
