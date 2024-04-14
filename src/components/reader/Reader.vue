@@ -8,14 +8,18 @@
         @swipe-right="move(false)"
         ref="clickarea"
         :class="classes"
+        :style="{
+            '--manga-filter': imageFilter,
+            '--manga-max-width': 'unset',
+            '--manga-max-height': 'unset'
+        }"
     >
         <Loading v-if="isLoading" />
         <template v-else-if="pageStyle === PageStyle.SinglePageFit">
             <div
-                class="image"
+                class="image image-filter"
                 :style="{
-                    'background-image': `url(${pageUrl})`,
-                    'filter': imageFilter
+                    'background-image': `url(${pageUrl})`
                 }"
             />
             <img class="hidden" v-if="nextPageUrl" :src="nextPageUrl" />
@@ -28,30 +32,28 @@
             <img
                 v-for="image of pageUrls"
                 :src="image"
-                :style="{ 'filter': imageFilter }"
+                class="image-filter"
             />
         </template>
 
         <template v-else-if="pageStyle === PageStyle.DoublePage">
             <div
-                class="image"
+                class="image image-filter"
                 :style="{
-                    'background-image': `url(${pageUrl})`,
-                    'filter': imageFilter
+                    'background-image': `url(${pageUrl})`
                 }"
             />
             <div
-                class="image"
+                class="image image-filter"
                 v-if="nextPageUrl"
                 :style="{
                     'background-image': `url(${nextPageUrl})`,
-                    'filter': imageFilter
                 }"
             />
         </template>
 
         <template v-else>
-            <img :src="pageUrl" :style="{ 'filter': imageFilter }" />
+            <img :src="pageUrl" class="image-filter" />
             <img class="hidden" v-if="nextPageUrl" :src="nextPageUrl" />
         </template>
 
@@ -275,6 +277,10 @@ $navwidth: 400px;
         background-repeat: no-repeat;
     }
 
+    .image-filter {
+        filter: var(--manga-filter);
+    }
+
     &.single-page {
         img {
             margin: 0 auto;
@@ -311,6 +317,13 @@ $navwidth: 400px;
                 position: absolute;
                 left: -100%;
             }
+        }
+    }
+
+    &.custom-size {
+        img {
+            max-width: var(--manga-max-width);
+            max-height: var(--manga-max-height);
         }
     }
 

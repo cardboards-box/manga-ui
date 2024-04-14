@@ -158,9 +158,9 @@
                             <SelectBox v-model="progressBar">
                                 <option
                                     v-for="style in PROGRESS_BAR_STYLES"
-                                    :value="style"
+                                    :value="style.value"
                                 >
-                                    {{ style }}
+                                    {{ style.display }}
                                 </option>
                             </SelectBox>
                         </div>
@@ -187,16 +187,16 @@
                         <div class="control">
                             <label class="no-bot">Image Style</label>
                             <SelectBox v-model="pageStyle">
-                                <option v-for="style in PAGE_STYLES" :value="style">
-                                    {{ style }}
+                                <option v-for="style in PAGE_STYLES" :value="style.value">
+                                    {{ style.display }}
                                 </option>
                             </SelectBox>
                         </div>
                         <div class="control">
                             <label class="no-bot">Image Filter</label>
                             <SelectBox v-model="filter">
-                                <option v-for="style in FILTER_STYLES" :value="style">
-                                    {{ style }}
+                                <option v-for="style in FILTER_STYLES" :value="style.value">
+                                    {{ style.display }}
                                 </option>
                             </SelectBox>
                         </div>
