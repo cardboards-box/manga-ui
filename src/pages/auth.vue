@@ -10,10 +10,15 @@ const { injectSettings } = useAppSettings();
 
 useHead({ title: 'Logging you into something really fancy!' });
 
-onMounted(() => nextTick(() => setTimeout(async () => {
-    const code = route.query.code?.toString();
+const code = computed(() => route.query.code?.toString());
+const pending = ref(false);
 
-    const result = await resolve(code);
+const triggerLogin = async () => {
+    if (!code.value || pending.value) return;
+
+    pending.value = true;
+    const result = await resolve(code.value);
+    pending.value = false;
     if (!result) return;
 
     injectSettings();
@@ -23,5 +28,8 @@ onMounted(() => nextTick(() => setTimeout(async () => {
         return;
     }
     navigateTo(loginReturnUrl.value || '/account');
-}, 300)));
+}
+
+watch(() => code.value, triggerLogin);
+onMounted(() => nextTick(() => triggerLogin()));
 </script>
