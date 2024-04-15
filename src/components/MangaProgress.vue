@@ -6,7 +6,7 @@
                 <IconBtn
                     v-if="currentUser"
                     :loading="loading"
-                    icon="star"
+                    :icon="isFavourite ? 'heart_minus' : 'favorite'"
                     :fill="isFavourite"
                     :text="isFavourite ? 'Unfavourite' : 'Favourite'"
                     color="shade"

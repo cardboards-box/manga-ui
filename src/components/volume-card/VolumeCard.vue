@@ -112,6 +112,10 @@ const toggleRead = async () => {
 
         &.btns {
             justify-content: flex-end;
+
+            .btn:last-child {
+                margin-right: var(--margin);
+            }
         }
     }
 

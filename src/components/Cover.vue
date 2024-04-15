@@ -5,6 +5,7 @@
     :link="actualLink"
     :class="{ 'porn': isPorn, 'rounded': true }"
     :style="styles"
+    :size="{ width: width, height: height }"
 />
 </template>
 

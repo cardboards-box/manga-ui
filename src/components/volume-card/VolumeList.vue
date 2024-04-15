@@ -9,6 +9,7 @@
                 v-for="s in sorts"
                 :link="url(s.key)"
                 :other-classes="s.key === actSort ? 'active' : ''"
+                no-boarder
             />
         </div>
         <IconBtn
@@ -16,10 +17,12 @@
             :rotate="actAsc ? 0 : 180"
             :flip="!actAsc"
             :link="url(undefined, !actAsc)"
+            no-boarder
         />
         <IconBtn
             @click="collapseToggle"
             :icon="allCollapsed ? 'remove' : 'add'"
+            no-boarder
         />
     </header>
     <Loading v-if="volumes.length === 0" />
