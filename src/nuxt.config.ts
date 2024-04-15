@@ -36,7 +36,8 @@ export default defineNuxtConfig({
             appId: 'fd9ea511-ad01-4ba4-ad3d-bc4dee7f53f6',
             authUrl: 'https://auth.index-0.com',
             baseUrl: baseUrl,
-            firebase: FIREBASE_CONFIG
+            firebase: FIREBASE_CONFIG,
+            prod: process.env.NODE_ENV === 'production',
         }
     },
     components: [
@@ -49,7 +50,8 @@ export default defineNuxtConfig({
     ],
     modules: [
         '@pinia/nuxt',
-        '@vite-pwa/nuxt'
+        '@vite-pwa/nuxt',
+        '@nuxt/image'
     ],
     imports: {
         dirs: [

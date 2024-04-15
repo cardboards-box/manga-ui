@@ -1,6 +1,6 @@
 import type { WritableComputedRef } from "nuxt/dist/app/compat/capi";
-import type { ThemeColor, SiteBackground } from "~/models";
-import { FilterStyle, ListStyle, PageStyle, ProgressBarStyle, THEME_DEFAULTS } from '~/models';
+import type { ThemeColor, SiteBackground,  } from "~/models";
+import { FilterStyle, ListStyle, PageStyle, ProgressBarStyle, ImageSize, THEME_DEFAULTS } from '~/models';
 
 type Dic = { [key: string]: string };
 interface MangaSettings {
@@ -9,6 +9,7 @@ interface MangaSettings {
     brightness: number;
     scrollAmount: number;
     pageStyle: PageStyle;
+    imageSize: ImageSize;
     filterStyle: FilterStyle;
     progressBarStyle: ProgressBarStyle;
     customFilter?: string;
@@ -35,6 +36,7 @@ type MangaSettingsKey = {
     brightness: WritableComputedRef<number>;
     scrollAmount: WritableComputedRef<number>;
     pageStyle: WritableComputedRef<PageStyle>;
+    imageSize: WritableComputedRef<ImageSize>;
     filterStyle: WritableComputedRef<FilterStyle>;
     progressBarStyle: WritableComputedRef<ProgressBarStyle>;
     customFilter: WritableComputedRef<string | undefined>;
@@ -56,7 +58,8 @@ const DEFAULTS: MangaSettings = {
     forwardOnly: false,
     brightness: 70,
     scrollAmount: 100,
-    pageStyle: PageStyle.SinglePageFit,
+    pageStyle: PageStyle.Single,
+    imageSize: ImageSize.Fit,
     filterStyle: FilterStyle.BlueLight,
     progressBarStyle: ProgressBarStyle.Left,
     customFilter: undefined,
@@ -85,7 +88,8 @@ export const useAppSettings = () => {
             forwardOnly: getSetBool('manga-forward-only', DEFAULTS.forwardOnly, () => commit()),
             brightness: getSetNumb('manga-brightness', DEFAULTS.brightness, () => commit()),
             scrollAmount: getSetNumb('scroll-amount', DEFAULTS.scrollAmount, () => commit()),
-            pageStyle: getSet<PageStyle>('image-size', DEFAULTS.pageStyle, () => commit()),
+            pageStyle: getSet<PageStyle>('manga-page-size', DEFAULTS.pageStyle, () => commit()),
+            imageSize: getSet<ImageSize>('manga-image-size', DEFAULTS.imageSize, () => commit()),
             filterStyle: getSet<FilterStyle>('image-filter', DEFAULTS.filterStyle, () => commit()),
             progressBarStyle: getSet<ProgressBarStyle>('progress-bar', DEFAULTS.progressBarStyle, () => commit()),
             customFilter: getSet<string>('custom-filter', DEFAULTS.customFilter, () => commit()),

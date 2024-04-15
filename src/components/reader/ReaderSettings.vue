@@ -185,9 +185,17 @@
                             />
                         </div>
                         <div class="control">
-                            <label class="no-bot">Image Style</label>
+                            <label class="no-bot">Page Style</label>
                             <SelectBox v-model="pageStyle">
                                 <option v-for="style in PAGE_STYLES" :value="style.value">
+                                    {{ style.display }}
+                                </option>
+                            </SelectBox>
+                        </div>
+                        <div class="control">
+                            <label class="no-bot">Image Sizes</label>
+                            <SelectBox v-model="imageSize">
+                                <option v-for="style in IMAGE_SIZES" :value="style.value">
                                     {{ style.display }}
                                 </option>
                             </SelectBox>
@@ -257,7 +265,8 @@
 import {
     PAGE_STYLES, PageStyle,
     PROGRESS_BAR_STYLES,
-    FilterStyle, FILTER_STYLES
+    FilterStyle, FILTER_STYLES,
+    IMAGE_SIZES
 } from '~/models';
 import type { ClassOptions } from '~/models';
 const DEFAULT_IMAGE = '/broken.png';
@@ -268,7 +277,7 @@ const { proxy, download } = useApiHelper();
 const { data, refresh, genLink } = useReaderHelper();
 const {
     invertControls, forwardOnly,
-    brightness, pageStyle, filterStyle: filter,
+    brightness, pageStyle, imageSize, filterStyle: filter,
     customFilter, progressBarStyle: progressBar,
     scrollAmount, showTutorial,
     pageMenuOver, regionMargin

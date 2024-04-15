@@ -1,21 +1,23 @@
 <template>
     <Error v-if="error" :message="error" />
     <div v-else
-        class="manga-reader flex fill"
+        class="manga-reader flex"
+        ref="clickarea"
         v-swipe
         @tap="pageClick"
-        @swipe-left="move(true)"
-        @swipe-right="move(false)"
-        ref="clickarea"
         :class="classes"
         :style="{
             '--manga-filter': imageFilter,
-            '--manga-max-width': 'unset',
-            '--manga-max-height': 'unset'
+            '--manga-width': maxImageWidth?.toString() ?? 'unset',
+            '--manga-height': maxImageHeight?.toString() ?? 'unset'
         }"
     >
         <Loading v-if="isLoading" />
-        <template v-else-if="pageStyle === PageStyle.SinglePageFit">
+
+        <ReaderLongStrip
+            v-else-if="pageStyle === PageStyle.LongStrip"
+        />
+        <!-- <template v-else-if="pageStyle === PageStyle.Single">
             <div
                 class="image image-filter"
                 :style="{
@@ -25,10 +27,7 @@
             <img class="hidden" v-if="nextPageUrl" :src="nextPageUrl" />
         </template>
 
-        <template v-else-if="
-            pageStyle === PageStyle.LongStrip ||
-            pageStyle === PageStyle.LongStripNaturalSize ||
-            pageStyle === PageStyle.LongStripMaxSize">
+        <template v-else-if="pageStyle === PageStyle.LongStrip">
             <img
                 v-for="image of pageUrls"
                 :src="image"
@@ -36,7 +35,7 @@
             />
         </template>
 
-        <template v-else-if="pageStyle === PageStyle.DoublePage">
+        <template v-else-if="pageStyle === PageStyle.Double">
             <div
                 class="image image-filter"
                 :style="{
@@ -55,7 +54,7 @@
         <template v-else>
             <img :src="pageUrl" class="image-filter" />
             <img class="hidden" v-if="nextPageUrl" :src="nextPageUrl" />
-        </template>
+        </template> -->
 
         <div class="progress-bar" :class="progressBar">
             <NuxtLink
@@ -118,12 +117,12 @@
 </template>
 
 <script setup lang="ts">
-import { PageStyle, FilterStyle, } from '~/models';
+import { PageStyle, FilterStyle, ImageSize, ImageScroll } from '~/models';
 import type { ClassOptions, booleanish } from '~/models';
 const { isTrue, scrollers, serClasses } = useUtils();
 const {
     invertControls, forwardOnly,
-    brightness, pageStyle, filterStyle: filter,
+    brightness, pageStyle, imageSize, maxImageHeight, maxImageWidth, filterStyle: filter,
     customFilter, progressBarStyle: progressBar,
     scrollAmount, showTutorial
 } = useAppSettings();
@@ -174,9 +173,42 @@ const imageFilter = computed(() => {
         .join(' ');
 });
 
-const classes = computed(() => serClasses(props.class, pageStyle.value));
+const classes = computed(() => serClasses(props.class, pageStyle.value, imageSize.value));
 
-const { top: scrollUp, bottom: scrollDown } = scrollers(clickarea, scrollAmount, scrollAmount);
+const scrollable = computed(() => {
+    if (!clickarea.value) return {
+        width: ImageScroll.None,
+        height: ImageScroll.None
+    };
+
+    const check = (client: number, scroll: number, top: number, offset: number, type: 'vert' | 'horz') => {
+        if (client >= scroll) return ImageScroll.None;
+
+        // if (top + offset >= scroll) return ImageScroll.Done;
+        // return ImageScroll.Doing;
+        const percent = ((top / scroll) - client) * 100;
+        console.log('Check Percent', {
+            client,
+            scroll,
+            top,
+            offset,
+            percent,
+            type
+        });
+
+        if (percent <= 0) return ImageScroll.Start;
+        if (percent >= 100) return ImageScroll.End;
+        return ImageScroll.Mid;
+    }
+
+    const el = clickarea.value;
+    const height = check(el.clientHeight, el.scrollHeight, el.scrollTop, el.offsetHeight, 'vert');
+    const width = check(el.clientWidth, el.scrollWidth, el.scrollLeft, el.offsetWidth, 'horz');
+
+    return { width, height };
+});
+
+const { top: scrollUp, bottom: scrollDown, left: scrollLeft, right: scrollRight } = scrollers(clickarea, scrollAmount, scrollAmount);
 
 const move = (forward: boolean) => {
     const n = invertControls.value ? 'PrevPage': 'NextPage';
@@ -217,17 +249,33 @@ const pageClick = (event: MouseEvent) => {
 }
 
 const arrowKeyHandler = (ev: KeyboardEvent, down: boolean) => {
-    const scrollabled = [
-        PageStyle.LongStrip,
-        PageStyle.SinglePageFitToWidth,
-        PageStyle.SinglePageNaturalSize
-    ].indexOf(pageStyle.value) !== -1;
+    const { width, height } = scrollable.value;
 
     switch(ev.key) {
-        case 'ArrowLeft': if(!down) move(false); return;
-        case 'ArrowRight': if(!down) move(true);  return;
+        case 'ArrowLeft':
+            if (width === ImageScroll.None ||
+                width === ImageScroll.Start) {
+                if (down) return;
+                move(false);
+                return;
+            }
+
+            scrollLeft.value();
+            return;
+        case 'ArrowRight':
+            if (width === ImageScroll.None ||
+                width === ImageScroll.End) {
+                if (down) return;
+                move(true);
+                return;
+            }
+
+            scrollRight.value();
+            return;
         case 'ArrowUp':
-            if (!scrollabled) {
+            if (height === ImageScroll.Start ||
+                height === ImageScroll.None) {
+                if (down) return;
                 move(false);
                 return;
             }
@@ -236,7 +284,9 @@ const arrowKeyHandler = (ev: KeyboardEvent, down: boolean) => {
             return;
 
         case 'ArrowDown':
-            if (!scrollabled) {
+            if (height === ImageScroll.End ||
+                height === ImageScroll.None) {
+                if (down) return;
                 move(true);
                 return;
             }
@@ -248,15 +298,15 @@ const arrowKeyHandler = (ev: KeyboardEvent, down: boolean) => {
 const arrowKeyDown = (ev: KeyboardEvent) => arrowKeyHandler(ev, true);
 const arrowKeyUp = (ev: KeyboardEvent) => arrowKeyHandler(ev, false);
 
-onMounted(() => nextTick(() => {
-    window.addEventListener('keyup', arrowKeyUp);
-    window.addEventListener('keydown', arrowKeyDown);
-}));
+// onMounted(() => nextTick(() => {
+//     window.addEventListener('keyup', arrowKeyUp);
+//     window.addEventListener('keydown', arrowKeyDown);
+// }));
 
-onUnmounted(() => {
-    window.removeEventListener('keyup', arrowKeyUp);
-    window.removeEventListener('keydown', arrowKeyDown);
-})
+// onUnmounted(() => {
+//     window.removeEventListener('keyup', arrowKeyUp);
+//     window.removeEventListener('keydown', arrowKeyDown);
+// })
 </script>
 
 <style scoped lang="scss">
@@ -265,7 +315,10 @@ $navwidth: 400px;
 .manga-reader {
     position: relative;
     overflow: auto;
-    max-width: 100%;
+    width: var(--full-width);
+    height: var(--full-height);
+    max-width: var(--full-width);
+    max-height: var(--full-height);
     transition: all 150ms;
 
     img { max-width: 100%; }
@@ -281,16 +334,16 @@ $navwidth: 400px;
         filter: var(--manga-filter);
     }
 
-    &.single-page {
+    &.single {
         img {
             margin: 0 auto;
             &.hidden { display: none; }
         }
     }
 
-    &.long-strip { flex-flow: column; }
+    &.longstrip { flex-flow: column; }
 
-    &.fit-to-width {
+    &.width {
         img {
             width: 100%;
             max-width: 100%;
@@ -299,7 +352,7 @@ $navwidth: 400px;
         }
     }
 
-    &.fit-to-height {
+    &.height {
         img {
             margin: auto;
             max-width: unset;
@@ -308,7 +361,7 @@ $navwidth: 400px;
         }
     }
 
-    &.natural-size {
+    &.natural {
         img {
             margin: auto;
             max-width: unset;
@@ -320,10 +373,17 @@ $navwidth: 400px;
         }
     }
 
-    &.custom-size {
+    &.custom-max {
         img {
             max-width: var(--manga-max-width);
             max-height: var(--manga-max-height);
+        }
+    }
+
+    &.custom {
+        img {
+            width: var(--manga-max-width);
+            height: var(--manga-max-height);
         }
     }
 
