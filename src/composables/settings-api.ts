@@ -23,6 +23,7 @@ interface MangaSettings {
     lastCheck?: Date | null;
     maxImageWidth?: number;
     maxImageHeight?: number;
+    infiniteScroll: boolean;
 }
 
 interface Settings {
@@ -49,6 +50,7 @@ type MangaSettingsKey = {
     lastCheck: WritableComputedRef<Date | undefined | null>;
     maxImageWidth?: WritableComputedRef<number | undefined | null>;
     maxImageHeight?: WritableComputedRef<number | undefined | null>;
+    infiniteScroll: WritableComputedRef<boolean>;
 };
 
 const DEFAULTS: MangaSettings = {
@@ -70,7 +72,8 @@ const DEFAULTS: MangaSettings = {
     background: { ...THEME_DEFAULTS.themes[0] },
     lastCheck: new Date(),
     maxImageHeight: undefined,
-    maxImageWidth: undefined
+    maxImageWidth: undefined,
+    infiniteScroll: true,
 }
 
 export const useAppSettings = () => {
@@ -98,8 +101,9 @@ export const useAppSettings = () => {
             fillPage: getSetBool('fill-page', DEFAULTS.fillPage, () => commit()),
             background: getSetJson<SiteBackground>('background', JSON.stringify(DEFAULTS.background), () => commitFix()),
             lastCheck: getSetDate('last-check', null, () => commit()),
-            maxImageWidth: getSetNumbNull('max-image-width', undefined, () => commit()),
-            maxImageHeight: getSetNumbNull('max-image-height', undefined, () => commit())
+            maxImageWidth: getSetNumbNull('max-image-width', DEFAULTS.maxImageWidth, () => commit()),
+            maxImageHeight: getSetNumbNull('max-image-height', DEFAULTS.maxImageHeight, () => commit()),
+            infiniteScroll: getSetBool('infinite-scroll', DEFAULTS.infiniteScroll, () => commit()),
         }
     })();
 

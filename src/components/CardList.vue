@@ -16,6 +16,12 @@
             @click="() => fill = !fill"
             :icon="!fill ? 'fullscreen' : 'fullscreen_exit'"
         />
+        <IconBtn
+            v-if="canPaginate"
+            @click="() => infinite = !infinite"
+            :icon="!infinite ? 'all_inclusive' : 'page_control'"
+            title="Infinite Scroll / Pagination"
+        />
         <div class="btn-group">
             <IconBtn
                 v-for="sty in styles"
@@ -29,6 +35,17 @@
     <header ref="stickyheader">
         <slot />
     </header>
+
+    <div class="pager-wrapper" v-if="canPaginate && !infinite && (pagination?.total ?? 0) > 1">
+        <Pager
+            :page="pagination!.page"
+            :pages="pagination!.pages"
+            :size="pagination!.size"
+            :total="pagination!.total"
+            :url="location.url"
+            :params="location.params"
+        />
+    </div>
 
     <div class="cards" :class="{ 'grid by-auto': listStyle === ListStyle.Album }">
         <div class="card" v-for="item in items" >
@@ -48,6 +65,19 @@
             </div>
         </div>
     </div>
+
+    <div class="pager-wrapper margin-bottom" v-if="canPaginate && !infinite">
+        <Pager
+            :page="pagination!.page"
+            :pages="pagination!.pages"
+            :size="pagination!.size"
+            :total="pagination!.total"
+            :url="location.url"
+            :params="location.params"
+            no-top-margin
+        />
+    </div>
+
 </div>
 </template>
 
@@ -61,7 +91,8 @@ import { ListStyle } from '~/models';
 type MangaType = Manga | ProgressExt;
 type SearchType = MatchResult | VisionResult | BaseResult | ImageSearchManga;
 
-const { listStyle, fillPage } = useAppSettings();
+const { listStyle, fillPage, infiniteScroll } = useAppSettings();
+const { keys } = useUtils();
 const stickyheader = ref<HTMLElement>();
 const emits = defineEmits<{
     (e: 'onscrolled'): void;
@@ -77,6 +108,12 @@ const props = defineProps<{
     capitalize?: boolean;
     title: string;
     allowReload?: boolean;
+    pagination?: {
+        page: number;
+        pages: number;
+        size: number;
+        total: number;
+    }
 }>();
 
 const items = computed(() => {
@@ -98,6 +135,28 @@ const fill = computed<boolean>({
     set: (value: boolean) => fillPage.value = value
 });
 
+const infinite = computed<boolean>({
+    get: () => infiniteScroll.value,
+    set: (value: boolean) => infiniteScroll.value = value
+});
+
+// const location = computed(() => ({
+//     url: window.location.pathname,
+//     params: Object.fromEntries(new URLSearchParams(window.location.search).entries())
+// }));
+const location = computed(() => {
+    const url = window.location.pathname;
+    const pars = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+    const parameters: { [key: string]: string } = keys(pars)
+        .filter(t => ['page', 'size'].indexOf(t.toString()) === -1)
+        .reduce((acc, key) => ({ ...acc, [key]: pars[key] }), {});
+    return {
+        url,
+        params: parameters
+    };
+});
+
+const canPaginate = computed(() => !!props.pagination);
 const cssStyle = computed(() => `${style.value} ${fill.value ? 'fill-page' : ''}`);
 
 const styles = [
@@ -176,6 +235,14 @@ onMounted(() => {
         }
     }
 
+    .pager-wrapper {
+        display: flex;
+        max-width: min(98vw, 1050px);
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     .title {
         h2 {
             overflow: hidden;
@@ -194,7 +261,14 @@ onMounted(() => {
         &[stuck] { padding-top: 5px; }
     }
 
-    .cards { padding-bottom: var(--margin); }
+    .cards {
+        padding-bottom: var(--margin);
+        margin-top: 0;
+
+        .card:first-child {
+            margin-top: 0;
+        }
+    }
 
     .error-card {
         display: flex;
@@ -220,7 +294,7 @@ onMounted(() => {
     }
 
     &.fill-page {
-        .title, header, .cards, .error-card { max-width: 100%; }
+        .title, header, .cards, .error-card, .pager-wrapper { max-width: 100%; }
     }
 }
 

@@ -74,6 +74,11 @@
                             Fill Card-List Page
                         </CheckBox>
                     </div>
+                    <div class="control checkbox">
+                        <CheckBox v-model="infiniteScroll">
+                            Card-List Infinite Scroll
+                        </CheckBox>
+                    </div>
                 </div>
             </Tab>
             <Tab title="Theme" icon="palette" scrollable keep-alive>
@@ -108,6 +113,7 @@ const {
     fillPage,
     filterStyle: filter,
     customFilter,
+    infiniteScroll,
 } = useAppSettings();
 
 useHead({ title: 'Configure the reader your way.' });

@@ -35,6 +35,7 @@
             :link="link"
             @click="doSearch(true)"
             :disabled="isDisabled"
+            no-boarder
         />
     </div>
     <div class="input-drawer">

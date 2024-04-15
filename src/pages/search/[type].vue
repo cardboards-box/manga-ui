@@ -8,6 +8,12 @@
     @reload="() => fetch(true)"
     capitalize
     allow-reload
+    :pagination="{
+        page: filter.page,
+        pages: results.pages,
+        size: filter.size,
+        total: results.count
+    }"
 >
     <InputGroup
         v-model="filter.search"
@@ -102,11 +108,11 @@
 import type { Paginated, ProgressExt, Filter } from "~/models";
 import { AttributeType } from "~/models";
 
-const advanced = ref(false);
 const headerStuck = ref(false);
 const route = useRoute();
 const { search, filters: getFilters } = useMangaApi();
 const { serialize, deserialize } = useFilterHelpter();
+const { infiniteScroll } = useAppSettings();
 
 const states = [
     { text: 'All', routes: '/search/all', index: 0 },
@@ -149,7 +155,11 @@ const DEFAULT_FILTER = <Filter>{
     ...defaultFilters
 };
 
-const filter = ref({...DEFAULT_FILTER});
+const filter = ref({
+    ...DEFAULT_FILTER,
+    page: +(route.query.page?.toString() || DEFAULT_FILTER.page),
+    size: +(route.query.size?.toString() || DEFAULT_FILTER.size)
+});
 const results = ref(<Paginated<ProgressExt>>{ pages: 0, count: 0, results: [] });
 const pending = ref(false);
 
@@ -157,12 +167,12 @@ const { data: filters } = await getFilters();
 
 const ffil = (key: string) => computed(() => filters.value?.find(t => t.key === key)?.values?.map(t => t.toLowerCase()) || []);
 
-const allTags = ffil('tag'); //computed(() => filters.value?.find(t => t.key === 'tag')?.values || []);
-const nsfwTags = ffil('nsfw-tag');// computed(() => filters.value?.find(t => t.key === 'nsfw-tag')?.values || []);
-const allSorts = ffil('sorts'); //computed(() => filters.value?.find(t => t.key === 'sorts')?.values || []);
-const sources = ffil('source'); // computed(() => filters.value?.find(t => t.key === 'source')?.values || []);
-const ratings = ffil('content rating'); // computed(() => filters.value?.find(t => t.key === 'content rating')?.values || []);
-const statuses = ffil('status'); //computed(() => filters.value?.find(t => t.key === 'status')?.values || []);
+const allTags = ffil('tag');
+const nsfwTags = ffil('nsfw-tag');
+const allSorts = ffil('sorts');
+const sources = ffil('source');
+const ratings = ffil('content rating');
+const statuses = ffil('status');
 const type = computed(() => route.params.type.toString());
 const state = computed(() => {
     for(let item of states) {
@@ -203,10 +213,17 @@ const filterRouteUrl = () => {
 const fetch = async (reset: boolean) => {
     if (pending.value) return;
 
-    if (reset){
+    if (reset || !infiniteScroll.value) {
         results.value.results = [];
+        filter.value.page = +(route.query.page?.toString() ?? filter.value.page);
+        filter.value.size = +(route.query.size?.toString() ?? filter.value.size);
+    }
+
+    if (reset) {
         results.value.pages = 0;
         results.value.count = 0;
+        if (infiniteScroll.value)
+            filter.value.page = 1;
     }
 
     pending.value = true;
@@ -223,7 +240,10 @@ const fetch = async (reset: boolean) => {
 
 const onScroll = async () => {
     const curRes = results.value;
-    if (!curRes || curRes.pages <= filter.value.page || pending.value) return;
+    if (!curRes ||
+        curRes.pages <= filter.value.page ||
+        pending.value ||
+        !infiniteScroll.value) return;
 
     filter.value.page++;
     await fetch(false);
@@ -236,7 +256,6 @@ const clearTags = () => {
     filter.value.attributes.forEach(t => t.values = []);
     filter.value.sort = defaultFilters.sort;
     filter.value.nsfw = defaultFilters.nsfw;
-
 }
 
 onMounted(() => nextTick(() => {
