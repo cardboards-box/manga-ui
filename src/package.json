@@ -27,6 +27,7 @@
     "workbox-routing": "^7.0.0"
   },
   "dependencies": {
+    "@nuxt/image": "^1.5.0",
     "colortranslator": "^2.0.0",
     "dayjs": "^1.11.7",
     "file-saver": "^2.0.5",

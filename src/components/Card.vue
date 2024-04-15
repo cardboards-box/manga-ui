@@ -9,9 +9,17 @@
             <NuxtLink :to="'/manga/' + mdata.manga.id">
                 {{ mdata.manga.displayTitle ?? mdata.manga.title }}
             </NuxtLink>
-            <Icon :fill="!!mdata.icon.fill" v-if="mdata.icon">
+            <Icon :fill="!!mdata.icon.fill" v-if="mdata.icon" :title="mdata.icon.title">
                 {{ mdata.icon.text }}
             </Icon>
+            <IconBtn
+                v-if="currentUser"
+                inline
+                :icon="mdata.favourited ? 'heart_minus' : 'favorite'"
+                icon-size=""
+                :loading="favouriteLoading"
+                @click="toggleFavourite"
+            />
         </div>
         <template v-if="mdata.stats">
             <div class="source" v-if="mdata.progress">
@@ -105,6 +113,9 @@ import type {
 } from '~/models';
 import { ListStyle } from '~/models';
 const { listStyle } = useAppSettings();
+const { currentUser } = useAuthApi();
+const { toPromise } = useApiHelper();
+const { favourite } = useMangaApi();
 
 interface Props {
     search?: MatchResult | VisionResult | BaseResult | ImageSearchManga;
@@ -117,8 +128,10 @@ interface MangaData {
     progress?: Progress;
     stats?: Stats;
     chapter?: Chapter;
+    favourited: boolean;
     icon?: {
         text: string;
+        title?: string;
         fill?: boolean;
     };
     rating?: string;
@@ -138,9 +151,11 @@ interface SearchData {
 }
 
 const { search, manga, overridestyle: style } = defineProps<Props>();
-const mdata = computed(() => determineCardData());
-const sdata = computed(() => determineSearchData());
+const mdata = ref(determineCardData());
+const sdata = ref(determineSearchData());
+const favouriteLoading = ref(false);
 const actStyle = computed(() => style ?? listStyle.value);
+
 
 const domain = (url: string) => new URL(url).hostname;
 
@@ -203,16 +218,16 @@ function determineCardData(): MangaData | undefined {
 
     if (!manga || 'id' in manga) return {
         manga: data,
+        favourited: false,
         rating: data.attributes.find(t => t.name === 'Content Rating')?.value
     };
 
     const { stats, progress, chapter } = manga;
 
     const getIcon = () => {
-        if (stats?.favourite) return { text: 'star', fill: true };
-        if (stats?.chapterProgress === 100) return { text: 'check_circle' };
-        if (stats?.hasBookmarks) return { text: 'bookmarks' };
-        if (progress) return { text: 'collections_bookmark' };
+        if (stats?.chapterProgress === 100) return { text: 'check_circle', title: 'Completed' };
+        if (stats?.hasBookmarks) return { text: 'bookmarks', title: 'Has Bookmarks' };
+        if (progress) return { text: 'collections_bookmark', title: 'In Progress' };
         return undefined;
     }
 
@@ -222,9 +237,27 @@ function determineCardData(): MangaData | undefined {
         stats: stats,
         chapter: chapter,
         icon: getIcon(),
+        favourited: !!stats?.favourite,
         rating: data.attributes.find(t => t.name === 'Content Rating')?.value
     }
 }
+
+const toggleFavourite = async () => {
+    if (!currentUser.value || !mdata.value) return;
+
+    favouriteLoading.value = true;
+    const result = await toPromise(favourite(mdata.value.manga.id)) ?? undefined;
+    mdata.value.favourited = !!result;
+    favouriteLoading.value = false;
+}
+
+const refresh = () => {
+    mdata.value = determineCardData();
+    sdata.value = determineSearchData();
+}
+
+watch(() => search, refresh, { immediate: true });
+watch(() => manga, refresh, { immediate: true });
 </script>
 
 <style lang="scss" scoped>

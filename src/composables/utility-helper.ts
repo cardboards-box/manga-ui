@@ -1,7 +1,10 @@
 import type { ClassOptions, booleanish, booleanishext, StyleOptions } from "~/models";
+import { ImageScroll } from "~/models";
 
 export const useUtils = () => {
-    const route = useRoute();
+    const config = useRuntimeConfig();
+    const refreshTrigger = useState<boolean>('ui-refresh-trigger', () => false);
+    const resizeTrigger = useState<boolean>('ui-resize-trigger', () => false);
 
     /**
      * Stop a function from being called too often
@@ -128,7 +131,6 @@ export const useUtils = () => {
      */
     const clone = <T>(val: T) => {
         if (val === undefined) return undefined;
-
         return <T>JSON.parse(JSON.stringify(val));
     }
 
@@ -204,9 +206,7 @@ export const useUtils = () => {
      * @param title The title to set the page to
      */
     const setTitle = (title: string) => {
-        const admin = route.path.indexOf('/admin') !== -1;
-
-        useSeoMeta({ title: `${title} | ${admin ? 'TMMs Admin Panel' : 'TMMs'}`})
+        useSeoMeta({ title: `${title} | MangaBox`})
     }
 
     /**
@@ -334,12 +334,35 @@ export const useUtils = () => {
     /**
      * The percentage of the given scroller that has been scrolled
      * @param scroller The scroller to check against
+     * @param height Whether or not to check the height or width
      * @returns The percent of the scroller that has been scrolled
      */
-    const scrollPercent = (scroller: HTMLElement) => {
-        if (scroller.scrollHeight == scroller.clientHeight) return 100;
-        return Math.floor(scroller.scrollTop / (scroller.scrollHeight - scroller.clientHeight) * 100);
+    const scrollPercent = (scroller: HTMLElement, height: boolean = true) => {
+        if (height) {
+            if (scroller.scrollHeight == scroller.clientHeight) return 100;
+            return Math.floor(scroller.scrollTop / (scroller.scrollHeight - scroller.clientHeight) * 100);
+        }
+
+        if (scroller.scrollWidth == scroller.clientWidth) return 100;
+        return Math.floor(scroller.scrollLeft / (scroller.scrollWidth - scroller.clientWidth) * 100);
     };
+
+    /**
+     * Write some text to the clipboard
+     * @param text The text to write
+     * @returns A promise that resolves when the text has been written
+     */
+    const writeToClipboard = (text: string) => {
+        return navigator.clipboard.writeText(text);
+    }
+
+    /**
+     * Gets the current base URL of the page
+     * @returns The base URL of the current page
+     */
+    const baseUrl = () => {
+        return `${window.location.protocol}//${window.location.host}`;
+    }
 
     /**
      * Throttled scroll amounts for the given scroller
@@ -355,11 +378,45 @@ export const useUtils = () => {
                 behavior: 'smooth'
             });
         }
+        const scrollLeft = (left: booleanish) => {
+            scroller.value?.scrollBy({
+                left: left ? -amount.value : amount.value,
+                behavior: 'smooth'
+            });
+        };
 
         return {
             top: computed(() => throttle<void>(() => scroll(true), wait.value)),
             bottom: computed(() => throttle<void>(() => scroll(false), wait.value)),
+            left: computed(() => throttle<void>(() => scrollLeft(true), wait.value)),
+            right: computed(() => throttle<void>(() => scrollLeft(false), wait.value)),
         }
+    }
+
+    /**
+     * Gets the scroll status of the element
+     * @param el The element to check
+     * @returns The width and height status of the elements
+     */
+    const scrollStatus = (el?: HTMLElement) => {
+        if (!el) return {
+            width: ImageScroll.None,
+            height: ImageScroll.None,
+        };
+
+        const check = (client: number, scroll: number, type: 'vert' | 'horz') => {
+            if (client >= scroll) return ImageScroll.None;
+
+            const percent = scrollPercent(el, type === 'vert');
+            if (percent <= 0) return ImageScroll.Start;
+            if (percent >= 100) return ImageScroll.End;
+            return ImageScroll.Mid;
+        }
+
+        const height = check(el.clientHeight, el.scrollHeight, 'vert');
+        const width = check(el.clientWidth, el.scrollWidth, 'horz');
+
+        return { width, height };
     }
 
     /**
@@ -398,7 +455,138 @@ export const useUtils = () => {
         }
     }
 
+    /**
+     * Scales the given width and height to fit within the given max width and height
+     * @param width The width to scale
+     * @param height The height to scale
+     * @param maxWidth The max width to fit within
+     * @param maxHeight The max height to fit within
+     * @returns The new width and height
+     */
+    const scale = (width: number, height: number, maxWidth: number, maxHeight: number) => {
+        if (width === 0 || height === 0) return { width: 0, height: 0 };
+
+        const widthRatio = maxWidth / width;
+        const heightRatio = maxHeight / height;
+
+        const ratio = Math.min(widthRatio, heightRatio);
+        const newWidth = width * ratio;
+        const newHeight = height * ratio;
+
+        return { width: Math.round(newWidth), height: Math.round(newHeight) };
+    }
+
+    /**
+     * Converts a CSS value to a number
+     * @param cssValue the CSS value
+     * @param target the element to check against
+     * @returns the converted number or undefined if it couldn't be converted
+     */
+    const cssUnit = (cssValue: string, target?: HTMLElement) => {
+        //Stolen from: https://stackoverflow.com/a/66569574
+        //And then adapted to work with CSS variables
+        target = target || document.body;
+
+        cssValue = cssValue.trim();
+
+        const supportedUnits: {
+            [key: string]: (value: number) => number
+        } = {
+
+            // Absolute sizes
+            'px': (value: number) => value,
+            'cm': (value: number) => value * 38,
+            'mm': (value: number) => value * 3.8,
+            'q': (value: number) => value * 0.95,
+            'in': (value: number) => value * 96,
+            'pc': (value: number) => value * 16,
+            'pt': (value: number) => value * 1.333333,
+
+            // Relative sizes
+            'rem': (value: number) => value * parseFloat( getComputedStyle( document.documentElement ).fontSize ),
+            'em': (value: number) => value * parseFloat( getComputedStyle( target ).fontSize ),
+            'vw': (value: number) => value / 100 * window.innerWidth,
+            'vh': (value: number) => value / 100 * window.innerHeight,
+
+            // Times
+            'ms': (value: number) => value,
+            's': (value: number) => value * 1000,
+
+            // Angles
+            'deg': (value: number) => value,
+            'rad': (value: number) => value * ( 180 / Math.PI ),
+            'grad': (value: number) => value * ( 180 / 200 ),
+            'turn': (value: number) => value * 360
+
+        };
+
+        // Match positive and negative numbers including decimals with following unit
+        const pattern = new RegExp( `^([\-\+]?(?:\\d+(?:\\.\\d+)?))(${ Object.keys( supportedUnits ).join( '|' ) })$`, 'i' );
+
+        // Pattern matches a CSS variable
+        const varPattern = new RegExp(`var\\(--([a-zA-Z0-9-]+)\\)`, 'i');
+
+        let matches;
+        while(matches = cssValue.match(varPattern)) {
+            const varName = matches[1];
+            const varValue = getComputedStyle(target).getPropertyValue(`--${varName}`);
+            cssValue = cssValue.replace(`var(--${varName})`, varValue);
+        }
+
+        // If is a match, return example: [ "-2.75rem", "-2.75", "rem" ]
+        matches = cssValue.match( pattern );
+
+        if ( matches ) {
+            const value = Number( matches[ 1 ] );
+            const unit = matches[ 2 ].toLocaleLowerCase();
+
+            // Sanity check, make sure unit conversion function exists
+            if ( unit in supportedUnits ) {
+                return supportedUnits[ unit ]( value );
+            }
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Print out the message only if we are in debug mode
+     * @param message The message to print
+     * @param args Any arguments to print
+     */
+    const debug = (message: string, ...args: any[]) => {
+        if (config.public.prod) return;
+        console.log(message, ...args);
+    };
+
+    (() => {
+        const doResize = () => {
+            if (window && 'resize-watcher' in window) return;
+
+            window.addEventListener('resize', () => {
+                resizeTrigger.value = !resizeTrigger.value;
+            });
+            (<any>window)['resize-watcher'] = true;
+        };
+
+        const doRefresh = () => {
+            if (window && 'refresh-watcher' in window) return;
+
+            (<any>window).rmmWatcherTimer = setInterval(async () => {
+                refreshTrigger.value = !refreshTrigger.value;
+            }, 1000);
+        }
+
+        if (!process.client) return;
+
+        doResize();
+        doRefresh();
+    });
+
     return {
+        refreshTrigger,
+        resizeTrigger,
+
         debounce,
         throttle,
         dateFormatLocal,
@@ -420,7 +608,13 @@ export const useUtils = () => {
         isTrue,
         fileSizeMicro,
         scrollPercent,
+        scrollStatus,
         fullscreen,
         scrollers,
+        scale,
+        cssUnit,
+        debug,
+        writeToClipboard,
+        baseUrl,
     }
 }

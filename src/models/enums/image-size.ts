@@ -9,6 +9,13 @@ export enum ImageSize {
     CustomMaxSize = 'custom-max',
 }
 
+export enum ImageScroll {
+    None = 'none',
+    Start = 'start',
+    Mid = 'mid',
+    End = 'end',
+}
+
 export const IMAGE_SIZES_ALL: EnumDescriptions<ImageSize> = [
     {
         value: ImageSize.Fit,

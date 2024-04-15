@@ -3,6 +3,7 @@
         <span
             class="material-symbols-outlined"
             :class="classes"
+            :title="title"
             :style="{
                 'font-size': size,
                 transform: `rotate(${rotate || 0}deg) scaleX(${flip ? -1 : 1})`,
@@ -26,7 +27,8 @@ const props = defineProps<{
     rotate?: number | string,
     speed?: string,
     flip?: booleanish,
-    'class'?: ClassOptions
+    'class'?: ClassOptions,
+    title?: string
 }>();
 
 const classes = computed(() => serClasses(props.class, {

@@ -29,7 +29,7 @@
             pageStyle === PageStyle.LongStrip ||
             pageStyle === PageStyle.LongStripNaturalSize ||
             pageStyle === PageStyle.LongStripMaxSize">
-            <img
+            <Image
                 v-for="image of pageUrls"
                 :src="image"
                 class="image-filter"
@@ -53,7 +53,7 @@
         </template>
 
         <template v-else>
-            <img :src="pageUrl" class="image-filter" />
+            <Image :src="pageUrl" class="image-filter" />
             <img class="hidden" v-if="nextPageUrl" :src="nextPageUrl" />
         </template>
 
