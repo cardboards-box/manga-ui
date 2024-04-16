@@ -25,10 +25,7 @@
             <img class="hidden" v-if="nextPageUrl" :src="nextPageUrl" />
         </template>
 
-        <template v-else-if="
-            pageStyle === PageStyle.LongStrip ||
-            pageStyle === PageStyle.LongStripNaturalSize ||
-            pageStyle === PageStyle.LongStripMaxSize">
+        <template v-else-if="isLongStrip">
             <Image
                 v-for="image of pageUrls"
                 :src="image"
@@ -57,7 +54,7 @@
             <img class="hidden" v-if="nextPageUrl" :src="nextPageUrl" />
         </template>
 
-        <div class="progress-bar" :class="progressBar">
+        <div class="progress-bar" :class="progressBar" v-if="!isLongStrip">
             <NuxtLink
                 v-for="(_, i) of pageUrls"
                 :to="genPageLink(i)"
@@ -147,6 +144,11 @@ const menuOpen = computed({
     get: () => props.modelValue,
     set: (v) => emits('update:modelValue', v)
 });
+const isLongStrip = computed(() => [
+    PageStyle.LongStrip,
+    PageStyle.LongStripNaturalSize,
+    PageStyle.LongStripMaxSize
+].includes(pageStyle.value));
 
 const imageFilter = computed(() => {
     let filters: { [key: string]: string } = {
@@ -178,9 +180,11 @@ const classes = computed(() => serClasses(props.class, pageStyle.value));
 
 const { top: scrollUp, bottom: scrollDown } = scrollers(clickarea, scrollAmount, scrollAmount);
 
-const move = (forward: boolean) => {
-    const n = invertControls.value ? 'PrevPage': 'NextPage';
-    const b = invertControls.value ? 'NextPage': 'PrevPage';
+const move = (forward: boolean, chapter: boolean = false) => {
+    const pp = chapter ? 'NextChapter': 'NextPage';
+    const pn = chapter ? 'PrevChapter': 'PrevPage';
+    const n = invertControls.value ? pn: pp;
+    const b = invertControls.value ? pp: pn;
     const link = genLink(forward ? n: b);
     if (!link) return;
 
@@ -197,7 +201,7 @@ const pageClick = (event: MouseEvent) => {
     }
 
     if (forwardOnly.value) {
-        const link = genLink('NextPage');
+        const link = genLink(isLongStrip.value ? 'NextChapter' : 'NextPage');
         if (link) navigateTo(link);
         return;
     }
@@ -206,12 +210,12 @@ const pageClick = (event: MouseEvent) => {
     let isForward = output.includes('right') || (output.includes('bottom') && !output.includes('left'));
 
     if (isBack) {
-        move(false);
+        move(false, isLongStrip.value);
         return;
     }
 
     if (isForward) {
-        move(true);
+        move(true, isLongStrip.value);
         return;
     }
 }

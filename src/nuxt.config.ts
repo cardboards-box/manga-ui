@@ -46,6 +46,10 @@ export default defineNuxtConfig({
         '~/components/buttons',
         '~/components/volume-card',
         '~/components/reader',
+        '~/components/manga',
+        '~/components/manga/readers',
+        '~/components/manga/volumes',
+        '~/components/manga/cards',
         '~/components'
     ],
     modules: [
