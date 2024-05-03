@@ -157,10 +157,11 @@ const favouriteLoading = ref(false);
 const actStyle = computed(() => style ?? listStyle.value);
 
 
-const domain = (url: string) => new URL(url).hostname;
 
 function determineSearchData(): SearchData | undefined {
     if (!search) return undefined;
+
+    const domain = (url: string) => new URL(url).hostname;
 
     if ('description' in search) {
         return {
