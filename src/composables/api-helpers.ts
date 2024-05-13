@@ -86,13 +86,22 @@ export const useApiHelper = () => {
         return useFetch<T>(wrapUrl(url), opts);
     }
 
-    function download(url: string, name?: string, req?: RequestInit) {
+    async function download(url: string, name?: string, req?: RequestInit) {
         const uri = wrapUrl(url);
-        return fetch(uri, req)
-            .then(t => t.blob())
-            .then(t => {
-                filesaver.saveAs(t, name);
+        try {
+            const response = await fetch(uri, req);
+            const fileData = await response.blob();
+            filesaver.saveAs(fileData, name);
+        } catch (error) {
+            console.error(`Failed to download ${uri}`, {
+                error,
+                uri,
+                url,
+                name,
+                req
             });
+            window.open(uri, '_blank')?.focus();
+        }
     }
 
     function onFinish<T>(request: AsyncData<T, any>, fn: (item?: T) => void, err?: (item: any) => void) {

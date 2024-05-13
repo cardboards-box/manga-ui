@@ -29,6 +29,14 @@
                     - <Date :date="mdata.progress.updatedAt.toString()" />
                 </span>
             </div>
+            <div class="source" v-if="mdata.chapter && mdata.progress">
+                <span>
+                    <b>Last Chapter Read: </b>&nbsp;
+                    <span v-if="mdata.chapter.volume">Vol. {{ mdata.chapter.volume }} -&nbsp;</span>
+                    <span>Ch. {{ mdata.chapter.ordinal }}</span>
+                    <span v-if="mdata.chapter.title">&nbsp;- {{ mdata.chapter.title }}</span>
+                </span>
+            </div>
             <div class="source">
                 <span>
                     <b>Latest Chapter: </b>&nbsp;
