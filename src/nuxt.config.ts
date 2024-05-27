@@ -44,7 +44,6 @@ export default defineNuxtConfig({
         '~/components/general',
         '~/components/general/tabs',
         '~/components/buttons',
-        '~/components/volume-card',
         '~/components/reader',
         '~/components/manga',
         '~/components/manga/readers',

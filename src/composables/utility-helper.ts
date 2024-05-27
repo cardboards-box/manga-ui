@@ -581,7 +581,7 @@ export const useUtils = () => {
 
         doResize();
         doRefresh();
-    });
+    })();
 
     return {
         refreshTrigger,
