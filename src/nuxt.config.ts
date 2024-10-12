@@ -38,6 +38,7 @@ export default defineNuxtConfig({
             baseUrl: baseUrl,
             firebase: FIREBASE_CONFIG,
             prod: process.env.NODE_ENV === 'production',
+            proxyUrl: 'https://cba-proxy.index-0.com',
         }
     },
     components: [
@@ -62,7 +63,7 @@ export default defineNuxtConfig({
         ]
     },
     pwa: {
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
         strategies: "injectManifest",
         includeAssets: [], // do not precache all the JS, it's really stupid
         includeManifestIcons: false,

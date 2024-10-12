@@ -146,6 +146,7 @@ export const useSettingsHelper = () => {
         apiUrl: config.public.apiUrl,
         authUrl: config.public.authUrl,
         appId: config.public.appId,
+        proxyUrl: config.public.proxyUrl,
 
         getSetBool,
         getSet,

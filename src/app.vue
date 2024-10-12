@@ -22,6 +22,7 @@ const { fixBgImage, injectSettings, lastCheck } = useAppSettings();
 const { toPromise } = useApiHelper();
 const { bump, currentUser } = useAuthApi();
 const { since } = useMangaApi();
+const { $pwa } = useNuxtApp();
 
 const latest = ref<ProgressExt[]>([]);
 let watcher: NodeJS.Timeout | undefined = undefined;
@@ -43,6 +44,20 @@ const bumpManga = async () => {
     return data?.results ?? [];
 };
 
+const selfupdateIfNecessary = () => {
+    if (!$pwa || !$pwa.swActivated) {
+        console.debug("ServiceWorker not installed/active, skipping selfupdate.");
+        return;
+    }
+
+    if ($pwa.needRefresh) {
+        console.log("Website update found, updating...");
+        $pwa.updateServiceWorker();
+    }
+};
+// if necessary, update on first load
+selfupdateIfNecessary();
+
 onMounted(() => nextTick(async () => {
     fixBgImage();
 
@@ -52,6 +67,7 @@ onMounted(() => nextTick(async () => {
 
     watcher = setTimeout(async () => {
         latest.value = await bumpManga();
+        selfupdateIfNecessary();
     }, 60 * 1000);
 }));
 

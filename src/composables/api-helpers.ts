@@ -4,7 +4,7 @@ import filesaver from 'file-saver';
 export type Params = { [key: string]: any; };
 
 export const useApiHelper = () => {
-    const { apiUrl, token } = useSettingsHelper();
+    const { apiUrl, token, proxyUrl } = useSettingsHelper();
 
     const wrapUrl = (url: string) => {
         if (url.toLowerCase().indexOf('https://') !== -1 ||
@@ -24,7 +24,8 @@ export const useApiHelper = () => {
 
     const proxy = (url: string, group: string = 'manga-page', referer?: string) => {
         const path = encodeURIComponent(url);
-        let uri = `https://cba-proxy.index-0.com/proxy?path=${path}&group=${group}`;
+        const proxy = proxyUrl.endsWith('/') ? proxyUrl : `${proxyUrl}/`;
+        let uri = `${proxy}proxy?path=${path}&group=${group}`;
 
         if (referer) uri += `&referer=${encodeURIComponent(referer)}`;
 

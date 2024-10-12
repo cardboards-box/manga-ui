@@ -58,24 +58,24 @@ onMounted(() => {
 
 @mixin page-menu-over {
     .fade {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-color-accent-dark);
-            z-index: -1;
-            opacity: 0;
-            transition: all 250ms;
-        }
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--bg-color-accent-dark);
+        z-index: -1;
+        opacity: 0;
+        transition: all 250ms;
+    }
 
-        &.open {
+    &.open {
 
-            .fade {
-                z-index: 1;
-                opacity: 1;
-            }
+        .fade {
+            z-index: 1;
+            opacity: 1;
         }
+    }
 }
 .page-wrapper {
     position: relative;
