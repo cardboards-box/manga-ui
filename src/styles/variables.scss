@@ -1,5 +1,7 @@
+@use "sass:color";
+
 $primary-color: #726ae4;
-$primary-color-trans: rgba( lighten( $primary-color, 20% ), 0.8 );
+$primary-color-trans: rgba( color.adjust( $primary-color, $lightness: 20% ), 0.8 );
 
 :root {
     --bg-color: rgba(12, 9, 12, 1);

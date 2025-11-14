@@ -29,6 +29,25 @@
                             </span>
                         </div>
                     </Drawer>
+                    <Drawer title="Bookmarks" v-if="bookmarks && bookmarks.length > 0" default-closed>
+                        <div class="bookmarks flex row">
+                            <template v-for="bookmark in bookmarks">
+                                <div class="bm-chap flex">
+                                    <Icon unsize size="28px" class="center-vert margin-left">import_contacts</Icon>
+                                    <div class="center-vert margin-left">{{ bookmark.chapter.title }}</div>
+                                </div>
+                                <NuxtLink
+                                    v-for="page in bookmark.pages"
+                                    class="bm-page flex margin-left"
+                                    :to="`/manga/${data.manga.id}/${bookmark.chapter.chapter.id}?page=${page}`"
+                                >
+                                    <Icon unsize size="28px" class="center-vert margin-left">auto_stories</Icon>
+                                    <div class="center-vert margin-left fill">Page. {{ page }}</div>
+                                    <div class="center-vert margin-left mute"><Date :date="bookmark.createdAt" format="r" /></div>
+                                </NuxtLink>
+                            </template>
+                        </div>
+                    </Drawer>
                 </div>
             </aside>
             <VolumeList :manga="data" :sort="params?.sort ?? 'ordinal'" :asc="params?.asc ?? true" />
@@ -40,13 +59,26 @@
 const route = useRoute();
 const { token } = useSettingsHelper();
 const { proxy } = useApiHelper();
-const { data, error, pending, params, refresh, unauthed, throttled } = useMangaCache();
+const { data, error, pending, params, refresh, unauthed, throttled, chapters } = useMangaCache();
 const { pending: isPending } = useAsyncData(async () => await refresh());
 
 const isLoading = computed(() => pending.value || isPending.value);
 const title = computed(() => data.value?.manga.displayTitle ?? data.value?.manga.title ?? 'Manga Not Found');
 const description = computed(() => data.value?.manga.description ?? 'Find your next binge on MangaBox!');
 const cover = computed(() => proxy(data.value?.manga.cover ?? 'https://cba.index-0.com/assets/broken.webp'));
+
+const bookmarks = computed(() => {
+    if (!data.value?.bookmarks || !chapters.value) return [];
+
+    return data.value.bookmarks.map(bookmark => {
+        const chapter = chapters.value[bookmark.mangaChapterId];
+        if (!chapter) return undefined;
+        return {
+            ...bookmark,
+            chapter
+        };
+    }).filter((bookmark): bookmark is NonNullable<typeof bookmark> => bookmark !== undefined);
+})
 
 useHead({ title })
 

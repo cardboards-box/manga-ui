@@ -1,9 +1,15 @@
-import type { Chapter, MangaVolumed, VolumeSort } from "~/models";
+import type { Chapter, MangaVolume, MangaVolumed, VolumeSort } from "~/models";
 
 type Params = {
     id: string | number;
     sort: VolumeSort;
     asc: boolean;
+}
+
+type ChapterVolume = {
+    chapter: Chapter;
+    volume: MangaVolume;
+    title: string;
 }
 
 const CACHE_KEY = 'manga-cache-';
@@ -22,6 +28,33 @@ export const useMangaCache = () => {
     const error = useState<string | undefined>(CACHE_KEY + 'error', () => undefined);
     const params = useState<Params | undefined>(CACHE_KEY + 'params', () => undefined);
     const data = useState<MangaVolumed | undefined>(CACHE_KEY + 'data', () => undefined);
+
+    const chapters = computed<Record<number, ChapterVolume>>(() => {
+        const map: Record<number, ChapterVolume> = {};
+        if (!data.value) return map;
+        for (const vol of data.value.volumes) {
+            for (const chap of vol.chapters) {
+                for (const ver of chap.versions) {
+                    let title = '';
+                    if (vol.name) {
+                        title += `Vol. ${vol.name} - `;
+                    }
+                    title += `Ch. ${ver.ordinal}`;
+
+                    if (ver.title) {
+                        title += `: ${ver.title}`;
+                    }
+
+                    map[ver.id] = {
+                        chapter: ver,
+                        volume: vol,
+                        title
+                    };
+                }
+            }
+        }
+        return map;
+    });
 
     const getParamsFromRoute = (): Params => {
         return {
@@ -81,6 +114,7 @@ export const useMangaCache = () => {
         unauthed,
         triggered,
         invalidate,
+        chapters,
 
         refresh,
         getPages,

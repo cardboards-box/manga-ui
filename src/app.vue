@@ -46,7 +46,6 @@ const bumpManga = async () => {
 
 const selfupdateIfNecessary = () => {
     if (!$pwa || !$pwa.swActivated) {
-        console.debug("ServiceWorker not installed/active, skipping selfupdate.");
         return;
     }
 

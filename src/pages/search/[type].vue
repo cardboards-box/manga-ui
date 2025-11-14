@@ -5,7 +5,7 @@
     :pending="pending"
     @onscrolled="onScroll"
     @headerstuck="(v) => headerStuck = v"
-    @reload="() => fetch(true)"
+    @reload="() => reset()"
     capitalize
     allow-reload
     :pagination="{
@@ -113,6 +113,7 @@ const route = useRoute();
 const { search, filters: getFilters } = useMangaApi();
 const { serialize, deserialize } = useFilterHelpter();
 const { infiniteScroll } = useAppSettings();
+const { debounce } = useUtils();
 
 const states = [
     { text: 'All', routes: '/search/all', index: 0 },
@@ -238,6 +239,9 @@ const fetch = async (reset: boolean) => {
     results.value.results = [...results.value.results, ...unbound.results];
 }
 
+const debounceFetch = debounce(() => fetch(true), 300);
+const reset = () => debounceFetch(null);
+
 const onScroll = async () => {
     const curRes = results.value;
     if (!curRes ||
@@ -260,10 +264,10 @@ const clearTags = () => {
 
 onMounted(() => nextTick(() => {
     filter.value = routeFilter();
-    fetch(true);
+    reset();
 }));
 
-watch(() => route.query, () => fetch(true));
+watch(() => route.query, () => reset());
 </script>
 
 <style lang="scss" scoped>
