@@ -26,7 +26,7 @@ $primary-color-trans: rgba( color.adjust( $primary-color, $lightness: 20% ), 0.8
     --font-family: 'Roboto';
     --mobile-limit: 1050px;
     --margin: 0.75rem;
-    --bg-image: linear-gradient(to right bottom, #1953aa, #693594, #57195c, #1a10a0, #171130);
+    --bg-image: linear-gradient(0deg, #222222FF, #222222FF); //linear-gradient(to right bottom, #1953aa, #693594, #57195c, #1a10a0, #171130);
     --bg-image-position: center;
     --bg-image-size: cover;
     --bg-image-repeat: no-repeat;

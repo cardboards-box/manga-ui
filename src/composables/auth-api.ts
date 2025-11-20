@@ -86,6 +86,7 @@ export const useAuthApi = () => {
         logout,
         loginReturnUrl,
         currentUser,
-        failureReason
+        failureReason,
+        canRead: computed(() => currentUser.value?.roles?.includes('Admin') ?? false),
     }
 };

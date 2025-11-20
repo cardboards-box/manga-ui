@@ -79,6 +79,10 @@
                             Card-List Infinite Scroll
                         </CheckBox>
                     </div>
+                    <div class="control span">
+                        <label class="no-bot">Proxy URL</label>
+                        <input type="text" v-model="proxyUrl" placeholder="Proxy URL (use placeholders: {image}, {group}, {referer})" />
+                    </div>
                 </div>
             </Tab>
             <Tab title="Theme" icon="palette" scrollable keep-alive>
@@ -114,6 +118,7 @@ const {
     filterStyle: filter,
     customFilter,
     infiniteScroll,
+    proxyUrl,
 } = useAppSettings();
 
 useHead({ title: 'Configure the reader your way.' });

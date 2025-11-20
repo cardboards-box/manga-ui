@@ -3,7 +3,7 @@
     <Error v-else-if="error || !data" :error="error ?? 'Manga Not Found'" />
     <div v-else class="manga flex fill-parent scroll-y">
         <main class="manga-content flex">
-            <aside class="details flex row">
+            <aside class="details flex row" :class="{ 'volumed': canRead }">
                 <Cover :manga="data.manga" type="background" width="100%" height="400px" />
                 <a class="title" :href="data.manga.url" target="_blank">{{ title }}</a>
                 <div class="drawers margin-top">
@@ -50,7 +50,12 @@
                     </Drawer>
                 </div>
             </aside>
-            <VolumeList :manga="data" :sort="params?.sort ?? 'ordinal'" :asc="params?.asc ?? true" />
+            <VolumeList
+                v-if="canRead"
+                :manga="data"
+                :sort="params?.sort ?? 'ordinal'"
+                :asc="params?.asc ?? true"
+            />
         </main>
     </div>
 </template>
@@ -58,14 +63,15 @@
 <script setup lang="ts">
 const route = useRoute();
 const { token } = useSettingsHelper();
-const { proxy } = useApiHelper();
+const { proxy } = useMangaApi();
+const { canRead } = useAuthApi();
 const { data, error, pending, params, refresh, unauthed, throttled, chapters } = useMangaCache();
 const { pending: isPending } = useAsyncData(async () => await refresh());
 
 const isLoading = computed(() => pending.value || isPending.value);
 const title = computed(() => data.value?.manga.displayTitle ?? data.value?.manga.title ?? 'Manga Not Found');
 const description = computed(() => data.value?.manga.description ?? 'Find your next binge on MangaBox!');
-const cover = computed(() => proxy(data.value?.manga.cover ?? 'https://cba.index-0.com/assets/broken.webp'));
+const cover = computed(() => proxy(data.value?.manga.cover ?? 'https://mangabox.app/broken.png'));
 
 const bookmarks = computed(() => {
     if (!data.value?.bookmarks || !chapters.value) return [];
@@ -88,13 +94,13 @@ useServerSeoMeta({
     ogImage: cover, twitterCard: 'summary_large_image'
 });
 
-watch(() => route.params.id, () => throttled());
-watch(() => route.query.asc, () => throttled());
-watch(() => route.query.sort, () => throttled());
+watch(() => route.params.id, () => throttled(false));
+watch(() => route.query.asc, () => throttled(false));
+watch(() => route.query.sort, () => throttled(false));
 
 onMounted(() => setTimeout(() => {
     if (unauthed.value && token.value) {
-        refresh(true);
+        throttled(true);
         return;
     }
 }, 200));
@@ -111,8 +117,9 @@ onMounted(() => setTimeout(() => {
 
         .details {
             position: relative;
-            margin: 5px;
-            width: 430px;
+            //margin: 5px;
+            width: max(430px, 70%);
+            margin: 5px auto;
             height: auto;
 
             a.title {
@@ -131,6 +138,11 @@ onMounted(() => setTimeout(() => {
                     margin: 5px;
                     p { display: none; }
                 }
+            }
+
+            &.volumed {
+                width: 430px;
+                margin: 5px !important;
             }
         }
     }

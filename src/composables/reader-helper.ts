@@ -243,6 +243,7 @@ export const useReaderHelper = () => {
         if (!item) return undefined;
 
         const { mangaId, chapterId, pageIndex, next, prev, pages } = item;
+        const link = `/manga/${mangaId}`;
 
         switch(type) {
             case 'ChapterEnd': return doMask(mangaId, chapterId, pages.length - 1, mask);
@@ -250,13 +251,13 @@ export const useReaderHelper = () => {
             case 'NextChapter': return next ? doMask(mangaId, next?.version.id, next.pageIndex, mask) : undefined;
             case 'PrevChapter': return prev ? doMask(mangaId, prev?.version.id, prev.pageIndex, mask) : undefined;
             case 'NextPage':
-                return (pages[pageIndex + 1])
+                return ((pages[pageIndex + 1])
                     ? doMask(mangaId, chapterId, pageIndex + 1, mask)
-                    : doMask(mangaId, next?.version.id, next?.pageIndex, mask);
+                    : doMask(mangaId, next?.version.id, next?.pageIndex, mask)) ?? link;
             case 'PrevPage':
-                return (pages[pageIndex - 1])
+                return ((pages[pageIndex - 1])
                     ? doMask(mangaId, chapterId, pageIndex - 1, mask)
-                    : doMask(mangaId, prev?.version.id, prev?.pageIndex, mask);
+                    : doMask(mangaId, prev?.version.id, prev?.pageIndex, mask)) ?? link;
         }
     }
 

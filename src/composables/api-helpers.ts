@@ -4,7 +4,7 @@ import filesaver from 'file-saver';
 export type Params = { [key: string]: any; };
 
 export const useApiHelper = () => {
-    const { apiUrl, token, proxyUrl } = useSettingsHelper();
+    const { apiUrl, token } = useSettingsHelper();
 
     const wrapUrl = (url: string) => {
         if (url.toLowerCase().indexOf('https://') !== -1 ||
@@ -21,17 +21,6 @@ export const useApiHelper = () => {
         if (!t) return undefined;
         return { 'Authorization': `Bearer ${t}` };
     };
-
-    const proxy = (url: string, group: string = 'manga-page', referer?: string) => {
-        const path = encodeURIComponent(url);
-        const proxy = proxyUrl.endsWith('/') ? proxyUrl : `${proxyUrl}/`;
-        let uri = `${proxy}proxy?path=${path}&group=${group}`;
-
-        if (referer) uri += `&referer=${encodeURIComponent(referer)}`;
-
-        return uri;
-    }
-
     const clone = <T>(item: T) => <T>JSON.parse(JSON.stringify(item));
 
     function get<T>(url: string, params?: Params, lazy: boolean = false) {
@@ -209,7 +198,6 @@ export const useApiHelper = () => {
         post,
         put,
         del: deletefn,
-        proxy,
         download,
         onFinish,
         toPromise,

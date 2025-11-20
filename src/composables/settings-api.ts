@@ -24,6 +24,7 @@ interface MangaSettings {
     maxImageWidth?: number;
     maxImageHeight?: number;
     infiniteScroll: boolean;
+    proxyUrl?: string;
 }
 
 interface Settings {
@@ -51,6 +52,7 @@ type MangaSettingsKey = {
     maxImageWidth?: WritableComputedRef<number | undefined | null>;
     maxImageHeight?: WritableComputedRef<number | undefined | null>;
     infiniteScroll: WritableComputedRef<boolean>;
+    proxyUrl: WritableComputedRef<string | undefined>;
 };
 
 const DEFAULTS: MangaSettings = {
@@ -74,6 +76,7 @@ const DEFAULTS: MangaSettings = {
     maxImageHeight: undefined,
     maxImageWidth: undefined,
     infiniteScroll: true,
+    proxyUrl: undefined,
 }
 
 export const useAppSettings = () => {
@@ -104,6 +107,7 @@ export const useAppSettings = () => {
             maxImageWidth: getSetNumbNull('max-image-width', DEFAULTS.maxImageWidth, () => commit()),
             maxImageHeight: getSetNumbNull('max-image-height', DEFAULTS.maxImageHeight, () => commit()),
             infiniteScroll: getSetBool('infinite-scroll', DEFAULTS.infiniteScroll, () => commit()),
+            proxyUrl: getSet<string>('proxy-url', DEFAULTS.proxyUrl, () => commit()),
         }
     })();
 

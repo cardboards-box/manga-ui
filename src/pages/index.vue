@@ -1,85 +1,199 @@
 <template>
-<CardList 
-    :title="title"
-    :manga="data"
-    :pending="pending"
-    allowReload
-    @reload="() => reload()"
-/>
+    <CardList
+        title="Reverse Image Lookup"
+        :search="combined"
+        :pending="pending"
+        :noresults="!!results"
+        @headerstuck="(v) => stuck = v"
+        @back="() => results = undefined"
+        v-if="results !== undefined || pending"
+    >
+        <ReverseSearch
+            v-model="search"
+            @file="searchFile"
+            :stuck="stuck"
+        />
+    </CardList>
+    <div
+        v-else
+        class="flex row center search-box"
+        :class="{ active }"
+        @dragenter.prevent="active = true"
+        @dragover.prevent="active = true"
+        @dragleave.prevent="active = false"
+        @drop.prevent="dragFile"
+    >
+        <h2 class="center-horz margin-top margin-bottom">Reverse Manga Search</h2>
+        <div class="flex row fill">
+            <div class="center flex">
+                <Image src="/kitsu.gif" width="100px" />
+                <h3 class="center-vert">
+                    Drag an image here or
+                    <a class="file-click" @click="clickFile">upload a file</a>
+                </h3>
+            </div>
+        </div>
+        <div class="flex">
+            <div class="spacer fill center-vert margin-left margin-right" />
+            <div class="or">OR</div>
+            <div class="spacer fill center-vert margin-left margin-right" />
+        </div>
+        <div class="flex margin">
+            <InputGroup
+                v-model="search"
+                placeholder="Paste an image URL"
+                class="fill"
+                @search="searchUrl(search)"
+            />
+        </div>
+
+        <input
+            class="file-input"
+            type="file"
+            ref="fileInput"
+            @change="initialSearch"
+        />
+    </div>
 </template>
 
 <script setup lang="ts">
-const { randomNum } = useMangaApi();
+import type { ImageSearch } from '~/models';
 
-const messages = [
-    'Here to find your next binge?',
-    'Here are some manga you might enjoy!',
-    'Who needs sleep? Just read more!',
-    'Dragon girls are best girls.',
-    'Who is your favourite waifu?',
-    'This site is written in Vue & Nuxt!',
-    'So many times, it happened so fast.',
-    'Testing testing, 1 2 3!',
-    'No.',
-    'I aM aToMiC!',
-    '3 am babblings make the best quotes.'
-];
+const route = useRoute();
 
-const title = ref(messages[0]);
+const url = computed(() => route.query.url?.toString() ?? '');
 
-useHead({ title: 'Find your next binge!' });
-useServerSeoMeta({
-    title: 'Find your next binge!',
-    ogTitle: 'Find your next binge!',
-    description: 'Find your next binge on MangaBox!',
-    ogDescription: 'Find your next binge on MangaBox!',
-    ogImage: 'https://manga.index-0.com/logo.png'
-});
+const { reverseFile, reverseUrl, proxy } = useMangaApi();
+const { toPromise } = useApiHelper();
+const search = ref('');
+const active = ref(false);
+const pending = ref(false);
+const stuck = ref(false);
+const fileInput = ref<HTMLInputElement>();
+const results = ref<ImageSearch | undefined>();
+const combined = computed(() =>
+    results.value
+        ? [
+            ...results.value.match,
+            ...results.value.vision,
+            ...results.value.textual
+        ] : []);
 
-let { data, pending, refresh } = await randomNum(6);
-const rndNum = (max: number, min: number = 0) => min + Math.floor(Math.random() * max);
-const rnd = <T>(array: T[]) => array[rndNum(array.length)];
-const timeout = () => rndNum(10, 75);
+const first = computed(() => combined.value[0]);
 
-const sleep = (timeout: number) => 
-    new Promise<void>((resolve) => setTimeout(() => resolve(), timeout));
+const title = computed(() => first.value?.manga?.title ?? 'Reverse Image Search');
+const description = computed(() =>
+    first.value?.manga.description
+    ?? 'Reverse Image search Manga pages to find the manga source.');
+const cover = computed(() =>
+    first.value?.manga.cover
+        ? proxy(first.value.manga.cover, 'manga-cover')
+        : '/logo.png');
 
-const unprint = async () => {
-    while(title.value.length !== 0) {
-        title.value = title.value.substring(0, title.value.length - 1);
-        await sleep(timeout());
-    }
+const clickFile = () => {
+    if (!fileInput.value) return;
+
+    fileInput.value.click();
 }
 
-const printMessage = async () => {
-    await unprint();
-    const message = rnd(messages);
+const dragFile = (event: DragEvent) => {
+    active.value = false;
+    const file = event.dataTransfer?.files[0];
+    if (!file) return;
 
-    for(let i = 0; i < message.length; i++) {
-        title.value += message[i];
-        await sleep(timeout());
-    }
+    searchFile(file);
+}
+
+const initialSearch = (event: Event) => {
+    if (!event?.target) return;
+
+    const files: File[] = (<any>event.target).files;
+    if (!files || files.length <= 0) return;
+
+    const file = files[0];
+    searchFile(file);
+}
+
+const searchFile = async (file: File) => {
+    pending.value = true;
+    results.value = undefined;
+    results.value = await toPromise(reverseFile(file), true) ?? undefined;
+    pending.value = false;
 };
 
-let mounted = false;
+const searchUrl = async (url: string) => {
+    if (!url) return;
 
-const reload = () => {
     pending.value = true;
-    data.value = [];
-
-    refresh();
+    results.value = undefined;
+    results.value = await toPromise(reverseUrl(url, true)) ?? undefined;
+    pending.value = false;
 }
 
-onMounted(() => nextTick(async () => {
-    mounted = true;
+const onPaste = (event: ClipboardEvent) => {
+    const items : DataTransferItemList = (event.clipboardData || (<any>event).originalEvent.clipboardData).items;
+    if (!items) return;
 
-    while(mounted) {
-        await printMessage();
-        await sleep(rndNum(500, 1000));
+    for(const index in items) {
+        const item = items[index];
+        if (item.kind !== 'file') continue;
+
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        searchFile(file);
+        return;
     }
-}));
+}
+
+useHead({ title });
+
+useServerSeoMeta({
+    title,
+    ogTitle: title,
+    description,
+    ogDescription: description,
+    ogImage: cover,
+    twitterCard: 'summary_large_image'
+});
+
+onMounted(() => {
+    nextTick(() => {
+        searchUrl(url.value);
+    });
+
+    document.onpaste = onPaste;
+});
 
 onUnmounted(() => {
-    mounted = false;
+    document.onpaste = null;
 });
+
+watch(() => url.value, () => searchUrl(url.value));
 </script>
+
+<style scoped lang="scss">
+
+.search-box {
+    border: 1px solid var(--color-primary);
+    border-radius: var(--margin);
+    min-width: min(98vw, 1050px);
+    min-height: min(98vh, 400px);
+
+    &.active {
+        background-color: var(--bg-color-accent);
+    }
+
+    .spacer {
+        border-top: 1px solid var(--color-primary);
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .file-click {
+        color: var(--color-primary);
+    }
+}
+</style>

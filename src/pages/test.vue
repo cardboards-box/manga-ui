@@ -143,7 +143,7 @@ const stuck = ref(false);
 const open = ref(false);
 const selected = ref(options[0]);
 const search = ref('');
-const { data, pending, refresh } = await randomNum(20);
+const { data, pending, refresh } = randomNum(20);
 const todos = ref(['laundry', 'cooking', 'testing code', 'fucking the loli']);
 const swipedDown = ref(false);
 

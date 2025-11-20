@@ -1,5 +1,7 @@
 <template>
+    <Error v-if="!canRead" message="This page does not exist!" />
     <div
+        v-else
         class="page-wrapper flex fill-parent"
         :class="{ 'open': menuOpen, 'over': pageMenuOver }"
     >
@@ -26,11 +28,11 @@ definePageMeta({
 
 const DEFAULT_IMAGE = '/broken.png';
 const route = useRoute();
-const { currentUser } = useAuthApi();
+const { currentUser, canRead } = useAuthApi();
 const { menuOpen } = useSettingsHelper();
 const { fetch, loading } = useReaderHelper();
 const { pageMenuOver } = useAppSettings();
-const { data, refresh, pending } = await useLazyAsyncData(async () => await fetch());
+const { data, refresh, pending } = useLazyAsyncData(async () => await fetch());
 const isLoading = computed(() => loading.value || pending.value);
 const output = computed(() => data.value?.output);
 const title = computed(() => `${output.value?.manga.title} | Ch. ${output.value?.version.ordinal}`);

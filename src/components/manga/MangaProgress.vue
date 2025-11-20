@@ -51,7 +51,7 @@
                 />
             </div>
         </Drawer>
-        <Drawer title="Progress">
+        <Drawer title="Progress" v-if="canRead">
             <div class="progress-options">
                 <ProgressBar
                     :percent="stats?.chapterProgress ?? 0"
@@ -83,7 +83,7 @@
 
 <script setup lang="ts">
 const { toPromise } = useApiHelper();
-const { currentUser } = useAuthApi();
+const { currentUser, canRead } = useAuthApi();
 const { favourite, resetProgress, reload, markAsRead } = useMangaApi();
 const { data, refresh } = useMangaCache();
 

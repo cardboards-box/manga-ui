@@ -15,9 +15,8 @@ type ChapterVolume = {
 const CACHE_KEY = 'manga-cache-';
 
 export const useMangaCache = () => {
-    const { volumed, pages } = useMangaApi();
+    const { volumed, pages, proxy } = useMangaApi();
     const { token } = useSettingsHelper();
-    const { proxy } = useApiHelper();
     const { throttle } = useUtils();
     const route = useRoute();
 
@@ -104,7 +103,7 @@ export const useMangaCache = () => {
         return doProxy(d.value);
     }
 
-    const throttled = throttle<void>(() => refresh(), 200);
+    const throttled = throttle<boolean>((force) => refresh(force), 200);
 
     return {
         data,

@@ -16,6 +16,7 @@
             @click="() => fill = !fill"
             :icon="!fill ? 'fullscreen' : 'fullscreen_exit'"
         />
+        <slot name="extra-buttons" />
         <IconBtn
             v-if="canPaginate"
             @click="() => infinite = !infinite"

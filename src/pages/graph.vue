@@ -55,7 +55,7 @@ const states: States[] = [
     'else', 'touched', 'all'
 ];
 const state = ref<States>('all');
-const { pending, data } = await graph(state);
+const { pending, data } = graph(state);
 </script>
 
 <style lang="scss" scoped>

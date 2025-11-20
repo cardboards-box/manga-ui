@@ -6,7 +6,7 @@
     />
     <div class="details masked-overflow">
         <div class="title">
-            <NuxtLink :to="'/manga/' + mdata.manga.id">
+            <NuxtLink :to="link">
                 {{ mdata.manga.displayTitle ?? mdata.manga.title }}
             </NuxtLink>
             <Icon :fill="!!mdata.icon.fill" v-if="mdata.icon" :title="mdata.icon.title">
@@ -67,15 +67,16 @@
     <Cover
         type="link"
         :url="sdata.manga.cover"
-        :link="'/import?url=' + encodeURIComponent(sdata.manga.url)"
+        :link="link"
     />
     <div class="details masked-overflow">
         <div class="title">
-            <NuxtLink
-                :to="'/import?url=' + encodeURIComponent(sdata.manga.url)"
-            >
+            <NuxtLink :to="link" v-if="canRead">
                 {{ sdata.manga.title }}
             </NuxtLink>
+            <a :href="link" target="_blank" v-else>
+                {{ sdata.manga.title }}
+            </a>
         </div>
         <div class="source">
             <b>Source: </b>&nbsp;{{ sdata.manga.source }}
@@ -101,7 +102,7 @@
             <NuxtLink
                 class="tag"
                 v-for="tag of sdata.manga.tags"
-                :to="'/search/all?include=' + tag.toLowerCase()"
+                :to="canRead ? '/search/all?include=' + tag.toLowerCase() : undefined"
             >
                 {{ tag }}
             </NuxtLink>
@@ -121,7 +122,7 @@ import type {
 } from '~/models';
 import { ListStyle } from '~/models';
 const { listStyle } = useAppSettings();
-const { currentUser } = useAuthApi();
+const { currentUser, canRead } = useAuthApi();
 const { toPromise } = useApiHelper();
 const { favourite } = useMangaApi();
 
@@ -164,6 +165,13 @@ const sdata = ref(determineSearchData());
 const favouriteLoading = ref(false);
 const actStyle = computed(() => style ?? listStyle.value);
 
+const link = computed(() => {
+    const id = mdata.value?.manga.id;
+    const url = mdata.value?.manga.url || sdata.value?.link?.url;
+
+    return !canRead.value ? url :
+        id ? `/manga/${id}` : '/import?url=' + encodeURIComponent(url!);
+});
 
 
 function determineSearchData(): SearchData | undefined {

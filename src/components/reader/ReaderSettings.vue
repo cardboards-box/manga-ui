@@ -263,8 +263,8 @@ import type { ClassOptions } from '~/models';
 const DEFAULT_IMAGE = '/broken.png';
 const { fullscreen, serClasses } = useUtils();
 const { apiUrl } = useSettingsHelper();
-const { resetPages: reset, bookmark } = useMangaApi();
-const { proxy, download } = useApiHelper();
+const { resetPages: reset, bookmark, proxy } = useMangaApi();
+const { download } = useApiHelper();
 const { data, refresh, genLink } = useReaderHelper();
 const {
     invertControls, forwardOnly,

@@ -1,7 +1,7 @@
 <template>
 <NuxtLink to="/" active-class="active" @click="clicked">
-    <Icon>home</Icon>
-    <p>Home</p>
+    <Icon>photo_camera</Icon>
+    <p>Page Lookup</p>
 </NuxtLink>
 
 <NuxtLink to="/search/all" active-class="active" @click="clicked">
@@ -9,50 +9,58 @@
     <p>Search</p>
 </NuxtLink>
 
-<NuxtLink class="sub" to="/search/in-progress" active-class="active" @click="clicked">
-    <Icon>menu_book</Icon>
-    <p>In Progress</p>
-</NuxtLink>
+<template v-if="canRead">
+    <NuxtLink class="sub" to="/search/in-progress" active-class="active" @click="clicked">
+        <Icon>menu_book</Icon>
+        <p>In Progress</p>
+    </NuxtLink>
 
-<NuxtLink class="sub" to="/search/completed" active-class="active" @click="clicked">
-    <Icon>done_all</Icon>
-    <p>Completed</p>
-</NuxtLink>
+    <NuxtLink class="sub" to="/search/completed" active-class="active" @click="clicked">
+        <Icon>done_all</Icon>
+        <p>Completed</p>
+    </NuxtLink>
 
-<NuxtLink class="sub" to="/search/bookmarked" active-class="active" @click="clicked">
-    <Icon>bookmarks</Icon>
-    <p>Bookmarked</p>
-</NuxtLink>
+    <NuxtLink class="sub" to="/search/bookmarked" active-class="active" @click="clicked">
+        <Icon>bookmarks</Icon>
+        <p>Bookmarked</p>
+    </NuxtLink>
 
-<NuxtLink class="sub" to="/search/favourites" active-class="active" @click="clicked">
-    <Icon>star</Icon>
-    <p>Favourites</p>
-</NuxtLink>
+    <NuxtLink class="sub" to="/search/favourites" active-class="active" @click="clicked">
+        <Icon>star</Icon>
+        <p>Favourites</p>
+    </NuxtLink>
 
-<NuxtLink to="/manga/random" active-class="active" @click="clicked">
+    <NuxtLink to="/import" active-class="active" @click="clicked">
+        <Icon>add</Icon>
+        <p>Import</p>
+    </NuxtLink>
+
+    <NuxtLink to="/graph" active-class="active" @click="clicked">
+        <Icon>monitoring</Icon>
+        <p>Stats</p>
+    </NuxtLink>
+
+    <NuxtLink to="/notifications" active-class="active" @click="clicked">
+        <Icon>notifications</Icon>
+        <p>Notifications</p>
+    </NuxtLink>
+</template>
+
+<NuxtLink to="/random" active-class="active" @click="clicked">
     <Icon>shuffle</Icon>
     <p>Random</p>
 </NuxtLink>
 
-<NuxtLink to="/import" active-class="active" @click="clicked">
-    <Icon>add</Icon>
-    <p>Import</p>
+<NuxtLink to="/about" active-class="active" @click="clicked">
+    <Icon>description</Icon>
+    <p>About</p>
 </NuxtLink>
 
-<NuxtLink to="/reverse" active-class="active" @click="clicked">
-    <Icon>photo_camera</Icon>
-    <p>Page Lookup</p>
+<NuxtLink to="/bot" active-class="active" @click="clicked">
+    <Icon>smart_toy</Icon>
+    <p>Discord Bot</p>
 </NuxtLink>
 
-<NuxtLink to="/graph" active-class="active" @click="clicked">
-    <Icon>monitoring</Icon>
-    <p>Stats</p>
-</NuxtLink>
-
-<NuxtLink to="/notifications" active-class="active" @click="clicked">
-    <Icon>notifications</Icon>
-    <p>Notifications</p>
-</NuxtLink>
 
 <div class="fill"></div>
 
@@ -77,11 +85,15 @@
     <p>Settings</p>
 </NuxtLink>
 
-<a href="https://cba.index-0.com" target="_blank" @click="clicked">
-    <Icon>live_tv</Icon>
-    <p>Anime</p>
-    <Icon>open_in_new</Icon>
-</a>
+<NuxtLink to="/privacy" active-class="active" @click="clicked">
+    <Icon>lock</Icon>
+    <p>Privacy Policy</p>
+</NuxtLink>
+
+<NuxtLink to="/terms" active-class="active" @click="clicked">
+    <Icon>gavel</Icon>
+    <p>Terms of Service</p>
+</NuxtLink>
 
 <a href="https://discord.gg/RV9MvvYXsp" target="_blank" @click="clicked">
     <img src="/discord-icon.png" alt="Discord Logo" />
@@ -89,7 +101,7 @@
     <Icon>open_in_new</Icon>
 </a>
 
-<a href="https://github.com/calico-crusade/cardboardbox-anime-vue" target="_blank" @click="clicked">
+<a href="https://github.com/cardboards-box/manga-reverse-img-search" target="_blank" @click="clicked">
     <svg height="24" width="24" aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" class="octicon octicon-mark-github v-align-middle">
         <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
     </svg>
@@ -102,7 +114,8 @@
 const {
     currentUser: user,
     login,
-    logout: doLogout
+    logout: doLogout,
+    canRead
 } = useAuthApi();
 
 const emits = defineEmits<{ (e: 'naved'): void }>();

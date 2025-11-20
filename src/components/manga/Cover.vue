@@ -12,6 +12,8 @@
 <script setup lang="ts">
 import type { Manga, StyleOptions } from '~/models';
 
+const { canRead } = useAuthApi();
+
 type Styles = 'background' | 'img' | 'link';
 
 const props = defineProps<{
@@ -27,8 +29,7 @@ const props = defineProps<{
 
 const DEFAULT_IMAGE = '/broken.png';
 
-const { proxy } = useApiHelper();
-const { shouldBlur } = useMangaApi();
+const { shouldBlur, proxy } = useMangaApi();
 
 const url = computed(() => props.manga?.cover ?? props.url);
 const uri = computed(() => url.value
@@ -38,6 +39,6 @@ const uri = computed(() => url.value
 const isPorn = computed(() => !!props.isPorn || shouldBlur(props.manga));
 const itemType = computed(() => props.type || 'link');
 
-const actualLink = computed(() => props.link ?? `/manga/${props.manga?.id}`);
+const actualLink = computed(() => props.link ?? (canRead.value ? `/manga/${props.manga?.id}` : props.manga?.url));
 
 </script>

@@ -33,7 +33,7 @@ const loading = ref(false);
 const error = ref<undefined | FetchError<any>>();
 const { reload, providers: getProviders } = useMangaApi();
 
-const { data: providers } = await getProviders();
+const { data: providers } = getProviders();
 
 const addManga = async () => {
     if (!url.value) return;

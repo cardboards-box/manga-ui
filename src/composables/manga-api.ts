@@ -13,7 +13,8 @@ type Worked = { worked: boolean };
 
 export const useMangaApi = () => {
     const { get, del, post, download, put } = useApiHelper();
-    const { blurPornCovers } = useAppSettings();
+    const { blurPornCovers, proxyUrl: settingsProxyUrl } = useAppSettings();
+    const { proxyUrl: defaultProxyUrl } = useSettingsHelper();
 
     const fetch = (id: number | string) => {
         const cache = useState<MangaWithChapters | null>('manga-' + id, () => null);
@@ -180,6 +181,19 @@ export const useMangaApi = () => {
         return del<void>(url);
     }
 
+    const proxy = (url: string, group: string = 'manga-page', referer?: string) => {
+        const path = encodeURIComponent(url);
+        const refererParam = referer ? encodeURIComponent(referer) : '';
+        const defProxy = defaultProxyUrl.endsWith('/') ? defaultProxyUrl : `${defaultProxyUrl}/`;
+
+        const uri = settingsProxyUrl.value || `${defProxy}proxy?path={image}&group={group}&referer={referer}`;
+        return uri
+            .replace('{image}', path)
+            .replace('{group}', group)
+            .replace('{referer}', refererParam)
+            .trim();
+    }
+
     return {
         fetch,
         random,
@@ -207,5 +221,6 @@ export const useMangaApi = () => {
         setDisplayTitle,
         setOrdinalReset,
         softDelete,
+        proxy,
     };
 };

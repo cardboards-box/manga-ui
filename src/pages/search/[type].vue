@@ -22,7 +22,7 @@
         :link="filterRouteUrl()"
     >
         <template #input>
-            <select v-model="filter.state">
+            <select v-model="filter.state" v-if="canRead">
                 <option
                     v-for="state in states"
                     :value="state.index"
@@ -114,6 +114,7 @@ const { search, filters: getFilters } = useMangaApi();
 const { serialize, deserialize } = useFilterHelpter();
 const { infiniteScroll } = useAppSettings();
 const { debounce } = useUtils();
+const { canRead } = useAuthApi();
 
 const states = [
     { text: 'All', routes: '/search/all', index: 0 },
@@ -164,7 +165,7 @@ const filter = ref({
 const results = ref(<Paginated<ProgressExt>>{ pages: 0, count: 0, results: [] });
 const pending = ref(false);
 
-const { data: filters } = await getFilters();
+const { data: filters } = getFilters();
 
 const ffil = (key: string) => computed(() => filters.value?.find(t => t.key === key)?.values?.map(t => t.toLowerCase()) || []);
 

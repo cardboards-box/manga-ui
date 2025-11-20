@@ -34,7 +34,7 @@
                         </div>
                     </div>
                 </div>
-                
+
             </Tab>
             <Tab title="Selected Image" icon="my_location" scrollable>
                 <div class="tab-control pad">
@@ -67,8 +67,8 @@
 
 <script setup lang="ts">
 const route = useRoute();
-const { proxy, clone, toPromise } = useApiHelper();
-const { fetch, pages, strip } = useMangaApi();
+const { clone, toPromise } = useApiHelper();
+const { fetch, pages, strip, proxy } = useMangaApi();
 
 type Selected = {
     id: string;
@@ -92,14 +92,14 @@ const chapterId = computed({
     }
 })
 
-const { data, pending } = await fetch(id.value);
+const { data, pending } = fetch(id.value);
 const manga = computed(() => data.value?.manga);
 const chapters = computed(() => data.value?.chapters || []);
 const chapter = computed(() => chapters.value.find(t => t.id === chapterId.value));
 const chapterIndex = computed(() => chapters.value.findIndex(t => t.id === chapterId.value));
-const pageUrls = computed(() => 
-    !manga.value || !chapter.value 
-        ? []  
+const pageUrls = computed(() =>
+    !manga.value || !chapter.value
+        ? []
         : chapter.value.pages.map((t, i) => {
             return <Selected>{
                 proxied: proxy(t, 'manga-page', manga.value?.referer),
