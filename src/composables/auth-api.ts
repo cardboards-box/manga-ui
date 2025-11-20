@@ -79,6 +79,12 @@ export const useAuthApi = () => {
         failureReason.value = undefined;
     };
 
+    const canRead = computed(() => {
+        if (!currentUser.value) return false;
+        const roles = ['User', 'Admin'];
+        return currentUser.value.roles?.some(t => roles.includes(t)) ?? false;
+    })
+
     return {
         bump,
         resolve,
@@ -87,6 +93,6 @@ export const useAuthApi = () => {
         loginReturnUrl,
         currentUser,
         failureReason,
-        canRead: computed(() => currentUser.value?.roles?.includes('Admin') ?? false),
+        canRead,
     }
 };
