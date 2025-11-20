@@ -65,7 +65,7 @@ const route = useRoute();
 const { token } = useSettingsHelper();
 const { proxy } = useMangaApi();
 const { canRead } = useAuthApi();
-const { data, error, pending, params, refresh, unauthed, throttled, chapters } = useMangaCache();
+const { data, error, pending, params, refresh, throttled, chapters } = useMangaCache();
 const { pending: isPending } = useAsyncData(async () => await refresh());
 
 const isLoading = computed(() => pending.value || isPending.value);
@@ -98,12 +98,10 @@ watch(() => route.params.id, () => throttled(false));
 watch(() => route.query.asc, () => throttled(false));
 watch(() => route.query.sort, () => throttled(false));
 
-onMounted(() => setTimeout(() => {
-    if (unauthed.value && token.value) {
-        throttled(true);
-        return;
-    }
-}, 200));
+onMounted(() => setTimeout(() => nextTick(() => {
+    if (!token.value) return;
+    refresh(true);
+}), 200));
 </script>
 
 <style scoped lang="scss">
