@@ -150,11 +150,13 @@ onMounted(() => setTimeout(() => nextTick(() => {
     .manga {
         flex-flow: column;
 
+
         .manga-content {
             flex-flow: column;
+            margin: 5px;
 
             .details {
-                width: unset;
+                width: unset !important;
                 flex: 1;
             }
         }
