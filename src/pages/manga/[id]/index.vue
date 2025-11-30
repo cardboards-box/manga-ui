@@ -99,7 +99,7 @@ watch(() => route.query.asc, () => throttled(false));
 watch(() => route.query.sort, () => throttled(false));
 
 onMounted(() => setTimeout(() => nextTick(() => {
-    if (!token.value) return;
+    if (!token.value || (!error.value && data.value)) return;
     refresh(true);
 }), 200));
 </script>
