@@ -21,18 +21,33 @@
                         <h3 v-if="manga?.title" class="margin-top">
                             {{ manga.title }}
                         </h3>
-                        <p>
-                            <b>Manga Progress: </b>&nbsp;
-                            {{ (((volumeIndex + 1) / volumes.length) * 100).toFixed(2) }}%
-                        </p>
-                        <p>
-                            <b>Volume Progress: </b>&nbsp;
-                            {{ (((chapterIndex + 1) / (volume?.chapters ?? []).length) * 100).toFixed(2) }}%
-                        </p>
-                        <p>
-                            <b>Chapter Progress: </b>&nbsp;
-                            {{ (page / (chapter?.pages?.length ?? 1) * 100).toFixed(2) }}%
-                        </p>
+
+                        <ProgressBar
+                            :percent="stats?.total ?? 0"
+                            icon="shelves"
+                            label="Total Progress"
+                        />
+
+                        <ProgressBar
+                            :percent="stats?.manga ?? 0"
+                            icon="book_5"
+                            label="Volumes Read"
+                            :side-label="stats?.mangaSlug"
+                        />
+
+                        <ProgressBar
+                            :percent="stats?.volume ?? 0"
+                            icon="menu_book"
+                            label="Volume Progress"
+                            :side-label="stats?.volumeSlug"
+                        />
+
+                        <ProgressBar
+                            :percent="stats?.chapter ?? 0"
+                            icon="auto_stories"
+                            label="Pages Read"
+                            :side-label="stats?.chapterSlug"
+                        />
 
                         <template v-for="attr of chapter?.attributes">
                             <p v-if="isLink(attr.value)">
@@ -103,7 +118,7 @@
                                 <Icon>home</Icon>
                                 <p>Manga Source Page</p>
                             </a>
-                            <button :disabled="downloading" @click="downloadData(pageUrl)">
+                            <button :disabled="downloading" @click="downloadPage()">
                                 <Icon :spin="downloading">
                                     {{ !downloading ? 'download' : 'sync' }}
                                 </Icon>
@@ -263,9 +278,10 @@ import type { ClassOptions } from '~/models';
 const DEFAULT_IMAGE = '/broken.png';
 const { fullscreen, serClasses } = useUtils();
 const { apiUrl } = useSettingsHelper();
-const { resetPages: reset, bookmark, proxy } = useMangaApi();
+const { resetPages: reset, bookmark, proxy, strip } = useMangaApi();
 const { download } = useApiHelper();
 const { data, refresh, genLink } = useReaderHelper();
+const { data: mangaData } = useMangaCache();
 const {
     invertControls, forwardOnly,
     brightness, pageStyle, filterStyle: filter,
@@ -306,6 +322,7 @@ const volume = computed(() => data.value?.volume);
 const chapterIndex = computed(() => data.value?.chapterIndex ?? 0);
 const chapter = computed(() => data.value?.version);
 const classes = computed(() => serClasses(props.class, { 'open': menuOpen.value }));
+const stats = computed(() => data.value?.progress);
 
 const prevChapterLink = computed(() => genLink('PrevChapter'));
 const nextChapterLink = computed(() => genLink('NextChapter'));
@@ -344,7 +361,18 @@ const toggleBookmark = async () => {
 
 const downloadData = async (url: string, name?: string) => {
     downloading.value = true;
-    await download(url, name);
+    await download(url, name ?? 'page.png');
+    downloading.value = false;
+}
+
+const downloadPage = async () => {
+    if (!manga.value || !chapter.value) return;
+
+    downloading.value = true;
+    await strip(manga.value.id, [{
+        chapterId: chapter.value.id,
+        page: page.value - 1
+    }]);
     downloading.value = false;
 }
 

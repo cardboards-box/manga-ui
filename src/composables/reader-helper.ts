@@ -29,12 +29,23 @@ type CurrentDetails = Target & {
     versionIndex: number;
 };
 
+type Progress = {
+    total: number;
+    manga: number;
+    mangaSlug: string;
+    volume: number;
+    volumeSlug: string;
+    chapter: number;
+    chapterSlug: string;
+}
+
 type Output = Ids & CurrentDetails & {
     pages: string[];
     next?: TargetIndex;
     prev?: TargetIndex;
     page: string;
     nextPage?: string;
+    progress: Progress;
 };
 
 type ErroredOutput = {
@@ -209,6 +220,7 @@ export const useReaderHelper = () => {
                 page: pages[pageIndex],
                 nextPage: pages[pageIndex + 1] ?? next?.pages[next.pageIndex],
                 pageIndex,
+                progress: calculateProgress(data, pageIndex, pages.length)
             }
         };
     }
@@ -227,6 +239,27 @@ export const useReaderHelper = () => {
         retrigger.value = !retrigger.value;
         loading.value = false;
         return output.value;
+    }
+
+    const calculateProgress = (data: CurrentDetails, page: number, pages: number): Progress => {
+        const volumeIndex = data.volumeIndex;
+        const chapterIndex = data.chapterIndex;
+        const totalVolumes = data.volumed.volumes.length;
+        const totalChaptersInVolume = data.volume.chapters.length;
+
+        const mangaPerc = ((volumeIndex + 1) / totalVolumes) * 100;
+        const volumePerc = ((chapterIndex + 1) / totalChaptersInVolume) * 100;
+        const chapterPerc = ((page + 1) / pages) * 100;
+
+        return {
+            total: ((volumeIndex + ((chapterIndex + 1) / totalChaptersInVolume)) / totalVolumes) * 100,
+            manga: mangaPerc,
+            mangaSlug: `${volumeIndex + 1}/${totalVolumes} (${mangaPerc.toFixed(2)}%)`,
+            volume: volumePerc,
+            volumeSlug: `${chapterIndex + 1}/${totalChaptersInVolume} (${volumePerc.toFixed(2)}%)`,
+            chapter: chapterPerc,
+            chapterSlug: `${page + 1}/${pages} (${chapterPerc.toFixed(2)}%)`,
+        }
     }
 
     const doMask = (m: string | number, c?: number, p?: number, mask?: string) => {

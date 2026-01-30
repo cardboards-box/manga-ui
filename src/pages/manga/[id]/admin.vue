@@ -5,7 +5,7 @@
     <div class="manga-offset-width flex row">
         <div class="manga-header flex row center-horz margin-top">
             <Cover :manga="manga" type="background" width="100%" height="400px" />
-            <a class="title" :href="manga.url" target="_blank">{{ manga.displayTitle ?? manga.title }}</a>
+            <NuxtLink class="title" :to="`/manga/${manga.id}`">{{ manga.displayTitle ?? manga.title }}</NuxtLink>
         </div>
         <div class="title-select margin flex row rounded">
             <div class="flex margin-top">

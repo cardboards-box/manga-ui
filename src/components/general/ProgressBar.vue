@@ -42,6 +42,8 @@ const classes = computed(() => serClasses(props.class, {
 $progress-height: 6px;
 $progress-radius: calc($progress-height / 2);
 .progress-item {
+    text-decoration: none !important;
+
     header {
         overflow: hidden;
 

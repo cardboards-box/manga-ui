@@ -167,8 +167,7 @@ const actStyle = computed(() => style ?? listStyle.value);
 
 const link = computed(() => {
     const id = mdata.value?.manga.id;
-    const url = mdata.value?.manga.url || sdata.value?.link?.url;
-
+    const url = mdata.value?.manga.url || sdata.value?.manga?.url || sdata.value?.link?.url;
     return !canRead.value ? url :
         id ? `/manga/${id}` : '/import?url=' + encodeURIComponent(url!);
 });
