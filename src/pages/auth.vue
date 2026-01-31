@@ -30,6 +30,5 @@ const triggerLogin = async () => {
     navigateTo(loginReturnUrl.value || '/account');
 }
 
-watch(() => code.value, triggerLogin);
 onMounted(() => nextTick(() => triggerLogin()));
 </script>
