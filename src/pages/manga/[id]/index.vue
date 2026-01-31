@@ -8,10 +8,10 @@
                 <a class="title" :href="data.manga.url" target="_blank">{{ title }}</a>
                 <div class="drawers margin-top">
                     <MangaProgress />
-                    <Drawer title="Description" v-if="description" default-closed>
+                    <Drawer title="Description" v-if="description" default-closed storage-key="manga-desc">
                         <Markdown :content="description" />
                     </Drawer>
-                    <Drawer title="More Details" default-closed>
+                    <Drawer title="More Details" default-closed storage-key="manga-details">
                         <div class="tags">
                             <span>Alternate Titles</span>
                             <span v-if="data.manga.displayTitle">{{ data.manga.title }}</span>
@@ -29,7 +29,7 @@
                             </span>
                         </div>
                     </Drawer>
-                    <Drawer title="Bookmarks" v-if="bookmarks && bookmarks.length > 0" default-closed>
+                    <Drawer title="Bookmarks" v-if="bookmarks && bookmarks.length > 0" default-closed storage-key="manga-bookmarks">
                         <div class="bookmarks flex row">
                             <template v-for="bookmark in bookmarks">
                                 <div class="bm-chap flex">

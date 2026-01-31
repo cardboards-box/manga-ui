@@ -1,7 +1,7 @@
 <template>
     <Loading v-if="!manga" />
     <template v-else>
-        <Drawer title="Actions" default-closed>
+        <Drawer title="Actions" default-closed storage-key="manga-actions">
             <div class="button-list flex row">
                 <IconBtn
                     v-if="currentUser"
@@ -51,7 +51,7 @@
                 />
             </div>
         </Drawer>
-        <Drawer title="Progress" v-if="canRead">
+        <Drawer title="Progress" v-if="canRead" storage-key="manga-progress">
             <div class="progress-options">
                 <ProgressBar
                     :percent="stats?.chapterProgress ?? 0"

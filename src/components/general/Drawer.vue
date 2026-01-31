@@ -18,9 +18,39 @@ const { isTrue } = useUtils();
 
 const props = defineProps<{
     title: string;
+    storageKey?: string;
     defaultClosed?: booleanish;
 }>();
-const open = ref(!isTrue(props.defaultClosed));
+
+const _open = ref<boolean>();
+
+const open = computed<boolean>({
+    get: () => {
+        if (_open.value !== undefined) return _open.value;
+
+        const stored = loadFromStorage();
+        if (stored !== undefined) return _open.value = stored;
+
+        return _open.value = !isTrue(props.defaultClosed);
+    },
+    set: (value: boolean) => {
+        _open.value = value;
+        saveToStorage(value);
+    }
+})
+
+const loadFromStorage = () => {
+    if (!props.storageKey) return undefined;
+
+    const stored = localStorage.getItem(props.storageKey);
+    return stored === "true";
+}
+
+const saveToStorage = (value: boolean) => {
+    if (!props.storageKey) return;
+
+    localStorage.setItem(props.storageKey, value.toString());
+}
 </script>
 
 <style lang="scss" scoped>
