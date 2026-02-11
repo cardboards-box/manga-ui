@@ -1,22 +1,17 @@
-ARG NODE_VERSION=oven/bun:latest
-
-FROM $NODE_VERSION AS build
+# Stage 1: Build the application
+FROM oven/bun:1 AS build
 WORKDIR /app
-
-COPY src/package.json .
-COPY src/bun.lock .
-RUN bun install --frozen-lockfile
-
+COPY src/package.json src/bun.lock* ./
+RUN bun install --frozen-lockfile --ignore-scripts
 COPY src/ .
+RUN bun --bun run build
 
-RUN bun build --frozen-lockfile --production
-
-FROM $NODE_VERSION AS production
-
-COPY --from=build /app/.output /app/.output
-ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=3000
-ENV NODE_ENV=production
-
+# Stage 2: Run the built application
+FROM oven/bun:1-slim AS production
+WORKDIR /app
+COPY --from=build /app/.output /app
 EXPOSE 3000
-CMD ["bun", "run", "/app/.output/server/index.mjs"]
+ENV HOST=0.0.0.0
+ENV PORT=3000
+ENV NODE_ENV="production"
+ENTRYPOINT [ "bun", "--bun", "run", "/app/server/index.mjs" ]

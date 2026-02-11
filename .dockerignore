@@ -1,0 +1,24 @@
+# Ignore version control and environment files
+.git
+.gitignore
+.env
+.aws
+
+# Ignore common dependency and cache directories
+**/node_modules
+**/__pycache__
+**/.nuxt
+**/.output
+**/.cache
+
+# Ignore logs and temporary files
+npm-debug.log
+*.log
+*~
+
+# Ignore the Dockerfile from being copied into the final image
+Dockerfile
+docker-compose.yml
+
+# Exception: ignore all markdown files except README.md
+*.md
