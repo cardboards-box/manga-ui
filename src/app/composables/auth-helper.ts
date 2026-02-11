@@ -47,6 +47,10 @@ export function useAuthHelper() {
             return false;
         }
 
+        token.value = undefined;
+        currentUser.value = undefined;
+        failureReason.value = undefined;
+
         const result = await resCode(code);
         if (!api.isSuccess(result)) {
             token.value = undefined;

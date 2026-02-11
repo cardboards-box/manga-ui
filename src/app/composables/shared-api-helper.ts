@@ -44,10 +44,10 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
 
     return {
         auth: {
-            resolve: (code: string) => get<RespAuthResolve>(`auth/resolve/${code}`),
+            resolve: (code: string) => get<RespAuthResolve>(`auth/resolve`, { code }),
             me: () => get<RespAuthMe>('auth/me'),
             settings: (settings?: string) => put<RespAuthMe>('auth/settings', { settings }),
-            loginUrl: (redirect?: string) => wrapUrl(apiUrl, 'auth/login', {
+            loginUrl: (redirect?: string) => wrapUrl(apiUrl, 'auth/login/discord', {
                 redirect: redirect || `${window.location.protocol}//${window.location.host}/auth`
             })
         },

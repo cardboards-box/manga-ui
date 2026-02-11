@@ -155,13 +155,14 @@ const toggleFavorite = async () => {
         .title {
             display: flex;
             flex-flow: row;
-            font-size: 1.5em;
-            font-weight: 700;
+            font-size: clamp(16px, 3vw, 1.5em);
+            font-weight: bolder;
             align-items: center;
             transition: all 250ms;
 
             a {
                 flex: 1;
+                font-weight: bolder;
             }
         }
 

@@ -96,5 +96,6 @@ export default defineNuxtConfig({
     routeRules: {
         '/chapter/**': { ssr: false },
         '/manga/**/admin': { ssr: false },
+        '/auth': { ssr: false },
     }
 })

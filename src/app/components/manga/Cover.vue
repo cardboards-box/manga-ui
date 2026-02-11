@@ -10,10 +10,10 @@
 </template>
 
 <script setup lang="ts">
-import type { ClassOptions, MbImage, MbTypeManga, MbTypeMangaSearch, StyleOptions } from '~/models';
+import type { MbImage, MbTypeManga, MbTypeMangaSearch, StyleOptions } from '~/models';
 
 const { canRead } = useAuthHelper();
-const { shouldBlur, getRelated: getRelatedItem, getManga } = useMangaUtils();
+const { shouldBlur, getRelateds, getManga } = useMangaUtils();
 const api = useMangaApi();
 
 type Styles = 'background' | 'img' | 'link';
@@ -42,7 +42,7 @@ const uri = computed(() => {
 
 const isPorn = computed(() => !!props.isPorn || shouldBlur(props.manga));
 const itemType = computed(() => props.type || 'link');
-const image = computed(() => props.image ?? (props.manga ? getRelatedItem(props.manga, 'MbImage') : undefined));
+const image = computed(() => props.image ?? (props.manga ? getRelateds(props.manga, 'MbImage').toSorted((a,b) => b.ordinal - a.ordinal)[0] : undefined));
 
 const actualLink = computed(() => {
     if (props.link) return props.link;

@@ -306,6 +306,11 @@ export function useReaderHelper() {
             return;
         }
 
+        if (pars.page <= 0) {
+            pars.page = params.value.page = getRelateds(fullChapter.value, 'MbImage')
+                .toSorted((a,b) => b.ordinal - a.ordinal)[0]?.ordinal ?? 1;
+        }
+
         if (shouldUseMangaCache(force)) {
             pending.value = false;
             afterNav();
@@ -502,7 +507,7 @@ export function useReaderHelper() {
             const best = findBestChapter(fullChapter.value!, prev.chapters[prev.chapters.length - 1]!.versions);
             if (!best) return;
 
-            return `/chapter/${best.id}?page=1`;
+            return `/chapter/${best.id}?page=-1`;
         }
 
         const prevChapter = () => {
@@ -517,7 +522,7 @@ export function useReaderHelper() {
             const best = findBestChapter(fullChapter.value!, prev.versions);
             if (!best) return;
 
-            return `/chapter/${best.id}?page=1`;
+            return `/chapter/${best.id}?page=-1`;
         }
 
         const prevPage = () => {
