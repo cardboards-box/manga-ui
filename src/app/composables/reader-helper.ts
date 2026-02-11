@@ -595,7 +595,7 @@ export function useReaderHelper() {
     return {
         manga: computed(() => manga.value?.entity),
         mangaExtended: computed(() => manga.value ? getRelated(manga.value, 'MbMangaExt') : undefined),
-        cover: computed(() => manga.value ? getRelated(manga.value, 'MbImage') : undefined),
+        cover: computed(() => manga.value ? getRelateds(manga.value, 'MbImage').toSorted((a,b) => b.ordinal - a.ordinal)[0] : undefined),
         chapter: computed(() => fullChapter.value?.entity),
         pending: computed(() => pending.value),
         partialLoading: computed(() => partialLoading.value),

@@ -7,10 +7,10 @@
     <img src="/logo.png" alt="Cardboard Box Logo" />
 </header>
 
-<div 
-    class="fade" 
-    :class="{ open: !closed }" 
-    @click="() => closed = !closed" 
+<div
+    class="fade"
+    :class="{ open: !closed }"
+    @click="() => closed = !closed"
 />
 <aside class="navbar flex" :class="{ closed }">
     <nav class="flex row scroll-y">
@@ -30,7 +30,14 @@
 </template>
 
 <script setup lang="ts">
-const closed = ref(false);
+const _closed = ref<boolean>(true);
+const closed = computed({
+    get: () => _closed.value,
+    set: (value) => {
+        _closed.value = value;
+        localStorage.setItem('nav-closed', value.toString());
+    }
+})
 
 const getWidth = () => {
   return Math.max(
@@ -47,6 +54,11 @@ const onClicked = () => {
         closed.value = true;
     }
 }
+
+onMounted(() => {
+    _closed.value = localStorage.getItem('nav-closed') === 'true';
+})
+
 </script>
 
 <style lang="scss">
@@ -64,7 +76,7 @@ const onClicked = () => {
     }
 
     img { width: 35px; height: 30px; }
-    h2 { 
+    h2 {
         margin: auto 5px;
         white-space: pre;
         display: block;
@@ -113,9 +125,9 @@ const onClicked = () => {
 
             button { margin: auto 0; }
             img { width: 35px; height: 30px; }
-            h2 { 
-                margin: auto 5px; 
-                flex: 1; 
+            h2 {
+                margin: auto 5px;
+                flex: 1;
                 white-space: pre;
                 display: block;
             }
@@ -130,7 +142,7 @@ const onClicked = () => {
 
             .title {
                 flex-flow: column;
-                img { 
+                img {
                     width: 35px;
                     margin: 0 auto;
                 }
@@ -145,7 +157,7 @@ const onClicked = () => {
                 margin: 0 auto;
                 p { display: none; }
                 span:last-child { display: none; }
-            } 
+            }
         }
     }
 }

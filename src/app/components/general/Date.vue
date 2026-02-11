@@ -35,7 +35,9 @@ const formatted = computed(() => {
     if (!date) return undefined;
 
     const format = props.format ?? 'f';
-    if (format === 'r' || format === 'R') return date.toRelative();
+    if (format === 'r' || format === 'R') return date.toRelative({
+        style: 'short'
+    });
 
 
     let formats: { [key: string]: any } = {

@@ -3,12 +3,9 @@
     <NuxtLink :to="url" :class="{ 'active': isRead }" class="cell" :target="external ? '_black': ''" :title="external ? 'External Manga' : 'Read ' + title">
         <Icon v-if="external">ungroup</Icon>
         <Icon v-if="isRead">done_all</Icon>
-        <Icon v-if="chapter.id === progress?.chapterId">
-            auto_stories
-        </Icon>
         {{ title }}
     </NuxtLink>
-    <span class="cell">
+    <span class="cell date">
         <Icon>schedule</Icon>&nbsp;
         <Date :date="chapter.createdAt.toString()" utc format="r" />
     </span>
@@ -130,6 +127,33 @@ const toggleRead = async () => {
     &.no-buttons {
         grid-template-columns: auto 150px;
         min-height: 46px;
+    }
+}
+
+@media only screen and (max-width: 550px) {
+    .volume-card {
+        display: flex;
+
+        .cell{
+
+            &:first-child {
+                flex: 1;
+            }
+
+            &.date {
+
+                :first-child {
+                    display: none;
+                }
+            }
+
+        }
+
+        &.version {
+            .date {
+                margin-right: var(--margin);
+            }
+        }
     }
 }
 </style>

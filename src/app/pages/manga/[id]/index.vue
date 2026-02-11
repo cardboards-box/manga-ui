@@ -126,7 +126,7 @@ onMounted(() => setTimeout(() => nextTick(() => {
             height: auto;
 
             a.title {
-                font-size: 2em;
+                font-size: clamp(16px, 3vw, 2em);
                 text-align: center;
                 margin-top: 5px;
                 max-width: 100%;

@@ -150,7 +150,7 @@ export function useCurrentManga() {
         extended,
         source: computed(() => manga.value ? getRelated(manga.value, 'MbSource') : undefined),
         tags: computed(() => manga.value ? getRelateds(manga.value, 'MbTag') : []),
-        cover: computed(() => manga.value ? getRelated(manga.value, 'MbImage') : undefined),
+        cover: computed(() => manga.value ? getRelateds(manga.value, 'MbImage').toSorted((a,b) => b.ordinal - a.ordinal)[0] : undefined),
         people: computed(() => manga.value ? getRelateds(manga.value, 'MbRelatedPerson') : []),
         volumes: computed(() => volumes.value),
         chapters: computed(() => Object.entries(volumes.value?.chapters ?? {}).map(([_, chapter]) => chapter)),
