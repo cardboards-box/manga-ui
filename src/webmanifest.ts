@@ -21,9 +21,9 @@ export default function webManifest(params: WebManifestParams): VitePWAOptions["
         ],
         related_applications: [],
 
-        background_color: '#1953aa',
+        background_color: '#0c090c',
         dir: 'ltr',
-        display: 'standalone',
+        display: 'fullscreen',
         display_override: [
             "window-controls-overlay",
             "standalone",
@@ -32,7 +32,7 @@ export default function webManifest(params: WebManifestParams): VitePWAOptions["
             "browser",
         ],
         orientation: "portrait-primary",
-        theme_color: "#171130",
+        theme_color: "#0c090c",
 
         icons: [
             {

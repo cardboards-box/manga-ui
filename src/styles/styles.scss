@@ -25,6 +25,13 @@
     }
 }
 
+body, html {
+    margin: 0;
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--color);
+}
+
 .text-center { text-align: center; }
 .shadow { text-shadow: 0 0 4px #000; }
 .mute { color: var(--color-muted) !important; }
@@ -257,3 +264,4 @@
         transform: rotate(360deg) scaleX(-1);
     }
 }
+

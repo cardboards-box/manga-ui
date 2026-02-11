@@ -37,8 +37,8 @@ export default defineNuxtConfig({
             ],
             meta: [
                 { name: 'apple-mobile-web-app-capable', content: 'yes' },
-                { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
-                { name: 'viewport', content: 'initial-scale=1, viewport-fit=cover, width=device-width' },
+                { name: 'viewport', content: 'initial-scale=1, width=device-width' },
+                { name: 'theme-color', content: '#0c090c' },
             ]
         },
         pageTransition: { name: 'page', mode: 'out-in' }
