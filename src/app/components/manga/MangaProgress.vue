@@ -58,6 +58,7 @@
                     icon="shelves"
                     label="Total Progress"
                     :side-label="stats?.totalSlug"
+                    :link="link"
                 />
 
                 <ProgressBar
@@ -65,6 +66,7 @@
                     icon="book_5"
                     label="Volumes Read"
                     :side-label="stats?.mangaSlug"
+                    :link="link"
                 />
 
                 <ProgressBar
@@ -72,6 +74,7 @@
                     icon="menu_book"
                     label="Volume Progress"
                     :side-label="stats?.volumeSlug"
+                    :link="link"
                 />
 
                 <ProgressBar
@@ -79,6 +82,7 @@
                     icon="auto_stories"
                     label="Pages Read"
                     :side-label="stats?.chapterSlug"
+                    :link="link"
                 />
 
                 <div class="flex margin-top">
@@ -95,7 +99,6 @@
 
 <script setup lang="ts">
 const { isAdmin, canRead } = useAuthHelper();
-const { chapterTitle } = useMangaUtils();
 const {
     manga, progress, favourited,
     resetProgress, markAsRead, partialLoading,
@@ -104,9 +107,7 @@ const {
 } = useCurrentManga();
 
 const chapter = computed(() => chapters.value.find(t => t.chapter.id === progress.value?.lastReadChapterId));
-const chapProg = computed(() => chapter.value?.progress);
 const link = computed(() => `/chapter/${chapter.value?.chapter.id}?page=${chapter.value?.progress?.pageOrdinal ?? 1}`);
-const title = computed(() => chapter.value ? chapterTitle(chapter.value.chapter) : '');
 
 const copyUrl = () => {
     const baseUrl = `${window.location.protocol}//${window.location.host}/manga/${manga.value?.id}`;

@@ -211,7 +211,7 @@ export function useMangaUtils() {
         const chapterProgress = chapterIndex / chapterCount * 100;
         const chapterSlug = `${chapterIndex}/${chapterCount} (${chapterProgress.toFixed(2)}%)`;
 
-        const pageCount = chapter.chapter.pageCount ?? pages;
+        const pageCount = chapter.chapter.pageCount || pages;
         const pageIndex = chapter.progress?.pageOrdinal ?? 0;
         const pageProgress = pageIndex / pageCount * 100;
         const pageSlug = `${pageIndex}/${pageCount} (${pageProgress.toFixed(2)}%)`;
