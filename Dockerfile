@@ -1,4 +1,4 @@
-ARG NODE_VERSION=node:18
+ARG NODE_VERSION=node:latest
 
 FROM $NODE_VERSION AS build
 WORKDIR /app
