@@ -164,6 +164,23 @@ export interface MangaSearchFilter extends SearchFiler<MangaOrderBy> {
     cFirstBefore?: Date | string;
 }
 
+export interface Stats {
+    timestamp: Date | string;
+    queue: {
+        manga: number;
+        chapters: number;
+        images: number;
+    },
+    database: {
+        period: string;
+        manga: number;
+        chapters: number;
+        images: number;
+        sources: number;
+        people: number;
+    }[]
+}
+
 export const ALL_STATES = [MangaState.Bookmarked, MangaState.Completed, MangaState.InProgress, MangaState.Favorited] as const;
 
 const isOnly = (filter: MangaSearchFilter, state: MangaState) => {

@@ -34,21 +34,16 @@
         <Icon>add</Icon>
         <p>Import</p>
     </NuxtLink>
-<!--
-    <NuxtLink to="/graph" active-class="active" @click="clicked">
-        <Icon>monitoring</Icon>
-        <p>Stats</p>
-    </NuxtLink>
-
-    <NuxtLink to="/notifications" active-class="active" @click="clicked">
-        <Icon>notifications</Icon>
-        <p>Notifications</p>
-    </NuxtLink> -->
 </template>
 
 <NuxtLink to="/random" active-class="active" @click="clicked">
     <Icon>shuffle</Icon>
     <p>Random</p>
+</NuxtLink>
+
+<NuxtLink to="/stats" active-class="active" @click="clicked">
+    <Icon>monitoring</Icon>
+    <p>DB Stats</p>
 </NuxtLink>
 
 <NuxtLink to="/about" active-class="active" @click="clicked">

@@ -17,7 +17,7 @@ import type {
     ComicFormat, ContentRating,
     RelationshipType, ChapterOrderBy,
     VolumeState, MangaOrderBy,
-    MangaState,
+    MangaState, RespStats
 } from '../models';
 
 type NuxtApiHandle = ReturnType<typeof useApiHelper>;
@@ -84,7 +84,8 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             mangaState: () => get<RespMetadataEnums<MangaState>>('metadata/manga-state'),
             downloadFormat: () => get<RespMetadataEnums<ComicFormat>>('metadata/download-format'),
             tags: () => get<RespMetadataTags>('metadata/manga-tag'),
-            sources: () => get<RespMetadataSource>('metadata/sources')
+            sources: () => get<RespMetadataSource>('metadata/sources'),
+            stats: () => get<RespStats>(`metadata/stats`)
         },
         progress: {
             reset: (id: string) => del<RespProgress>(`progress/${id}/read`),

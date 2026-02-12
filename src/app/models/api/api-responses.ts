@@ -5,7 +5,7 @@ import type {
     MbTypeMangaSearch, MbTypeProgress,
     MbTypeManga,
     MangaVolumes,
-    EnumDescription,
+    EnumDescription, Stats,
 } from './composites';
 
 export interface RespAuthResolve extends Boxed<{
@@ -48,3 +48,5 @@ export interface RespMetadataEnums<T = number> extends BoxedArray<EnumDescriptio
 export interface RespMetadataTags extends BoxedArray<MbTag> { }
 
 export interface RespMetadataSource extends BoxedArray<MbSource> { }
+
+export interface RespStats extends BoxedArray<Stats> { }
