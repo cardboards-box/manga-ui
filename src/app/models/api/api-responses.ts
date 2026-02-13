@@ -25,6 +25,8 @@ export interface RespImage extends Boxed<MbTypeImage> { }
 
 export interface RespMangaSearch extends BoxedPaged<MbTypeMangaSearch> { }
 
+export interface RespMangaRecommendations extends BoxedArray<MbTypeMangaSearch> { }
+
 export interface RespManga extends Boxed<MbTypeManga> { }
 
 export interface RespMangaChapters extends Boxed<MangaVolumes> { }

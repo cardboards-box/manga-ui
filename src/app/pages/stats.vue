@@ -3,18 +3,20 @@
     <div v-else class="max-width flex">
         <Tabs>
             <Tab title="Image Index Queue">
-                <h1>Image Index Queue</h1>
-                <div class="flex margin-top" style="max-width: 100%; width: 90vw;">
-                    <Line :data="imageIndexQueue" :options="{
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        scales: {
-                            y: { ticks: { color: color } },
-                            x: { ticks: { color: color } }
-                        }
-                    }" />
+                <div class="flex row">
+                    <h1 class="margin-top center-horz">Image Index Queue</h1>
+                    <div class="flex margin-top" style="max-width: 100%; width: 90vw;">
+                        <Line :data="imageIndexQueue" :options="{
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            scales: {
+                                y: { ticks: { color: color } },
+                                x: { ticks: { color: color } }
+                            }
+                        }" />
+                    </div>
+                    <p class="mute margin-top center-horz">This is the number of images left in the queue to index for the Reverse Image Search Database</p>
                 </div>
-                <p class="mute margin-bottom">This is the number of images left in the queue to index for the Reverse Image Search Database</p>
             </Tab>
             <Tab v-for="period of periodCharts" :title="period.period">
                 <div class="flex row">
@@ -29,10 +31,9 @@
                             }
                         }" />
                     </div>
-                    <p
-                        v-if="period.period !== 'All Time'"
-                        class="mute margin-top center-horz"
-                    >This is the number of items created in the database from the last {{ period.period }}</p>
+                    <p class="mute margin-top center-horz">
+                        This is the number of items created in the database from the last {{ period.period }}
+                    </p>
                 </div>
             </Tab>
         </Tabs>

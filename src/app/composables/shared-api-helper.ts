@@ -13,6 +13,7 @@ import type {
     RespMangaSet, RespMetadataEnums,
     RespMetadataTags, RespMetadataSource,
     RespReverseResult, MangaSearchFilter,
+    RespMangaRecommendations,
 
     ComicFormat, ContentRating,
     RelationshipType, ChapterOrderBy,
@@ -66,6 +67,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             search: (filter: MangaSearchFilter) => post<RespMangaSearch>('manga', filter),
             searchUrl: (filter: MangaSearchFilter) => get<RespMangaSearch>('manga', filter),
             fetch: (id: string) => get<RespManga>(`manga/${id}`),
+            recommendations: (id: string, size?: number) => get<RespMangaRecommendations>(`manga/${id}/recommended`, { size }),
             delete: (id: string) => del<BoxedEmpty>(`manga/${id}`),
             chapters: (id: string, order?: ChapterOrderBy, asc?: boolean) => get<RespMangaChapters>(`manga/${id}/chapters`, { order, asc }),
             refresh: (id: string) => get<RespManga>(`manga/${id}/refresh`),
