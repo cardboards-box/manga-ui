@@ -49,4 +49,4 @@ export interface RespMetadataTags extends BoxedArray<MbTag> { }
 
 export interface RespMetadataSource extends BoxedArray<MbSource> { }
 
-export interface RespStats extends BoxedArray<Stats> { }
+export interface RespStats extends Boxed<Stats> { }

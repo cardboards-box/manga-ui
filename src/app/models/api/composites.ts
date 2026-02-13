@@ -165,14 +165,16 @@ export interface MangaSearchFilter extends SearchFiler<MangaOrderBy> {
 }
 
 export interface Stats {
-    timestamp: Date | string;
     queue: {
+        timestamp: Date | string;
         manga: number;
         chapters: number;
         images: number;
-    },
+    }[],
     database: {
         period: string;
+        start: Date | string;
+        end: Date | string;
         manga: number;
         chapters: number;
         images: number;
