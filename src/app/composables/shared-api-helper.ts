@@ -68,6 +68,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             searchUrl: (filter: MangaSearchFilter) => get<RespMangaSearch>('manga', filter),
             fetch: (id: string) => get<RespManga>(`manga/${id}`),
             recommendations: (id: string, size?: number) => get<RespMangaRecommendations>(`manga/${id}/recommended`, { size }),
+            personalRecs: (size?: number) => get<RespMangaRecommendations>(`manga/recommended`, { size }),
             delete: (id: string) => del<BoxedEmpty>(`manga/${id}`),
             chapters: (id: string, order?: ChapterOrderBy, asc?: boolean) => get<RespMangaChapters>(`manga/${id}/chapters`, { order, asc }),
             refresh: (id: string) => get<RespManga>(`manga/${id}/refresh`),

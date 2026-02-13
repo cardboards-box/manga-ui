@@ -90,6 +90,13 @@ const PERC = { min: 0, step: 5 };
 const MAX_PERC = { ...PERC, max: 100, step: 5 };
 const THEMES: SiteBackground[] =[
     {
+        name: 'Better Dark',
+        type: 'solid-color',
+        solidColor: '#222222',
+        gradient: { ...DEFAULT_GRADIENT },
+        image: { ...DEFAULT_IMAGE },
+        colorMods: {}
+    }, {
         name: 'Default',
         type: 'gradient',
         solidColor: '#061a7d',

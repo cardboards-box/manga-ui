@@ -98,5 +98,6 @@ export default defineNuxtConfig({
         '/manga/**/admin': { ssr: false },
         '/auth': { ssr: false },
         '/stats': { ssr: false },
+        '/manga/recommendations': { ssr: false },
     }
 })

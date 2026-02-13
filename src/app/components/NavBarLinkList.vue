@@ -30,6 +30,11 @@
         <p>Favourites</p>
     </NuxtLink>
 
+    <NuxtLink class="sub" to="/manga/recommendations" active-class="active" @click="clicked">
+        <Icon>recommend</Icon>
+        <p>Recommended</p>
+    </NuxtLink>
+
     <NuxtLink to="/import" active-class="active" @click="clicked">
         <Icon>add</Icon>
         <p>Import</p>
