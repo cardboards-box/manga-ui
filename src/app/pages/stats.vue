@@ -22,7 +22,7 @@
                 <div class="flex row">
                     <h3 class="margin-top center-horz">Database Stats from the last {{ period.period }}</h3>
                     <div class="flex margin-top" style="max-width: 100%; width: 90vw;">
-                        <Line :data="period.set" :options="{
+                        <Bar :data="period.set" :options="{
                             responsive: true,
                             maintainAspectRatio: true,
                             scales: {

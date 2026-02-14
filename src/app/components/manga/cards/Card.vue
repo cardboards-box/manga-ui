@@ -91,7 +91,7 @@ const cache = computed(() => progressCache.cache.value[props.manga.entity.id]);
 const actProgress = computed(() => _localProg.value ?? cache.value);
 const favLoading = ref(false);
 
-const tags = computed(() => getRelateds(props.manga, 'MbTag'));
+const tags = computed(() => getRelateds(props.manga, 'MbTag').toSorted((a, b) => a.name.localeCompare(b.name)));
 const ext = computed(() => getRelated(props.manga, 'MbMangaExt'));
 const source = computed(() => getRelated(props.manga, 'MbSource'));
 const actStyle = computed(() => props.overrideStyle ?? listStyle.value);
