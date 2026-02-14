@@ -4,6 +4,7 @@
             <IconBtn
                 icon="arrow_back"
                 @click="back"
+                v-if="showBack"
             />
             <h2 class="fill" :class="{ 'caps': isTrue(capitalize) }">{{ title }} ({{ manga.length }})</h2>
 
@@ -73,7 +74,7 @@
                     <p class="pad">No Results</p>
                 </div>
             </div>
-            
+
         </div>
 
         <div class="pager-wrapper margin-bottom" v-if="canPaginate && !infinite && !pending">
@@ -94,7 +95,7 @@
 import { ListStyle } from '~/models';
 import type {
     booleanish, EnumDescription,
-    ImageSearchResultType, MbMangaProgress,
+    ImageSearchResultType,
     MbTypeManga, MbTypeMangaSearch,
     ContentRating
 } from '~/models';
@@ -121,6 +122,7 @@ const props = defineProps<{
     capitalize?: booleanish;
     title: string;
     allowReload?: booleanish;
+    hideBack?:  booleanish;
     pagination?: {
         page: number;
         pages: number;
@@ -148,6 +150,7 @@ const infinite = computed<boolean>({
 
 const canPaginate = computed(() => !!props.pagination);
 const cssStyle = computed(() => `${style.value} ${fill.value ? 'fill-page' : ''}`);
+const showBack = computed(() => !isTrue(props.hideBack));
 
 const styles = [
     { icon: 'list', style: ListStyle.Compact },

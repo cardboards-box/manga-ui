@@ -28,6 +28,7 @@ export function useCurrentManga() {
     const chapters = useState<Record<string, MbTypeChapter>>(CACHE_KEY + 'chapters', () => ({}));
 
     const extended = computed(() => manga.value ? getRelated(manga.value, 'MbMangaExt') : undefined);
+    const covers = computed(() => manga.value ? getRelateds(manga.value, 'MbImage').toSorted((a,b) => b.ordinal - a.ordinal) : []);
 
     const getRouteParams = (): Params => {
         return {
@@ -150,7 +151,8 @@ export function useCurrentManga() {
         extended,
         source: computed(() => manga.value ? getRelated(manga.value, 'MbSource') : undefined),
         tags: computed(() => manga.value ? getRelateds(manga.value, 'MbTag') : []),
-        cover: computed(() => manga.value ? getRelateds(manga.value, 'MbImage').toSorted((a,b) => b.ordinal - a.ordinal)[0] : undefined),
+        covers,
+        cover: computed(() => covers.value[0]),
         people: computed(() => manga.value ? getRelateds(manga.value, 'MbRelatedPerson') : []),
         volumes: computed(() => volumes.value),
         chapters: computed(() => Object.entries(volumes.value?.chapters ?? {}).map(([_, chapter]) => chapter)),

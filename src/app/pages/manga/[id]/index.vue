@@ -54,13 +54,60 @@
                     </Drawer>
                 </div>
             </aside>
-            <VolumeList
-                v-if="canRead && volumes"
-                :volumes="volumes"
-                :manga="manga"
-                :sort="params?.sort ?? ChapterOrderBy.Ordinal"
-                :asc="params?.asc ?? true"
-            />
+            <div class="content-container flex row fill">
+                <div class="tab-list flex">
+                    <button
+                        :class="{ 'active': tab === 'chapters' }"
+                        @click="tab = 'chapters'"
+                    >
+                        <Icon>book_5</Icon>
+                        <span>Chapters</span>
+                    </button>
+                    <button
+                        :class="{ 'active': tab === 'covers' }"
+                        @click="tab = 'covers'"
+                    >
+                        <Icon>art_track</Icon>
+                        <span>Covers</span>
+                    </button>
+                    <button
+                        :class="{ 'active': tab === 'recommendations' }"
+                        @click="tab = 'recommendations'"
+                    >
+                        <Icon>recommend</Icon>
+                        <span>Recommended</span>
+                    </button>
+                </div>
+                <VolumeList
+                    v-show="tab === 'chapters'"
+                    v-if="canRead && volumes"
+                    :volumes="volumes"
+                    :manga="manga"
+                    :sort="params?.sort ?? ChapterOrderBy.Ordinal"
+                    :asc="params?.asc ?? true"
+                />
+                <Loading v-if="recsPending" v-show="tab === 'recommendations'" />
+                <Error v-else-if="recsError" :message="recsError" v-show="tab === 'recommendations'" />
+                <CardList v-else
+                    v-show="tab === 'recommendations'"
+                    title="Recommended Manga"
+                    hide-back
+                    :manga="recs"
+                    capitalize
+                    allow-reload
+                    @reload="() => recsRefresh()"
+                    :content-ratings="contentRatings"
+                />
+                <div class="covers flex row wrap" v-show="tab === 'covers'">
+                    <Cover
+                        v-for="cover in covers"
+                        :image="cover"
+                        type="img"
+                        width="300px"
+                        styles="margin: var(--margin) auto"
+                    />
+                </div>
+            </div>
         </main>
     </div>
 </template>
@@ -69,6 +116,7 @@
 import { ChapterOrderBy } from '~/models';
 
 const route = useRoute();
+const api = useMangaApi();
 const { canRead } = useAuthHelper();
 const { wrapUrl, apiUrl } = useSettingsHelper();
 const cache = useCacheHelper();
@@ -78,17 +126,32 @@ const {
     refresh, manga, extended,
     error, volumes, cover, tags,
     pending, throttled, params,
-    bookmarks,
+    bookmarks, covers
 } = useCurrentManga();
 const { pending: nuxtPending } = useAsyncData(async () => await refresh());
 const { data: cached } = useAsyncData(async () => await cache.get());
+const {
+    pending: recsPending,
+    data: recsData,
+    error: recsErrorRaw,
+    refresh: recsRefresh
+} = api.nuxt.manga.recommendations(route.params.id?.toString() ?? '');
 const contentRatings = computed(() => cached.value?.contentRatings ?? []);
 const rating = computed(() => contentRatings.value.find(t => t.value === manga.value?.contentRating));
+
+const recsError = computed(() => {
+    if (api.isSuccess(recsData.value)) return undefined;
+    if (recsErrorRaw.value) return api.errorMessage(recsErrorRaw.value.data);
+    return api.errorMessage(recsData.value) ?? 'An unknown error occurred!';
+});
+
+const recs = computed(() => recsData.value ? api.data(recsData.value) ?? [] : []);
 
 const loading = computed(() => nuxtPending.value || pending.value);
 const title = computed(() => extended.value?.displayTitle ?? manga.value?.title ?? 'Manga Not Found!');
 const description = computed(() => manga.value?.description ?? 'Find your next binge on MangaBox!');
 const coverImage = computed(() => cover.value ? wrapUrl(apiUrl, cover.value?.url) : 'https://mangabox.app/broken.png');
+const tab = ref<'chapters' | 'covers' | 'recommendations'>('chapters');
 
 useHead({ title });
 
@@ -148,6 +211,37 @@ onMounted(() => setTimeout(() => nextTick(() => {
                 margin: 5px !important;
             }
         }
+
+        .content-container {
+            .tab-list {
+                margin-top: var(--margin);
+                margin-bottom: var(--margin);
+                border-bottom: 1px solid var(--ctrl-bg);
+
+                button {
+                    flex: 1;
+                    border-bottom: 3px solid transparent;
+                    display: flex;
+                    font-size: 1rem;
+                    padding: var(--margin) 0;
+                    position: relative;
+
+                    :first-child {
+                        position: absolute;
+                        float: left;
+                        left: var(--margin);
+                    }
+
+                    span {
+                        margin: auto;
+                    }
+
+                    &.active {
+                        border-bottom-color: var(--color-primary);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -163,6 +257,18 @@ onMounted(() => setTimeout(() => nextTick(() => {
             .details {
                 width: unset !important;
                 flex: 1;
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    .content-container {
+        .tab-list {
+            button {
+                :first-child {
+                    display: none;
+                }
             }
         }
     }

@@ -30,6 +30,10 @@
         .content {
             flex-flow: column;
         }
+
+        &.wrap {
+            flex-flow: row wrap;
+        }
     }
 
     &.scroll, .scroll { overflow: auto; }

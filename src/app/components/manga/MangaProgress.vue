@@ -37,12 +37,6 @@
                     @click="forceRefresh"
                 />
                 <IconBtn
-                    icon="recommend"
-                    text="Recommendations / Related"
-                    color="shade"
-                    :link="`/manga/${manga.id}/recommendations`"
-                />
-                <IconBtn
                     icon="content_copy"
                     text="Copy Manga Url"
                     color="shade"
