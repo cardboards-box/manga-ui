@@ -53,7 +53,7 @@ const addManga = async () => {
         return;
     }
 
-    navigateTo(`/manga/${manga.id}`);
+    navigateTo(`/manga/${manga.entity.id}`);
 };
 
 onMounted(() => nextTick(() => {

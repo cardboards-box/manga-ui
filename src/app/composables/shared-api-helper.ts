@@ -72,7 +72,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             delete: (id: string) => del<BoxedEmpty>(`manga/${id}`),
             chapters: (id: string, order?: ChapterOrderBy, asc?: boolean) => get<RespMangaChapters>(`manga/${id}/chapters`, { order, asc }),
             refresh: (id: string) => get<RespManga>(`manga/${id}/refresh`),
-            load: (url: string, force?: boolean) => post<RespMangaSet>('manga/load', { url, force }),
+            load: (url: string, force?: boolean) => post<RespManga>('manga/load', { url, force }),
             favorite: (id: string) => get<RespProgress>(`manga/${id}/favorite`),
             unfavorite: (id: string) => del<RespProgress>(`manga/${id}/favorite`),
             recompute: (ids?: string[], since?: number) => get<RespMangaRecompute>(`manga/recompute`, { ids, since }),

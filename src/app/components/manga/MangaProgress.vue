@@ -102,12 +102,13 @@ const { isAdmin, canRead } = useAuthHelper();
 const {
     manga, progress, favourited,
     resetProgress, markAsRead, partialLoading,
-    forceRefresh, chapters,
+    forceRefresh, chapters, volumes,
     progressData: stats
 } = useCurrentManga();
 
 const chapter = computed(() => chapters.value.find(t => t.chapter.id === progress.value?.lastReadChapterId));
-const link = computed(() => `/chapter/${chapter.value?.chapter.id}?page=${chapter.value?.progress?.pageOrdinal ?? 1}`);
+const chapterId = computed(() => chapter.value?.chapter.id ?? volumes.value?.volumes[0]?.chapters[0]?.versions[0]);
+const link = computed(() => chapterId.value ? `/chapter/${chapterId.value}?page=${chapter.value?.progress?.pageOrdinal ?? 1}` : undefined);
 
 const copyUrl = () => {
     const baseUrl = `${window.location.protocol}//${window.location.host}/manga/${manga.value?.id}`;

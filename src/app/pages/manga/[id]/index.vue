@@ -128,7 +128,11 @@ const {
     pending, throttled, params,
     bookmarks, covers
 } = useCurrentManga();
-const { pending: nuxtPending } = useAsyncData(async () => await refresh());
+const { pending: nuxtPending } = useAsyncData(
+    `manga-${route.params.id}-fetch`,
+    async () => await refresh(), {
+    watch: [() => route.params, () => route.query]
+});
 const { data: cached } = useAsyncData(async () => await cache.get());
 const {
     pending: recsPending,

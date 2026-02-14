@@ -127,7 +127,7 @@ export function useMangaUtils() {
         }
 
         if (!volumes || !progress.entity ||
-            volumes.progress?.mangaId !== progress.entity.mangaId)
+            (volumes.progress?.mangaId && volumes.progress?.mangaId !== progress.entity.mangaId))
             return;
 
         volumes.progress = progress.entity;
