@@ -597,6 +597,26 @@ export function useReaderHelper() {
         mergeProgress(mvCache.value, progress);
     }
 
+    /**
+     * Gets the pages for the given chapter ID
+     * @param id The ID of the chapter
+     * @returns The pages for the chapter
+     */
+    async function getPages(id: string): Promise<MbImage[]> {
+        if (fullChapters.value[id]) {
+            return getRelateds(fullChapters.value[id]!, 'MbImage').toSorted((a,b) => a.ordinal - b.ordinal);
+        }
+
+        const res = await api.promise.chapter.fetch(id);
+        if (!api.isSuccess(res)) {
+            console.error('Failed to fetch chapter for pages!', api.errorMessage(res));
+            return [];
+        }
+
+        fullChapters.value[id] = api.data(res);
+        return getRelateds(fullChapters.value[id]!, 'MbImage').toSorted((a,b) => a.ordinal - b.ordinal);
+    }
+
     return {
         manga: computed(() => manga.value?.entity),
         mangaExtended: computed(() => manga.value ? getRelated(manga.value, 'MbMangaExt') : undefined),
@@ -605,9 +625,11 @@ export function useReaderHelper() {
         pending: computed(() => pending.value),
         partialLoading: computed(() => partialLoading.value),
         error: computed(() => error.value),
+        volumes: computed(() => volumes.value),
         bookmarks,
         progress,
         pages,
+        getPages,
         preloadPages,
         regions,
         fetch,

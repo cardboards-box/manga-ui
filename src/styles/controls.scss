@@ -9,7 +9,7 @@ input, textarea, select {
     font-family: var(--font-family);
     transition: all 250ms;
 
-    option {
+    option, optgroup[label] {
         font-family: var(--font-family);
         background-color: #171130;
         margin: 5px;

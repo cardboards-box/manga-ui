@@ -61,7 +61,13 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
         image: {
             fetch: (id: string) => get<RespImage>(`image/${id}/meta`),
             downloadUrl: (id: string) => `/api/image/${id}`,
-            stripUrl: (ids: string[]) => wrapUrl(apiUrl, `image/strip`, { ids })
+            stripUrl: (ids: string[]) => {
+                const pars: Record<string, string> = {};
+                for(let i = 0; i < ids.length; i++) {
+                    pars[`ids[${i}]`] = ids[i]!;
+                }
+                return wrapUrl(apiUrl, `image/strip`, pars);
+            }
         },
         manga: {
             search: (filter: MangaSearchFilter) => post<RespMangaSearch>('manga', filter),
