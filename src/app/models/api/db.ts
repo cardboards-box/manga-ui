@@ -186,6 +186,7 @@ export interface MbSource extends MbDbObject {
     baseUrl: string;
     isHidden: boolean;
     enabled: boolean;
+    defaultRating: ContentRating;
 }
 
 export interface MbTag extends MbDbObject {

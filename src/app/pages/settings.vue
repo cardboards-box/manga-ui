@@ -84,12 +84,14 @@
                             <label class="no-bot">Proxy URL</label>
                             <input type="text" v-model="proxyUrl" placeholder="Proxy URL (use placeholders: {image}, {group}, {referer})" />
                         </div>
+                        <div class="control span">
+                            <label class="no-bot">Black List Tags</label>
+                            <BlackListTagsSelector v-model="blackListTags" />
+                        </div>
                     </div>
                 </Tab>
                 <Tab title="Theme" icon="palette" scrollable keep-alive>
-                    <ClientOnly>
-                        <ThemeEditor />
-                    </ClientOnly>
+                    <ThemeEditor />
                 </Tab>
             </Tabs>
         </ClientOnly>
@@ -121,6 +123,7 @@ const {
     customFilter,
     infiniteScroll,
     proxyUrl,
+    blackListTags,
 } = useAppSettings();
 
 useHead({ title: 'Configure the reader your way.' });

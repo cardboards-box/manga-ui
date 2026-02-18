@@ -1,5 +1,10 @@
 import { ContentRating, VolumeState } from '../models';
-import type { MangaBoxType, MangaVolumes, MbChapter, MbManga, MbMangaExt, MbTypeManga, MbTypeMangaSearch, MbTypeProgress, ProgressChapter } from '../models';
+import type {
+    MangaBoxType, MangaSearchFilter, MangaVolumes,
+    MbChapter, MbManga, MbMangaExt,
+    MbTypeManga, MbTypeMangaSearch, MbTypeProgress,
+    ProgressChapter
+} from '../models';
 
 type ExplodeKey<T extends MangaBoxType<any, any>> = T['related'][number]['type'];
 
@@ -26,8 +31,9 @@ type Progress = {
 
 export function useMangaUtils() {
     const { clamp } = useUtils();
-    const { blurPornCovers, proxyUrl } = useAppSettings();
+    const { blurPornCovers, proxyUrl, blackListTags } = useAppSettings();
     const defaultProxyUrl = 'https://cba-proxy.index-0.com';
+    const api = useMangaApi();
 
     /**
      * Gets the manga from the given types
@@ -228,6 +234,32 @@ export function useMangaUtils() {
         }
     }
 
+    /**
+     * Do the search with the given filter
+     * @param filter The search filter
+     */
+    async function searchManga(filter: MangaSearchFilter) {
+        filter.tagsEx = [... new Set([
+            ...(filter.tagsEx ?? []),
+            ...(blackListTags.value ?? [])
+        ])];
+        return await api.promise.manga.search(filter);
+    }
+
+    /**
+     * Get the recommendations for the given manga ID or the person's profile if no ID is given
+     * @param id The ID of the manga to get recommendations for, or undefined to get profile recommendations
+     */
+    async function recommendations(id?: string, size: number = 20) {
+        const tags = blackListTags.value ?? [];
+
+        const action = id
+            ? () => api.promise.manga.recommendations(id, size, tags)
+            : () => api.promise.manga.personalRecs(size, tags);
+
+        return await action();
+    }
+
     return {
         shouldBlur,
         getManga,
@@ -236,6 +268,8 @@ export function useMangaUtils() {
         proxy,
         mergeProgress,
         chapterTitle,
-        calculateProgress
+        calculateProgress,
+        searchManga,
+        recommendations
     }
 }

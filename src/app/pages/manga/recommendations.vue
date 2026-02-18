@@ -15,6 +15,7 @@
 <script lang="ts" setup>
 const api = useMangaApi();
 const cache = useCacheHelper();
+const { recommendations } = useMangaUtils();
 
 useHead({ title: 'Find your next binge!' });
 
@@ -31,13 +32,13 @@ const {
     data: apiData,
     error: apiError,
     refresh
-} = api.nuxt.manga.personalRecs();
+} = useAsyncData(async () => await recommendations());
 const { data: cached } = useAsyncData(async () => await cache.get());
 const contentRatings = computed(() => cached.value?.contentRatings ?? []);
 
 const error = computed(() => {
     if (api.isSuccess(apiData.value)) return undefined;
-    if (apiError.value) return api.errorMessage(apiError.value.data);
+    if (apiError.value) return api.errorMessage(<any>apiError.value.data);
     return api.errorMessage(apiData.value) ?? 'An unknown error occurred!';
 });
 

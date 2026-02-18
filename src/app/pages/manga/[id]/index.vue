@@ -86,18 +86,19 @@
                     :sort="params?.sort ?? ChapterOrderBy.Ordinal"
                     :asc="params?.asc ?? true"
                 />
-                <Loading v-if="recsPending" v-show="tab === 'recommendations'" />
-                <Error v-else-if="recsError" :message="recsError" v-show="tab === 'recommendations'" />
-                <CardList v-else
-                    v-show="tab === 'recommendations'"
-                    title="Recommended Manga"
-                    hide-back
-                    :manga="recs"
-                    capitalize
-                    allow-reload
-                    @reload="() => recsRefresh()"
-                    :content-ratings="contentRatings"
-                />
+                <div class="recommendations flex row" v-show="tab === 'recommendations'">
+                    <Loading v-if="recsPending" />
+                    <Error v-else-if="recsError" :message="recsError" />
+                    <CardList v-else
+                        title="Recommended Manga"
+                        hide-back
+                        :manga="recs"
+                        capitalize
+                        allow-reload
+                        @reload="() => recsRefresh()"
+                        :content-ratings="contentRatings"
+                    />
+                </div>
                 <div class="covers flex row wrap" v-show="tab === 'covers'">
                     <Cover
                         v-for="cover in covers"
@@ -120,7 +121,7 @@ const api = useMangaApi();
 const { canRead } = useAuthHelper();
 const { wrapUrl, apiUrl } = useSettingsHelper();
 const cache = useCacheHelper();
-const { chapterTitle } = useMangaUtils();
+const { chapterTitle, recommendations } = useMangaUtils();
 
 const {
     refresh, manga, extended,
@@ -139,13 +140,17 @@ const {
     data: recsData,
     error: recsErrorRaw,
     refresh: recsRefresh
-} = api.nuxt.manga.recommendations(route.params.id?.toString() ?? '');
+} = useAsyncData(
+    `manga-${route.params.id}-recs`,
+    async () => await recommendations(route.params.id?.toString() ?? ''),
+    { watch: [() => route.params.id] }
+);
 const contentRatings = computed(() => cached.value?.contentRatings ?? []);
 const rating = computed(() => contentRatings.value.find(t => t.value === manga.value?.contentRating));
 
 const recsError = computed(() => {
     if (api.isSuccess(recsData.value)) return undefined;
-    if (recsErrorRaw.value) return api.errorMessage(recsErrorRaw.value.data);
+    if (recsErrorRaw.value) return api.errorMessage(<any>recsErrorRaw.value.data);
     return api.errorMessage(recsData.value) ?? 'An unknown error occurred!';
 });
 
@@ -244,6 +249,11 @@ onMounted(() => setTimeout(() => nextTick(() => {
                         border-bottom-color: var(--color-primary);
                     }
                 }
+            }
+
+            .recommendations {
+                max-width: 100%;
+                padding-right: calc(var(--margin) * 2);
             }
         }
     }

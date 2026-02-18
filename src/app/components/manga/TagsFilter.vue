@@ -49,6 +49,7 @@
 
 <script setup lang="ts">
 import type { MangaSearchFilter, MbSource, MbTag } from '~/models';
+import { ContentRating } from '~/models';
 
 const props = defineProps<{
     modelValue: MangaSearchFilter;
@@ -60,11 +61,8 @@ const emits = defineEmits<{
     (e: 'update:modelValue', value: MangaSearchFilter): void;
 }>();
 
-const hentaiSourceSlugs = ['nhentai'];
-
 const hentaiSources = computed(() => props.sources
-    .filter(source => hentaiSourceSlugs
-    .includes(source.slug))
+    .filter(source => source.defaultRating !== ContentRating.Safe)
     .map(t => t.id));
 const hasHentaiSource = computed(() => filters.value.sources &&
     filters.value.sources.length > 0 &&

@@ -10,7 +10,7 @@ interface MangaSettings {
     pageStyle: PageStyle;
     filterStyle: FilterStyle;
     progressBarStyle: ProgressBarStyle;
-    customFilter?: string;
+    customFilter: string | undefined;
     listStyle: ListStyle;
     blurPornCovers: boolean;
     showTutorial: boolean;
@@ -19,11 +19,12 @@ interface MangaSettings {
     regionMargin: number;
     fillPage: boolean;
     background: SiteBackground;
-    lastCheck?: Date | null;
-    maxImageWidth?: number;
-    maxImageHeight?: number;
+    lastCheck: Date | undefined;
+    maxImageWidth: number | undefined;
+    maxImageHeight: number | undefined;
     infiniteScroll: boolean;
-    proxyUrl?: string;
+    proxyUrl: string | undefined;
+    blackListTags: string[] | undefined;
 }
 
 interface Settings {
@@ -31,27 +32,7 @@ interface Settings {
 }
 
 type MangaSettingsKey = {
-    invertControls: WritableComputedRef<boolean>;
-    forwardOnly: WritableComputedRef<boolean>;
-    brightness: WritableComputedRef<number>;
-    scrollAmount: WritableComputedRef<number>;
-    pageStyle: WritableComputedRef<PageStyle>;
-    filterStyle: WritableComputedRef<FilterStyle>;
-    progressBarStyle: WritableComputedRef<ProgressBarStyle>;
-    customFilter: WritableComputedRef<string | undefined>;
-    listStyle: WritableComputedRef<ListStyle>;
-    blurPornCovers: WritableComputedRef<boolean>;
-    showTutorial: WritableComputedRef<boolean>;
-    showPorn: WritableComputedRef<boolean>;
-    pageMenuOver: WritableComputedRef<boolean>;
-    regionMargin: WritableComputedRef<number>;
-    fillPage: WritableComputedRef<boolean>;
-    background: WritableComputedRef<SiteBackground>;
-    lastCheck: WritableComputedRef<Date | undefined | null>;
-    maxImageWidth?: WritableComputedRef<number | undefined | null>;
-    maxImageHeight?: WritableComputedRef<number | undefined | null>;
-    infiniteScroll: WritableComputedRef<boolean>;
-    proxyUrl: WritableComputedRef<string | undefined>;
+    [K in keyof MangaSettings]: WritableComputedRef<MangaSettings[K]>;
 };
 
 const DEFAULTS: MangaSettings = {
@@ -76,6 +57,7 @@ const DEFAULTS: MangaSettings = {
     maxImageWidth: undefined,
     infiniteScroll: true,
     proxyUrl: undefined,
+    blackListTags: []
 }
 
 export const useAppSettings = () => {
@@ -108,6 +90,7 @@ export const useAppSettings = () => {
             maxImageHeight: getSetNumbNull('max-image-height', DEFAULTS.maxImageHeight, () => commit()),
             infiniteScroll: getSetBool('infinite-scroll', DEFAULTS.infiniteScroll, () => commit()),
             proxyUrl: getSet<string>('proxy-url', DEFAULTS.proxyUrl, () => commit()),
+            blackListTags: getSetJson<string[]>('blacklist-tags', DEFAULTS.blackListTags, () => commit())
         }
     })();
 

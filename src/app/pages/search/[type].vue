@@ -108,9 +108,10 @@ const route = useRoute();
 const router = useRouter();
 const { canRead } = useAuthHelper();
 const { addParams } = useSettingsHelper();
-const { infiniteScroll } = useAppSettings();
+const { infiniteScroll, blackListTags } = useAppSettings();
 const cache = useCacheHelper();
 const { throttle } = useUtils();
+const { searchManga } = useMangaUtils();
 
 useHead({ title: 'Find your next binge!' });
 
@@ -151,7 +152,11 @@ const headerStuck = ref(false);
 const _error = ref<string>();
 const filter = computed(() => parseFilters());
 const searchFilters = ref(parseFilters());
-const { data, error: rawError, pending, refresh } = api.nuxt.manga.search(<any>filter);
+const { data, error: rawError, pending, refresh } = useAsyncData(
+    `search-${route.fullPath}`,
+    async () => await searchManga(searchFilters.value),
+    { watch: [() => route.query] }
+);
 const results = computed(() => (data.value ? api.data(data.value)?.data : []) ?? []);
 const total = computed(() => (data.value ? api.data(data.value)?.total : 0));
 const pages = computed(() => (data.value ? api.data(data.value)?.pages : 0));
@@ -262,6 +267,11 @@ function parseFilters(): MangaSearchFilter {
             continue;
 
         state.set(filter);
+    }
+
+    for(const tag of blackListTags?.value ?? []) {
+        if (!filter.tagsEx?.includes(tag))
+            filter.tagsEx = [...(filter.tagsEx ?? []), tag];
     }
 
     return filter;
