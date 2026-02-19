@@ -53,7 +53,6 @@ const error = ref<string>();
 const loading = ref(false);
 const interval = ref<any>();
 
-const primaryColor = computed(() => getComputedStyle(document.body).getPropertyValue('--color-primary'));
 const color = computed(() => getComputedStyle(document.body).getPropertyValue('--color'));
 
 const imageIndexQueue = computed(() => formatLine(
@@ -62,12 +61,16 @@ const imageIndexQueue = computed(() => formatLine(
     [
         {
             label: 'Images In Queue',
-            func: (i) => i.images,
-            options: {
-                backgroundColor: primaryColor.value,
-                borderColor: primaryColor.value,
-            }
-        }
+            property: 'images'
+        },
+        {
+            label: 'Chapters In Queue',
+            property: 'chapters'
+        },
+        {
+            label: 'Manga In Queue',
+            property: 'manga'
+        },
     ])
 );
 
