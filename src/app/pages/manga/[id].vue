@@ -7,7 +7,7 @@
                 <Cover :image="cover" type="background" width="100%" height="400px" />
                 <a class="title" :href="manga.url" target="_blank">{{ title }}</a>
                 <div class="drawers margin-top">
-                    <MangaProgress />
+                    <MangaProgress v-model="adminMode" />
                     <Drawer title="Description" v-if="description" default-closed storage-key="manga-desc">
                         <Markdown :content="description" />
                     </Drawer>
@@ -52,6 +52,42 @@
                             </template>
                         </div>
                     </Drawer>
+
+                    <Drawer title="Admin Actions" v-if="adminMode" storage-key="manga-admin">
+                        <div class="margin flex row">
+                            <div class="flex margin-top">
+                                <label class="flex center-vert margin-right">Select a Title: </label>
+                                <SelectBox
+                                    v-model="selectedTitle"
+                                    fill
+                                >
+                                    <option :value="manga.title">{{ manga.title }} (Main Title)</option>
+                                    <option v-for="alt in manga.altTitles" :key="alt" :value="alt">{{ alt }} (Alt Title)</option>
+                                </SelectBox>
+                            </div>
+                            <div class="alt flex margin-top">
+                                <label class="flex center-vert margin-right">Or Input a custom one: </label>
+                                <input class="fill" v-model="selectedTitle" />
+                            </div>
+                            <p class="alt flex margin-top pad-left mute-light">Leave blank to use the original title.</p>
+                            <div class="margin-top pad-left">
+                                <IconBtn
+                                    icon="save"
+                                    text="Save Title"
+                                    color="primary"
+                                    @click="saveTitle"
+                                />
+                                <IconBtn
+                                    v-if="selectedChapters.length > 0"
+                                    icon="save"
+                                    text="Mass Delete Chapters"
+                                    color="danger"
+                                    @click="massSoftDelete"
+                                    other-classes="margin-left"
+                                />
+                            </div>
+                        </div>
+                    </Drawer>
                 </div>
             </aside>
             <div class="content-container flex row fill">
@@ -85,7 +121,29 @@
                     :manga="manga"
                     :sort="params?.sort ?? ChapterOrderBy.Ordinal"
                     :asc="params?.asc ?? true"
-                />
+                    :has-slot="adminMode"
+                >
+                    <template v-if="adminMode" #default="{ chapter }">
+                        <IconBtn
+                            class="cell margin-right"
+                            icon="delete"
+                            color="danger"
+                            inline
+                            @click="softDelete(chapter)"
+                        />
+                        <IconBtn
+                            class="cell margin-right"
+                            :icon="selectedChapters.includes(chapter.chapter.id) ? 'check_box' : 'check_box_outline_blank'"
+                            color="primary"
+                            inline
+                            @click="() => {
+                                selectedChapters.includes(chapter.chapter.id)
+                                    ? selectedChapters = selectedChapters.filter(id => id !== chapter.chapter.id)
+                                    : selectedChapters.push(chapter.chapter.id);
+                            }"
+                        />
+                    </template>
+                </VolumeList>
                 <div class="recommendations flex row" v-show="tab === 'recommendations'">
                     <Loading v-if="recsPending" />
                     <Error v-else-if="recsError" :message="recsError" />
@@ -115,6 +173,7 @@
 
 <script setup lang="ts">
 import { ChapterOrderBy } from '~/models';
+import type { ProgressChapter } from '~/models';
 
 const route = useRoute();
 const api = useMangaApi();
@@ -156,11 +215,15 @@ const recsError = computed(() => {
 
 const recs = computed(() => recsData.value ? api.data(recsData.value) ?? [] : []);
 
-const loading = computed(() => nuxtPending.value || pending.value);
+const rawLoading = ref(false);
+const loading = computed(() => nuxtPending.value || pending.value || rawLoading.value);
 const title = computed(() => extended.value?.displayTitle ?? manga.value?.title ?? 'Manga Not Found!');
 const description = computed(() => manga.value?.description ?? 'Find your next binge on MangaBox!');
 const coverImage = computed(() => cover.value ? wrapUrl(apiUrl, cover.value?.url) : 'https://mangabox.app/broken.png');
 const tab = ref<'chapters' | 'covers' | 'recommendations'>('chapters');
+const adminMode = ref(false);
+const selectedChapters = ref<string[]>([]);
+const selectedTitle = ref('');
 
 useHead({ title });
 
@@ -180,6 +243,35 @@ onMounted(() => setTimeout(() => nextTick(() => {
     if (!canRead.value || (!error.value && manga.value)) return;
     refresh(true);
 }), 200));
+
+const saveTitle = async () => {
+    if (!manga.value) return;
+    rawLoading.value = true;
+
+    const title = selectedTitle.value.trim();
+    await api.promise.manga.displayTitle(manga.value.id, title);
+    rawLoading.value = false;
+    throttled(true);
+}
+
+const softDelete = async (chapter: ProgressChapter) => {
+    if (!manga.value) return;
+    rawLoading.value = true;
+
+    await api.promise.chapter.delete(chapter.chapter.id);
+    rawLoading.value = false;
+    throttled(true);
+}
+
+const massSoftDelete = async () => {
+    if (!manga.value || selectedChapters.value.length === 0) return;
+    rawLoading.value = true;
+
+    await Promise.all(selectedChapters.value.map(id => api.promise.chapter.delete(id)));
+    selectedChapters.value = [];
+    rawLoading.value = false;
+    throttled(true);
+}
 </script>
 
 <style lang="scss" scoped>

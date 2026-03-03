@@ -23,8 +23,7 @@ interface Emits {
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();
 
-const properOptions = props.options.map(opt => !(opt && typeof opt === 'object' && 'name' in opt) ? { name: opt, value: opt } : opt);
-
+const properOptions = computed(() => props.options.map(opt => !(opt && typeof opt === 'object' && 'name' in opt) ? { name: opt, value: opt } : opt));
 const value = computed({
     get: () => props.modelValue ?? [],
     set: (value: Options) => emits('update:modelValue', value)

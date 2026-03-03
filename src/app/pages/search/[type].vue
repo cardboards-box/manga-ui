@@ -154,8 +154,8 @@ const filter = computed(() => parseFilters());
 const searchFilters = ref(parseFilters());
 const { data, error: rawError, pending, refresh } = useAsyncData(
     `search-${route.fullPath}`,
-    async () => await searchManga(searchFilters.value),
-    { watch: [() => route.query] }
+    async () => await searchManga(parseFilters()),
+    { watch: [() => route.query]}
 );
 const results = computed(() => (data.value ? api.data(data.value)?.data : []) ?? []);
 const total = computed(() => (data.value ? api.data(data.value)?.total : 0));

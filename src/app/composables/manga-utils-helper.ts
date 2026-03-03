@@ -204,8 +204,9 @@ export function useMangaUtils() {
         const currentChapter = currentVolume?.chapters.find(c => c.versions.includes(currentChapId));
         if (!currentVolume || !currentChapter || !chapter) return DEFAULT;
 
+        const flatChapIndex = volumes.volumes.flatMap(v => v.chapters).findIndex(c => c.versions.includes(currentChapId));
         const totalProgress = mangaProgress.progressPercentage;
-        const totalSlug = `${mangaProgress.lastReadOrdinal}/${extended.uniqueChapterCount} (${totalProgress.toFixed(2)}%)`;
+        const totalSlug = `${flatChapIndex + 1}/${extended.uniqueChapterCount} (${totalProgress.toFixed(2)}%)`;
 
         const volumeCount = volumes.volumes.length;
         const volumeIndex = volumes.volumes.indexOf(currentVolume) + 1;

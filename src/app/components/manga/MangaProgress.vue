@@ -45,9 +45,9 @@
                 <IconBtn
                     v-if="isAdmin"
                     icon="edit"
-                    text="Admin Edit"
+                    :text="admin ? 'Exit Admin Edit' : 'Admin Edit'"
                     color="shade"
-                    :link="`/manga/${manga.id}/admin`"
+                    @click="admin = !admin"
                 />
             </div>
         </Drawer>
@@ -105,6 +105,22 @@ const {
     forceRefresh, chapters, volumes,
     progressData: stats
 } = useCurrentManga();
+
+const props = defineProps<{
+    modelValue: boolean;
+}>();
+
+const emits = defineEmits<{
+    (e: 'update:modelValue', value: boolean): void;
+}>();
+
+const admin = computed({
+    get: () => isAdmin.value ? props.modelValue : false,
+    set: (value: boolean) => {
+        if (!isAdmin.value) return;
+        emits('update:modelValue', value);
+    }
+});
 
 const chapter = computed(() => chapters.value.find(t => t.chapter.id === progress.value?.lastReadChapterId));
 const chapterId = computed(() => chapter.value?.chapter.id ?? volumes.value?.volumes[0]?.chapters[0]?.versions[0]);
