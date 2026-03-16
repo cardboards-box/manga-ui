@@ -13,7 +13,7 @@
                     @click="favourited = !favourited"
                 />
                 <IconBtn
-                    v-if="canRead && (progress?.progressPercentage ?? 0) > 0"
+                    v-if="canRead && (progress?.entity.progressPercentage ?? 0) > 0"
                     :loading="partialLoading"
                     icon="delete"
                     text="Reset Progress"
@@ -48,6 +48,14 @@
                     :text="admin ? 'Exit Admin Edit' : 'Admin Edit'"
                     color="shade"
                     @click="admin = !admin"
+                />
+                <IconBtn
+                    v-if="canRead"
+                    :loading="partialLoading"
+                    icon="list"
+                    text="Add to list"
+                    color="shade"
+                    @click="doListPopup"
                 />
             </div>
         </Drawer>
@@ -88,11 +96,12 @@
                 <div class="flex margin-top">
                     <Icon class="margin-right">event</Icon>
                     <span class="fill center-vert">Last Opened</span>
-                    <span v-if="!progress?.lastReadAt" class="center-vert">Never</span>
-                    <Date v-else :date="progress.lastReadAt" format="r" utc class="center-vert" />
+                    <span v-if="!progress?.entity.lastReadAt" class="center-vert">Never</span>
+                    <Date v-else :date="progress.entity.lastReadAt" format="r" utc class="center-vert" />
                 </div>
             </div>
         </Drawer>
+        <ListPopup v-model="popupIds" />
     </template>
 
 </template>
@@ -122,13 +131,18 @@ const admin = computed({
     }
 });
 
-const chapter = computed(() => chapters.value.find(t => t.chapter.id === progress.value?.lastReadChapterId));
+const chapter = computed(() => chapters.value.find(t => t.chapter.id === progress.value?.entity.lastReadChapterId));
 const chapterId = computed(() => chapter.value?.chapter.id ?? volumes.value?.volumes[0]?.chapters[0]?.versions[0]);
 const link = computed(() => chapterId.value ? `/chapter/${chapterId.value}?page=${chapter.value?.progress?.pageOrdinal ?? 1}` : undefined);
+const popupIds = ref<string[]>([]);
 
 const copyUrl = () => {
     const baseUrl = `${window.location.protocol}//${window.location.host}/manga/${manga.value?.id}`;
     navigator.clipboard.writeText(baseUrl);
+}
+
+const doListPopup = () => {
+    popupIds.value = manga.value?.id ? [manga.value.id] : [];
 }
 
 </script>

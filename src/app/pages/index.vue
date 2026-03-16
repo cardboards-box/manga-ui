@@ -6,7 +6,7 @@
         :pending="pending"
         :noresults="!!results && results.length === 0"
         :content-ratings="contentRatings"
-        @headerstuck="(v) => stuck = v"
+        v-model="stuck"
         @back="() => results = []"
         v-else-if="results.length > 0 || pending"
     >

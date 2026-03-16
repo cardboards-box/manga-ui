@@ -14,11 +14,13 @@ import type {
     RespMetadataTags, RespMetadataSource,
     RespReverseResult, MangaSearchFilter,
     RespMangaRecommendations,
+    RespList, RespListSearch, RespLists,
 
     ComicFormat, ContentRating,
     RelationshipType, ChapterOrderBy,
     VolumeState, MangaOrderBy,
-    MangaState, RespStats
+    MangaState, RespStats,
+    ListSearchFilter, ListType, ListOrderBy
 } from '../models';
 
 type NuxtApiHandle = ReturnType<typeof useApiHelper>;
@@ -92,6 +94,8 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             mangaOrderBy: () => get<RespMetadataEnums<MangaOrderBy>>('metadata/manga-order-by'),
             mangaState: () => get<RespMetadataEnums<MangaState>>('metadata/manga-state'),
             downloadFormat: () => get<RespMetadataEnums<ComicFormat>>('metadata/download-format'),
+            listType: () => get<RespMetadataEnums<ListType>>('metadata/list-type'),
+            listOrderBy: () => get<RespMetadataEnums<ListOrderBy>>('metadata/list-order-by'),
             tags: () => get<RespMetadataTags>('metadata/manga-tag'),
             sources: () => get<RespMetadataSource>('metadata/sources'),
             stats: () => get<RespStats>(`metadata/stats`)
@@ -106,6 +110,16 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
         reverse: {
             url: (url: string) => get<RespReverseResult>('reverse-search', { url }),
             file: (file: File) => postFile<RespReverseResult>('reverse-search', file)
+        },
+        list: {
+            fetch: (id: string) => get<RespList>(`list/${id}`),
+            all: () => get<RespLists>('list/all'),
+            create: (name: string, isPublic: boolean, description?: string) => post<RespList>('list', { name, isPublic, description }),
+            edit: (id: string, isPublic: boolean, description?: string) => put<RespList>(`list/${id}`, { isPublic, description }),
+            add: (listId: string, mangaId: string) => get<RespList>(`list/${listId}/${mangaId}`),
+            remove: (listId: string, mangaId: string) => del<RespList>(`list/${listId}/${mangaId}`),
+            search: (filter: ListSearchFilter) => post<RespListSearch>('list/search', filter),
+            searchUrl: (filter: ListSearchFilter) => get<RespListSearch>('list', filter)
         }
     }
 }

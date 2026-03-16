@@ -6,6 +6,7 @@ import type {
     MbMangaRelationship, MbMangaTag,
     MbPerson, MbProfile,
     MbSource, MbTag,
+    MbList, MbListItem, MbListExt,
     RelationshipType
 } from './db';
 
@@ -27,6 +28,9 @@ type RelatedProfile = MbRelated<'MbProfile', MbProfile>;
 type RelatedSource = MbRelated<'MbSource', MbSource>;
 type RelatedTag = MbRelated<'MbTag', MbTag>;
 type RelatedRelatedPerson = MbRelated<'MbRelatedPerson', MbRelatedPerson>;
+type RelatedList = MbRelated<'MbList', MbList>;
+type RelatedListItem = MbRelated<'MbListItem', MbListItem>;
+type RelatedListExt = MbRelated<'MbListExt', MbListExt>;
 
 export type MangaBoxRelationship =
     RelatedChapter |
@@ -41,7 +45,10 @@ export type MangaBoxRelationship =
     RelatedProfile |
     RelatedSource |
     RelatedTag |
-    RelatedRelatedPerson;
+    RelatedRelatedPerson |
+    RelatedList |
+    RelatedListItem |
+    RelatedListExt;
 
 export interface MangaBoxType<T, TRelated extends MbRelated = MangaBoxRelationship> {
     entity: T;
@@ -53,11 +60,14 @@ export interface MbRelatedPerson extends MbPerson {
 }
 
 export type MbTypeChapter = MangaBoxType<MbChapter, RelatedManga | RelatedSource | RelatedImage>;
-export type MbTypeProgress = MangaBoxType<MbMangaProgress, RelatedChapterProgress>;
+export type MbTypeProgress = MangaBoxType<MbMangaProgress, RelatedChapterProgress | RelatedList>;
+export type MbTypeProgressMulti = MangaBoxType<MbMangaProgress, RelatedList>;
 export type MbTypeImage = MangaBoxType<MbImage, RelatedChapter | RelatedManga | RelatedSource>;
 export type MbTypeManga = MangaBoxType<MbManga, RelatedSource | RelatedRelatedPerson | RelatedTag | RelatedMangaExt | RelatedImage>;
 export type MbTypeMangaSearch = MangaBoxType<MbManga, RelatedSource | RelatedTag | RelatedMangaExt | RelatedImage>;
 export type MbTypeMangaExt = MangaBoxType<MbMangaExt, RelatedManga | RelatedChapter | RelatedMangaProgress | RelatedChapterProgress>;
+export type MbTypeList = MangaBoxType<MbList, RelatedListItem | RelatedTag | RelatedImage | RelatedListExt>;
+export type MbTypeListSearch = MangaBoxType<MbList, RelatedTag | RelatedImage | RelatedListExt>;
 
 export interface VolumeChapter {
     open?: boolean;
@@ -135,6 +145,19 @@ export enum MangaState {
     Bookmarked = 3
 }
 
+export enum ListOrderBy {
+    CreatedAt = 0,
+    UpdatedAt = 1,
+    Name = 2,
+    IsPublic = 3,
+    Random = 4
+}
+
+export enum ListType {
+    Mine = 0,
+    Public = 1,
+}
+
 export interface SearchFiler<T = MangaOrderBy | ChapterOrderBy> {
     page?: number;
     size?: number;
@@ -162,6 +185,11 @@ export interface MangaSearchFilter extends SearchFiler<MangaOrderBy> {
     cLastBefore?: Date | string;
     cFirstAfter?: Date | string;
     cFirstBefore?: Date | string;
+    lists?: string[];
+}
+
+export interface ListSearchFilter extends SearchFiler<ListOrderBy> {
+    types?: ListType[];
 }
 
 export interface Stats {
@@ -260,3 +288,5 @@ export const STATE_ROLLUP = [
         readRequired: false,
     }
 ] as const;
+
+export type StateRollup = typeof STATE_ROLLUP[number];

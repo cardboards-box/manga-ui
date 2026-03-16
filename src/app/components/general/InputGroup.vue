@@ -30,6 +30,7 @@
             @click="() => open = !open"
         />
         <IconBtn
+            v-if="hasButton"
             :icon="icon"
             inline
             :link="link"
@@ -68,6 +69,7 @@ const props = withDefaults(defineProps<{
 const isDrawer = computed(() => isTrue(props.isDrawer) || !!slots['default']);
 const isStuck = computed(() => isTrue(props.stuck));
 const isDisabled = computed(() => isTrue(props.disabled));
+const hasButton = computed(() => !!getCurrentInstance()?.vnode.props?.onSearch);
 
 const emits = defineEmits<{
     (e: 'update:modelValue', v: string | undefined): void;

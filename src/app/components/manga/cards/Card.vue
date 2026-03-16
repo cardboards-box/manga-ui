@@ -1,127 +1,70 @@
 <template>
-    <div class="manga" :class="actStyle">
-        <Cover :manga="manga" type="link" />
+    <div class="card" :class="style">
+        <Cover
+            type="link"
+            :image="coverImage"
+            :url="coverUrl"
+            :manga="coverManga"
+            :link="link"
+        />
         <div class="details masked-overflow">
-            <div class="title">
-                <NuxtLink :to="link">{{ displayTitle }}</NuxtLink>
-                <template v-if="canRead">
-                    <Icon title="Completed" v-if="completed">check_circle</Icon>
-                    <Icon title="In Progress" v-if="inProgress">autorenew</Icon>
-                    <IconBtn
-                        v-if="canRead"
-                        inline
-                        :icon="favorited ? 'heart_minus' : 'favorite'"
-                        icon-size=""
-                        :loading="favLoading"
-                        @click="toggleFavorite"
-                    />
-                </template>
-            </div>
-            <slot />
-            <div class="source" v-if="progPerc !== 0">
-                <span>
-                    <b>Progress:</b> &nbsp;
-                    {{ progPerc.toFixed(2) }}%&nbsp;
-                    - <Date :date="actProgress?.lastReadAt" utc />
-                </span>
-            </div>
-            <template v-if="ext">
-                <div class="source">
-                    <span>
-                        <b>Latest Chapter:</b>&nbsp;
-                        <Date :date="ext.lastChapterCreated" utc />
-                    </span>
-                </div>
-                <div class="source">
-                    <span>
-                        <b>Stats:</b>&nbsp;
-                        {{ ext.chapterCount }} Chapter{{ ext.chapterCount !== 1 ? 's' : '' }}
-                        <span v-if="ext.volumeCount > 0">&nbsp;in {{ ext.volumeCount }} Volume{{ ext.volumeCount !== 1 ? 's' : '' }}</span>
-                        <span v-if="ext.daysBetweenUpdates > 0">&nbsp;- Updating every {{ ext.daysBetweenUpdates.toFixed(2) }} days</span>
-                    </span>
-                </div>
-            </template>
-            <div class="source">
-                <span>
-                    <b>Source:</b>&nbsp; <a :href="manga.entity.url">{{ source?.name }}</a>
-                </span>
-            </div>
-            <div class="tags">
-                <div class="header">Tags: </div>
-                <div
-                    v-if="rating"
-                    class="tag"
-                    :class="{
-                        'nsfw': rating.value !== ContentRating.Safe
-                    }"
-                >{{ rating.name }}</div>
+            <header>
                 <NuxtLink
-                    class="tag"
-                    v-for="tag of tags"
-                    :to="'/search/all?include=' + tag.id"
+                    v-if="hasLink"
+                    :to="link"
+                    :target="external ? '_blank' : '_self'"
+                    class="title"
                 >
-                    {{ tag.name }}
+                    {{ title }}
                 </NuxtLink>
-            </div>
+                <div v-else class="title">{{ title }}</div>
+                <slot name="title" />
+            </header>
+            <slot />
             <div class="description">
-                <Markdown :content="manga.entity.description" />
+                <Markdown v-if="description" :content="description" />
+                <slot name="description" />
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ContentRating, ListStyle } from '~/models';
-import type { EnumDescription, MbMangaProgress, MbTypeManga, MbTypeMangaSearch } from '~/models';
+import type {
+    ListStyle, MbImage,
+    MbTypeManga, MbTypeMangaSearch
+} from '~/models';
 
-const { listStyle } = useAppSettings();
-const { canRead } = useAuthHelper();
-const { getRelateds, getRelated } = useMangaUtils();
-const api = useMangaApi();
-const progressCache = useProgressCacheHelper();
+type CoverOptions = MbImage | MbTypeManga | MbTypeMangaSearch | string;
 
 const props = defineProps<{
-    manga: MbTypeManga | MbTypeMangaSearch;
-    overrideStyle?: ListStyle;
-    contentRatings: EnumDescription<ContentRating>[];
+    cover?: CoverOptions;
+    style: ListStyle;
+    title: string;
+    link?: string;
+    description?: string;
 }>();
 
-const _localProg = ref<MbMangaProgress | undefined>();
-const cache = computed(() => progressCache.cache.value[props.manga.entity.id]);
-const actProgress = computed(() => _localProg.value ?? cache.value);
-const favLoading = ref(false);
+const hasLink = computed(() => !!props.link);
+const external = computed(() => hasLink.value && props.link!.toLocaleLowerCase().startsWith('http'));
 
-const tags = computed(() => getRelateds(props.manga, 'MbTag').toSorted((a, b) => a.name.localeCompare(b.name)));
-const ext = computed(() => getRelated(props.manga, 'MbMangaExt'));
-const source = computed(() => getRelated(props.manga, 'MbSource'));
-const actStyle = computed(() => props.overrideStyle ?? listStyle.value);
+const coverImage = computed(() => props.cover &&
+    typeof props.cover !== 'string' &&
+    'ordinal' in props.cover ? props.cover : undefined);
 
-const favorited = computed(() => actProgress.value?.favorited);
-const completed = computed(() => actProgress.value?.isCompleted);
-const progPerc = computed(() => actProgress.value?.progressPercentage ?? 0);
-const inProgress = computed(() => progPerc.value > 0 && progPerc.value < 100);
-const rating = computed(() => props.contentRatings.find(t => t.value === props.manga.entity.contentRating));
-const displayTitle = computed(() => ext.value?.displayTitle ?? props.manga.entity.title);
+const coverUrl = computed(() => props.cover &&
+    typeof props.cover === 'string' ? props.cover : undefined);
 
-const link = computed(() => canRead.value ? `/manga/${props.manga.entity.id}` : props.manga.entity.url);
-
-const toggleFavorite = async () => {
-    if (!canRead.value || !actProgress.value) return;
-
-    favLoading.value = true;
-    const result = await (favorited.value
-        ? api.promise.manga.unfavorite(props.manga.entity.id)
-        : api.promise.manga.favorite(props.manga.entity.id));
-    favLoading.value = false;
-    if (!api.isSuccess(result)) return;
-
-    _localProg.value = api.data(result)?.entity;
-    progressCache.clear(props.manga.entity.id);
-}
+const coverManga = computed(() => {
+    if (!props.cover) return undefined;
+    if (typeof props.cover === 'string') return undefined;
+    if ('ordinal' in props.cover) return undefined;
+    return props.cover;
+});
 </script>
 
 <style lang="scss" scoped>
-.manga {
+.card {
     margin-top: var(--margin);
     display: flex;
     flex-flow: row;
@@ -152,7 +95,7 @@ const toggleFavorite = async () => {
         overflow: hidden;
         transition: all 250ms;
 
-        .title {
+        header {
             display: flex;
             flex-flow: row;
             font-size: clamp(16px, 3vw, 1.5em);
@@ -160,31 +103,28 @@ const toggleFavorite = async () => {
             align-items: center;
             transition: all 250ms;
 
-            a {
+            .title {
                 flex: 1;
                 font-weight: bolder;
             }
         }
 
-        .tags {
-            .header {
-                display: inline-block;
-                font-weight: bold;
-            }
-
-            .tag {
-                display: inline-block;
-                padding: 3px 5px;
-                margin: 3px;
-                background-color: var(--color-default);
-                border: 1px solid var(--bg-color-offset);
-                border-radius: 3px;
-
-                &.nsfw {
-                    background-color: var(--color-warning);
-                    text-transform: capitalize;
-                }
-            }
+        &.masked-overflow {
+            --scrollbar-width: 0px;
+            --mask-height: 32px;
+            --mask-image-content: linear-gradient(
+                to bottom,
+                black,
+                black calc(100% - var(--mask-height)),
+                transparent
+            );
+            --mask-size-content: calc(100% - var(--scrollbar-width)) 100%;
+            --mask-image-scrollbar: linear-gradient(black, black);
+            --mask-size-scrollbar: var(--scrollbar-width) 100%;
+            mask-image: var(--mask-image-content), var(--mask-image-scrollbar);
+            mask-size: var(--mask-size-content), var(--mask-size-scrollbar);
+            mask-position: 0 0, 100% 0;
+            mask-repeat: no-repeat, no-repeat;
         }
     }
 
@@ -198,13 +138,10 @@ const toggleFavorite = async () => {
 
         .details {
             max-height: 100px;
-            .title {
-                font-size: 1rem;
-                a { font-weight: bold; }
-            }
 
-            .tags, .source {
-                display: none;
+            header {
+                font-size: 1rem;
+                .title { font-weight: bold; }
             }
         }
     }
@@ -233,7 +170,7 @@ const toggleFavorite = async () => {
             max-width: 100%;
             margin: 0;
 
-            .title {
+            header {
                 flex: 1;
                 font-size: 1.25rem;
                 color: #fff;
@@ -241,15 +178,17 @@ const toggleFavorite = async () => {
                 padding: var(--margin);
                 border-radius: var(--margin);
                 overflow: hidden;
-                text-shadow: 0px 0px 10px #000;
+                text-shadow: 0px 0px 5px #000,
+                    0px 0px 10px #000,
+                    0px 0px 20px #000;
 
-                a {
+                .title {
                     font-weight: bold;
                     color: #fff;
                 }
             }
 
-            .tags, .source, .description {
+            .description {
                 display: none;
             }
         }
@@ -263,7 +202,7 @@ const toggleFavorite = async () => {
                 }
             }
 
-            .details .title {
+            .details header .title {
                 text-shadow: 0px 0px 6px #000;
             }
         }
@@ -272,23 +211,5 @@ const toggleFavorite = async () => {
     &:hover .image.porn {
         filter: blur(0);
     }
-}
-
-.masked-overflow {
-    --scrollbar-width: 0px;
-    --mask-height: 32px;
-    --mask-image-content: linear-gradient(
-        to bottom,
-        black,
-        black calc(100% - var(--mask-height)),
-        transparent
-    );
-    --mask-size-content: calc(100% - var(--scrollbar-width)) 100%;
-    --mask-image-scrollbar: linear-gradient(black, black);
-    --mask-size-scrollbar: var(--scrollbar-width) 100%;
-    mask-image: var(--mask-image-content), var(--mask-image-scrollbar);
-    mask-size: var(--mask-size-content), var(--mask-size-scrollbar);
-    mask-position: 0 0, 100% 0;
-    mask-repeat: no-repeat, no-repeat;
 }
 </style>

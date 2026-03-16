@@ -1,4 +1,4 @@
-import type { ApiResult, BoxedArray, BoxedError, Boxed } from "~/models";
+import type { ApiResult, BoxedError, Boxed } from "~/models";
 
 type CacheItem<T> = {
     value?: T[];
@@ -19,7 +19,9 @@ export function useCacheHelper() {
         'downloadFormat': () => api.promise.metaData.downloadFormat(),
         'chapterOrderBy': () => api.promise.metaData.chapterOrderBy(),
         'relationshipType': () => api.promise.metaData.relationshipType(),
-        'volumeState': () => api.promise.metaData.volumeState()
+        'volumeState': () => api.promise.metaData.volumeState(),
+        'listType': () => api.promise.metaData.listType(),
+        'listOrderBy': () => api.promise.metaData.listOrderBy()
     };
 
     type Keys = keyof typeof CACHE_ITEMS;

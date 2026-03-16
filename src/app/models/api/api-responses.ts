@@ -1,11 +1,12 @@
 import type { Boxed, BoxedArray, BoxedPaged } from './base';
-import type { MbMangaExt, MbProfile, MbTag, MbSource, MbMangaProgress } from './db';
+import type { MbMangaExt, MbProfile, MbTag, MbSource, MbList } from './db';
 import type {
     MbTypeChapter, MbTypeImage,
     MbTypeMangaSearch, MbTypeProgress,
-    MbTypeManga,
+    MbTypeManga, MbTypeList, MbTypeListSearch,
     MangaVolumes,
     EnumDescription, Stats,
+    MbTypeProgressMulti,
 } from './composites';
 
 export interface RespAuthResolve extends Boxed<{
@@ -19,7 +20,7 @@ export interface RespChapter extends Boxed<MbTypeChapter> { }
 
 export interface RespProgress extends Boxed<MbTypeProgress> { }
 
-export interface RespProgresses extends BoxedArray<MbMangaProgress> { }
+export interface RespProgresses extends BoxedArray<MbTypeProgressMulti> { }
 
 export interface RespImage extends Boxed<MbTypeImage> { }
 
@@ -34,6 +35,12 @@ export interface RespMangaChapters extends Boxed<MangaVolumes> { }
 export interface RespMangaRecompute extends BoxedArray<MbMangaExt> { }
 
 export interface RespMangaSet extends Boxed<MbMangaExt> { }
+
+export interface RespList extends Boxed<MbTypeList> { }
+
+export interface RespLists extends BoxedArray<MbList> { }
+
+export interface RespListSearch extends BoxedPaged<MbTypeListSearch> { }
 
 export interface ReqMangaLoad {
     url: string;

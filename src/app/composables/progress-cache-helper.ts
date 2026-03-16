@@ -1,8 +1,8 @@
-import type { MbMangaProgress } from "~/models";
+import type { MbTypeProgressMulti } from "~/models";
 
 type Cache = {
     [key: string]: {
-        data: MbMangaProgress | undefined;
+        data: MbTypeProgressMulti | undefined;
         updated: number;
     }
 }
@@ -31,16 +31,28 @@ export function useProgressCacheHelper() {
         tap();
     }
 
-    const get = (mangaId: string) => {
-        if (!cache.value[mangaId]) {
+    function get(id: string) : ComputedRef<MbTypeProgressMulti | undefined>;
+    function get(ids: string[]): ComputedRef<(MbTypeProgressMulti)[]>;
+    function get(ids: string | string[]) {
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+
+        for(const mangaId of ids) {
+            if (cache.value[mangaId]) continue;
+
             cache.value[mangaId] = {
                 data: undefined,
                 updated: 0
             };
-            tap();
         }
 
-        return computed(() => cache.value[mangaId]?.data);
+        tap();
+
+        if (ids.length === 1)
+            return computed(() => cache.value[ids[0]!]?.data);
+
+        return computed(() => ids.map(id => cache.value[id]?.data).filter(t => !!t));
     }
 
     const expired = (value: number) => {
@@ -70,14 +82,14 @@ export function useProgressCacheHelper() {
 
         const progs = api.data(fetched) ?? [];
         for(const prog of progs) {
-            if (!cache.value[prog.mangaId])
-                cache.value[prog.mangaId] = {
+            if (!cache.value[prog.entity.mangaId])
+                cache.value[prog.entity.mangaId] = {
                     data: undefined,
                     updated: 0
                 };
 
-            cache.value[prog.mangaId]!.data = prog;
-            cache.value[prog.mangaId]!.updated = Date.now();
+            cache.value[prog.entity.mangaId]!.data = prog;
+            cache.value[prog.entity.mangaId]!.updated = Date.now();
         }
 
         trigger.value = !trigger.value;
@@ -104,7 +116,7 @@ export function useProgressCacheHelper() {
         clear,
         cache: computed(() => {
             trigger.value;
-            const output: Record<string, MbMangaProgress> = {};
+            const output: Record<string, MbTypeProgressMulti> = {};
             for (const key in cache.value) {
                 if (!cache.value[key]?.data) continue;
                 output[key] = cache.value[key]!.data!;

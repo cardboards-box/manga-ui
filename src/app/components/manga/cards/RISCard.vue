@@ -1,5 +1,5 @@
 <template>
-    <Card
+    <MangaCard
         v-if="manga.closest"
         :manga="manga.closest"
         :override-style="overrideStyle"
@@ -21,7 +21,7 @@
                 </span>
             </span>
         </div>
-    </Card>
+    </MangaCard>
     <div v-else-if="manga.source === 'sauce-nao'" class="ris-card" :class="actStyle">
         <Image
             v-if="manga.image"
@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import { ListStyle } from '~/models';
-import type { ImageSearchResultType, EnumDescription, ContentRating, MbMangaProgress } from '~/models';
+import type { ImageSearchResultType, EnumDescription, ContentRating } from '~/models';
 
 const { listStyle } = useAppSettings();
 const { proxy } = useMangaUtils();

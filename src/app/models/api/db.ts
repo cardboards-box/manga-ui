@@ -195,3 +195,21 @@ export interface MbTag extends MbDbObject {
     description?: string;
     sourceId: string;
 }
+
+export interface MbList extends MbDbObject {
+    name: string;
+    description?: string;
+    isPublic: boolean;
+}
+
+export interface MbListItem extends MbDbObject {
+    listId: string;
+    mangaId: string;
+}
+
+export interface MbListExt extends MbDbObject {
+    listId: string;
+    coverId?: string;
+    mangaCount: number;
+    clonedCount: number;
+}

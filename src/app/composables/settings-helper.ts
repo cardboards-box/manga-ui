@@ -139,20 +139,31 @@ export const useSettingsHelper = () => {
     }
 
     const addParams = (url: string, param?: Params | undefined) => {
+        const append = (key: string, value: any, parameters: string[]) => {
+            if (typeof value === 'string' && value === '') return;
+            if (typeof value === 'number' && isNaN(value)) return;
+            if (value === undefined || value === null) return;
+
+            key = encodeURIComponent(key);
+            value = encodeURIComponent(value!.toString());
+
+            parameters.push(`${key}=${value}`);
+        }
+
         if (!param) return url;
 
-        const parameters = [];
+        const parameters: string[] = [];
         for (const key in param) {
             if (param[key] === undefined || param[key] === null) continue;
 
             if (Array.isArray(param[key])) {
                 for (const item of param[key]) {
-                    parameters.push(`${encodeURIComponent(key)}=${encodeURIComponent(item!.toString())}`);
+                    append(key, item, parameters);
                 }
                 continue;
             }
 
-            parameters.push(`${encodeURIComponent(key)}=${encodeURIComponent(param[key]!.toString())}`);
+            append(key, param[key], parameters);
         }
 
         if (url.indexOf('?') !== -1)

@@ -1,6 +1,6 @@
 <template>
     <SearchList
-        :items="manga"
+        :items="lists"
         :pending="pending"
         capitalize
         :title="title"
@@ -16,23 +16,7 @@
         :styles="listStyle"
     >
         <template #default="{ item }">
-            <MangaCard
-                v-if="'entity' in item"
-                :manga="item"
-                :content-ratings="contentRatings"
-            >
-                <template #title>
-                    <slot name="card-title" :manga="item" />
-                </template>
-                <template #default>
-                    <slot name="card-body" :manga="item" />
-                </template>
-            </MangaCard>
-            <RISCard
-                v-else
-                :manga="item"
-                :content-ratings="contentRatings"
-            />
+            <ListCard :list="item" />
         </template>
 
         <template #extra-buttons>
@@ -50,21 +34,15 @@
         <template #header>
             <slot />
         </template>
+
     </SearchList>
 </template>
 
 <script lang="ts" setup>
 import { ListStyle } from '~/models';
-import type {
-    booleanish, EnumDescription,
-    ImageSearchResultType,
-    MbTypeManga, MbTypeMangaSearch,
-    ContentRating
-} from '~/models';
+import type { booleanish, MbTypeList, MbTypeListSearch } from '~/models';
 
 const { listStyle } = useAppSettings();
-const { canRead } = useAuthHelper();
-const progress = useProgressCacheHelper();
 
 const emits = defineEmits<{
     (e: 'onscrolled'): void;
@@ -75,7 +53,7 @@ const emits = defineEmits<{
 }>();
 
 const props = defineProps<{
-    manga: (MbTypeManga | MbTypeMangaSearch | ImageSearchResultType)[],
+    lists: (MbTypeList | MbTypeListSearch)[];
     pending?: booleanish;
     title: string;
     pagination?: {
@@ -83,8 +61,7 @@ const props = defineProps<{
         pages: number;
         size: number;
         total: number;
-    },
-    contentRatings: EnumDescription<ContentRating>[];
+    };
     modelValue?: boolean;
 }>();
 
@@ -106,34 +83,6 @@ const styles = [
     { icon: 'expand', style: ListStyle.Expanded },
     { icon: 'book', style: ListStyle.Album }
 ];
-
-const loadProgress = async (key?: string) => {
-    if (!canRead.value || !import.meta.client) return;
-
-    const mids = [... new Set(props.manga.map(t => {
-        if ('entity' in t) return t.entity.id;
-        return t.closest?.entity.id!;
-    }).filter(t => !!t))];
-
-    if (!mids.length) return;
-
-    progress.load(mids);
-}
-
-watch(() => props.manga, () => {
-    loadProgress('props.manga');
-}, { deep: true });
-
-watch(canRead, () => loadProgress('canRead'));
-
-onMounted(() => {
-    loadProgress('onMounted');
-});
-
-onUnmounted(() => {
-    progress.clear();
-});
-
 </script>
 
 <style lang="scss" scoped>
@@ -160,3 +109,4 @@ onUnmounted(() => {
     }
 }
 </style>
+

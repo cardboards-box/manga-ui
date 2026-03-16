@@ -1,5 +1,5 @@
 import { ChapterOrderBy } from '~/models';
-import type { MangaVolumes, MbTypeManga, MbTypeChapter, MbChapter, MbTypeProgress, ApiResult, RespManga, RespMangaChapters } from '~/models';
+import type { MangaVolumes, MbTypeManga, MbTypeChapter, MbChapter, MbTypeProgress, ApiResult, RespManga, RespMangaChapters, RespProgress } from '~/models';
 
 const CACHE_KEY = 'manga-cache-';
 
@@ -26,6 +26,7 @@ export function useCurrentManga() {
     const manga = useState<MbTypeManga | undefined>(CACHE_KEY + 'manga', () => undefined);
     const volumes = useState<MangaVolumes | undefined>(CACHE_KEY + 'volumes', () => undefined);
     const chapters = useState<Record<string, MbTypeChapter>>(CACHE_KEY + 'chapters', () => ({}));
+    const progress = useState<MbTypeProgress | undefined>(CACHE_KEY + 'progress', () => undefined);
 
     const extended = computed(() => manga.value ? getRelated(manga.value, 'MbMangaExt') : undefined);
     const covers = computed(() => manga.value ? getRelateds(manga.value, 'MbImage').toSorted((a,b) => b.ordinal - a.ordinal) : []);
@@ -49,16 +50,46 @@ export function useCurrentManga() {
     }
 
     const fetch = async (pars: Params, force: boolean = false) => {
+        const progProm = async () => {
+            if (!canRead.value) return undefined;
+
+            try {
+                const result = await api.promise.progress.fetch(pars.id);
+                if (!api.isSuccess(result)) return undefined;
+                return api.data(result);
+            } catch (ex) {
+                console.error('Error fetching progress:', ex);
+                return undefined;
+            }
+        }
+
+        const volumesProm = async (): Promise<MangaVolumes> => {
+            const def = { chapters: {}, volumes: [] };
+            try {
+                const result = await api.promise.manga.chapters(pars.id, pars.sort, pars.asc);
+                if (!api.isSuccess(result)) return def;
+                return api.data(result);
+
+            } catch (ex) {
+                console.error('Error fetching volumes:', ex);
+                return def;
+            }
+        }
+
         const doFetch = async (force: boolean)
-            : Promise<[ApiResult<RespManga>, ApiResult<RespMangaChapters>]> => {
+            : Promise<[ApiResult<RespManga>, MangaVolumes, MbTypeProgress | undefined]> => {
             if (!force) return await Promise.all([
                 api.promise.manga.fetch(pars.id),
-                api.promise.manga.chapters(pars.id, pars.sort, pars.asc)
+                volumesProm(),
+                progProm()
             ]);
 
             const manga = await api.promise.manga.refresh(pars.id);
-            const volumes = await api.promise.manga.chapters(pars.id, pars.sort, pars.asc);
-            return [manga, volumes];
+            const [volumes, progress] = await Promise.all([
+                volumesProm(),
+                progProm()
+            ]);
+            return [manga, volumes, progress];
         };
 
         pending.value = true;
@@ -68,16 +99,17 @@ export function useCurrentManga() {
 
         params.value = pars;
         unauthed.value = !import.meta.client || !canRead.value;
-        const [mres, vres] = await doFetch(force);
+        const [mres, vres, prog] = await doFetch(force);
 
         invalidate.value = false;
-        if (!mres || !vres || !api.isSuccess(mres) || !api.isSuccess(vres)) {
-            error.value = [api.errorMessage(mres), api.errorMessage(vres)]
+        if (!mres || !vres || !api.isSuccess(mres)) {
+            error.value = [api.errorMessage(mres)]
                 .filter(t => !!t).join('; ') || 'An error occurred while loading manga!';
         }
 
         manga.value = api.data(mres);
-        volumes.value = api.data(vres);
+        volumes.value = vres;
+        progress.value = prog;
         triggered.value = !triggered.value;
         pending.value = false;
         return manga.value;
@@ -118,6 +150,7 @@ export function useCurrentManga() {
             if (!api.isSuccess(res)) return;
 
             mergeProgress(volumes.value, api.data(res));
+            progress.value = api.data(res);
         }
     });
 
@@ -130,6 +163,7 @@ export function useCurrentManga() {
         if (!api.isSuccess(res)) return;
 
         mergeProgress(volumes.value, api.data(res));
+        progress.value = api.data(res);
     }
 
     const markAsRead = async () => {
@@ -141,6 +175,7 @@ export function useCurrentManga() {
         if (!api.isSuccess(res)) return;
 
         mergeProgress(volumes.value, api.data(res));
+        progress.value = api.data(res);
     }
 
     const forceRefresh = () => refresh(true, true);
@@ -159,7 +194,7 @@ export function useCurrentManga() {
         bookmarks: computed(() => Object.entries(volumes.value?.chapters ?? {})
             .map(([_, chapter]) => chapter)
             .filter(progress => progress && progress.progress && progress.progress.bookmarks.length > 0)),
-        progress: computed(() => volumes.value?.progress),
+        progress: computed(() => progress.value),
         error: computed(() => error.value),
         params: computed(() => params.value),
         pending: computed(() => pending.value),

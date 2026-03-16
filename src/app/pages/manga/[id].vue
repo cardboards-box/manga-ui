@@ -117,6 +117,7 @@
                 <VolumeList
                     v-show="tab === 'chapters'"
                     v-if="canRead && volumes"
+                    :pending="pending"
                     :volumes="volumes"
                     :manga="manga"
                     :sort="params?.sort ?? ChapterOrderBy.Ordinal"
@@ -145,17 +146,17 @@
                     </template>
                 </VolumeList>
                 <div class="recommendations flex row" v-show="tab === 'recommendations'">
-                    <Loading v-if="recsPending" />
-                    <Error v-else-if="recsError" :message="recsError" />
-                    <CardList v-else
-                        title="Recommended Manga"
-                        hide-back
-                        :manga="recs"
-                        capitalize
-                        allow-reload
-                        @reload="() => recsRefresh()"
-                        :content-ratings="contentRatings"
-                    />
+                    <ClientOnly>
+                        <Loading v-if="recsPending" />
+                        <Error v-else-if="recsError" :message="recsError" />
+                        <CardList v-else
+                            title="Recommended Manga"
+                            :manga="recs"
+                            capitalize
+                            @reload="() => recsRefresh()"
+                            :content-ratings="contentRatings"
+                        />
+                    </ClientOnly>
                 </div>
                 <div class="covers flex row wrap" v-show="tab === 'covers'">
                     <Cover

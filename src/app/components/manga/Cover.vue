@@ -1,12 +1,12 @@
 <template>
-<Image
-    :src="uri"
-    :type="itemType"
-    :link="actualLink"
-    :class="{ 'porn': isPorn, 'rounded': true }"
-    :style="styles"
-    :size="{ width: width, height: height }"
-/>
+    <Image
+        :src="uri"
+        :type="itemType"
+        :link="actualLink"
+        :class="{ 'porn': isPorn, 'rounded': true }"
+        :style="styles"
+        :size="{ width: width, height: height }"
+    />
 </template>
 
 <script setup lang="ts">

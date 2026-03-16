@@ -25,7 +25,8 @@
             no-boarder
         />
     </header>
-    <Loading v-if="volumes.length === 0" />
+    <Loading v-if="loading" />
+    <Error v-else-if="volumes.length === 0" message="Manga has no chapters!" />
     <template v-else>
         <Volume
             v-for="(vol, index) in volumes"
@@ -41,11 +42,15 @@
 </template>
 
 <script setup lang="ts">
-import { type MangaVolumes, ChapterOrderBy, type booleanish, type MbManga } from '~/models';
+import { ChapterOrderBy } from '~/models';
+import type { MangaVolumes, booleanish, MbManga } from '~/models';
+
+const { isTrue } = useUtils();
 
 const props = defineProps<{
     sort?: ChapterOrderBy;
     asc?: boolean;
+    pending?: booleanish;
     manga: MbManga;
     volumes: MangaVolumes;
     reloading?: boolean;
@@ -57,6 +62,7 @@ const actAsc = computed(() => props.asc ?? true);
 
 const volumes = computed(() => props.volumes?.volumes ?? []);
 const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
+const loading = computed(() => isTrue(props.pending));
 
 const sorts : { key: ChapterOrderBy, icon: string }[] = [
     { key: ChapterOrderBy.Ordinal, icon: 'list' },
