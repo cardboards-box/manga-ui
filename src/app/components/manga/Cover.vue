@@ -1,5 +1,6 @@
 <template>
     <Image
+        v-if="!hasSlot"
         :src="uri"
         :type="itemType"
         :link="actualLink"
@@ -7,6 +8,22 @@
         :style="styles"
         :size="{ width: width, height: height }"
     />
+    <div
+        class="image-container flex"
+        :style="actStyles"
+        v-else
+    >
+        <Image
+            :src="uri"
+            :type="itemType"
+            :link="actualLink"
+            :class="{ 'porn': isPorn, 'rounded': true }"
+            :size="{ width: width, height: height }"
+        />
+        <div class="floating-buttons flex row">
+            <slot />
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -14,7 +31,9 @@ import type { MbImage, MbTypeManga, MbTypeMangaSearch, StyleOptions } from '~/mo
 
 const { canRead } = useAuthHelper();
 const { shouldBlur, getRelateds, getManga } = useMangaUtils();
+const { serStyles } = useUtils();
 const api = useMangaApi();
+const slots = useSlots();
 
 type Styles = 'background' | 'img' | 'link';
 
@@ -55,4 +74,20 @@ const actualLink = computed(() => {
     return canRead ? `/manga/${manga.id}` : manga.url;
 });
 
+const hasSlot = computed(() => !!slots.default);
+
+const actStyles = computed(() => serStyles(props.styles));
+
 </script>
+
+<style lang="scss" scoped>
+.image-container {
+    position: relative;
+
+    .floating-buttons {
+        position: absolute;
+        top: var(--margin);
+        right: var(--margin);
+    }
+}
+</style>

@@ -69,7 +69,8 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
                     pars[`ids[${i}]`] = ids[i]!;
                 }
                 return wrapUrl(apiUrl, `image/strip`, pars);
-            }
+            },
+            del: (id: string) => del<BoxedEmpty>(`image/${id}`)
         },
         manga: {
             search: (filter: MangaSearchFilter) => post<RespMangaSearch>('manga', filter),

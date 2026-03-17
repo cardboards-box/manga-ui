@@ -40,11 +40,15 @@
             <a :href="manga.entity.url">{{ source?.name }}</a>
         </CardLine>
         <CardTags :style="actStyle">
-            <CardTag v-if="rating" :nsfw="rating.value !== ContentRating.Safe">{{ rating.name }}</CardTag>
+            <CardTag
+                v-if="rating"
+                :nsfw="rating.value !== ContentRating.Safe"
+                :link="`/search/all?ratings=` + rating.value"
+            >{{ rating.name }}</CardTag>
             <CardTag
                 v-for="tag of tags"
                 :key="tag.id"
-                :link="'/search/all?include=' + tag.id"
+                :link="'/search/all?tags=' + tag.id"
             >{{ tag.name }}</CardTag>
         </CardTags>
     </Card>

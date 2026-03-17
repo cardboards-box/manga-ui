@@ -1,34 +1,43 @@
 <template>
-    <div class="volume-card" :class="{ 'version': version && !hasSlot, 'no-buttons': !hasButtons }">
-    <NuxtLink :to="url" :class="{ 'active': isRead }" class="cell" :target="external ? '_black': ''" :title="external ? 'External Manga' : 'Read ' + title">
-        <Icon v-if="external">ungroup</Icon>
-        <Icon v-if="isRead">done_all</Icon>
-        {{ title }}
-    </NuxtLink>
-    <span class="cell date">
-        <Icon>schedule</Icon>&nbsp;
-        <Date :date="chapter.createdAt.toString()" utc format="r" />
-    </span>
-    <div class="cell btns" v-if="hasButtons">
-        <IconBtn
-            class="margin-right"
-            v-if="canRead && !version"
-            inline
-            :loading="loading"
-            :icon="isRead ? 'visibility_off' : 'visibility'"
-            @click="toggleRead"
-        />
-        <IconBtn
-            v-if="hasVersions"
-            class="margin-right"
-            :loading="loading"
-            inline
-            :icon="isOpen ? 'expand_less' : 'expand_more'"
-            @click="() => isOpen = !isOpen"
-        />
-        <slot />
+    <div
+        class="volume-card"
+        :class="{ 'version': version && !hasSlot, 'no-buttons': !hasButtons }"
+    >
+        <NuxtLink
+            :to="url"
+            :class="{ 'active': isRead }"
+            class="cell"
+            :target="external ? '_black': ''"
+            :title="external ? 'External Manga' : 'Read ' + title"
+        >
+            <Icon v-if="external">ungroup</Icon>
+            <Icon v-if="isRead">done_all</Icon>
+            {{ title }}
+        </NuxtLink>
+        <span class="cell date">
+            <Icon>schedule</Icon>&nbsp;
+            <Date :date="chapter.createdAt.toString()" utc format="r" />
+        </span>
+        <div class="cell btns" v-if="hasButtons">
+            <IconBtn
+                class="margin-right"
+                v-if="canRead && !version"
+                inline
+                :loading="loading"
+                :icon="isRead ? 'visibility_off' : 'visibility'"
+                @click="toggleRead"
+            />
+            <IconBtn
+                v-if="hasVersions"
+                class="margin-right"
+                :loading="loading"
+                inline
+                :icon="isOpen ? 'expand_less' : 'expand_more'"
+                @click="() => isOpen = !isOpen"
+            />
+            <slot />
+        </div>
     </div>
-</div>
 </template>
 
 <script setup lang="ts">

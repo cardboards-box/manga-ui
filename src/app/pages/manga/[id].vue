@@ -159,13 +159,23 @@
                     </ClientOnly>
                 </div>
                 <div class="covers flex row wrap" v-show="tab === 'covers'">
-                    <Cover
-                        v-for="cover in covers"
-                        :image="cover"
-                        type="img"
-                        width="300px"
-                        styles="margin: var(--margin) auto"
-                    />
+                    <ClientOnly>
+                        <Cover
+                            v-for="cover in covers"
+                            :image="cover"
+                            type="img"
+                            width="300px"
+                            styles="margin: var(--margin) auto"
+                        >
+                            <IconBtn
+                                v-if="adminMode"
+                                icon="delete"
+                                color="danger"
+                                title="Delete Cover"
+                                @click="() => deleteCover(cover)"
+                            />
+                        </Cover>
+                    </ClientOnly>
                 </div>
             </div>
         </main>
@@ -174,7 +184,7 @@
 
 <script setup lang="ts">
 import { ChapterOrderBy } from '~/models';
-import type { ProgressChapter } from '~/models';
+import type { MbImage, ProgressChapter } from '~/models';
 
 const route = useRoute();
 const api = useMangaApi();
@@ -270,6 +280,15 @@ const massSoftDelete = async () => {
 
     await Promise.all(selectedChapters.value.map(id => api.promise.chapter.delete(id)));
     selectedChapters.value = [];
+    rawLoading.value = false;
+    throttled(true);
+}
+
+const deleteCover = async (cover: MbImage) => {
+    if (!cover || !adminMode.value) return;
+
+    rawLoading.value = true;
+    await api.promise.image.del(cover.id);
     rawLoading.value = false;
     throttled(true);
 }

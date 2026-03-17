@@ -19,7 +19,7 @@
             <CardTag
                 v-for="tag of tags"
                 :key="tag.id"
-                :link="'/search/all?include=' + tag.id"
+                :link="'/search/all?tags=' + tag.id"
             >{{ tag.name }}</CardTag>
         </CardTags>
     </Card>
