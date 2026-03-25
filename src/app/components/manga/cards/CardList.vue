@@ -36,6 +36,7 @@
         </template>
 
         <template #extra-buttons>
+            <slot name="extra-buttons" />
             <div class="btn-group">
                 <IconBtn
                     v-for="sty in styles"
@@ -43,7 +44,6 @@
                     :icon="sty.icon"
                     :color="sty.style === listStyle ? 'primary' : 'shade'"
                 />
-                <slot name="extra-buttons" />
             </div>
         </template>
 

@@ -147,14 +147,9 @@
                 </VolumeList>
                 <div class="recommendations flex row" v-show="tab === 'recommendations'">
                     <ClientOnly>
-                        <Loading v-if="recsPending" />
-                        <Error v-else-if="recsError" :message="recsError" />
-                        <CardList v-else
-                            title="Recommended Manga"
-                            :manga="recs"
-                            capitalize
-                            @reload="() => recsRefresh()"
-                            :content-ratings="contentRatings"
+                        <RecommendationList
+                            :title="`Manga Similar to: ${manga.title}`"
+                            :id="manga.id"
                         />
                     </ClientOnly>
                 </div>
@@ -191,7 +186,7 @@ const api = useMangaApi();
 const { canRead } = useAuthHelper();
 const { wrapUrl, apiUrl } = useSettingsHelper();
 const cache = useCacheHelper();
-const { chapterTitle, recommendations } = useMangaUtils();
+const { chapterTitle } = useMangaUtils();
 
 const {
     refresh, manga, extended,
@@ -205,26 +200,9 @@ const { pending: nuxtPending } = useAsyncData(
     watch: [() => route.params, () => route.query]
 });
 const { data: cached } = useAsyncData(async () => await cache.get());
-const {
-    pending: recsPending,
-    data: recsData,
-    error: recsErrorRaw,
-    refresh: recsRefresh
-} = useAsyncData(
-    `manga-${route.params.id}-recs`,
-    async () => await recommendations(route.params.id?.toString() ?? ''),
-    { watch: [() => route.params.id] }
-);
 const contentRatings = computed(() => cached.value?.contentRatings ?? []);
 const rating = computed(() => contentRatings.value.find(t => t.value === manga.value?.contentRating));
 
-const recsError = computed(() => {
-    if (api.isSuccess(recsData.value)) return undefined;
-    if (recsErrorRaw.value) return api.errorMessage(<any>recsErrorRaw.value.data);
-    return api.errorMessage(recsData.value) ?? 'An unknown error occurred!';
-});
-
-const recs = computed(() => recsData.value ? api.data(recsData.value) ?? [] : []);
 
 const rawLoading = ref(false);
 const loading = computed(() => nuxtPending.value || pending.value || rawLoading.value);

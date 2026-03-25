@@ -192,6 +192,13 @@ export interface ListSearchFilter extends SearchFiler<ListOrderBy> {
     types?: ListType[];
 }
 
+export interface RecommendationFilter {
+    size?: number;
+    tags?: string[];
+    tagsEx?: string[];
+    ratings?: ContentRating[];
+}
+
 export interface Stats {
     queue: {
         timestamp: Date | string;

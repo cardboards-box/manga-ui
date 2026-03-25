@@ -22,7 +22,7 @@
             />
         </template>
 
-        <div class="flex margin-top">
+        <div class="flex margin-top" v-if="showMode">
             <div class="flex row margin-right">
                 <label>Tag Inclusion Mode</label>
                 <ButtonGroupBool
@@ -47,33 +47,42 @@
     </Drawer>
 </template>
 
-<script setup lang="ts">
-import type { MangaSearchFilter, MbSource, MbTag } from '~/models';
+<script setup lang="ts" generic="T extends MangaSearchFilter | RecommendationFilter">
+import type { booleanish, MangaSearchFilter, MbSource, MbTag, RecommendationFilter } from '~/models';
 import { ContentRating } from '~/models';
 
+const { isTrue } = useUtils();
+
 const props = defineProps<{
-    modelValue: MangaSearchFilter;
+    modelValue: T;
     tags: MbTag[],
-    sources: MbSource[]
+    sources: MbSource[];
+    filteredSources?: string[];
+    hideMode?: booleanish;
 }>();
 
 const emits = defineEmits<{
-    (e: 'update:modelValue', value: MangaSearchFilter): void;
+    (e: 'update:modelValue', value: T): void;
 }>();
+
+const showMode = computed(() => !isTrue(props.hideMode));
 
 const hentaiSources = computed(() => props.sources
     .filter(source => source.defaultRating !== ContentRating.Safe)
     .map(t => t.id));
-const hasHentaiSource = computed(() => filters.value.sources &&
-    filters.value.sources.length > 0 &&
-    filters.value.sources.some(t => hentaiSources.value.includes(t)));
-const onlyHentaiSources = computed(() => filters.value.sources &&
-    filters.value.sources.length > 0 &&
-    filters.value.sources.every(t => hentaiSources.value.includes(t)));
+
+const filterSources = computed(() => ('sources' in filters.value ? filters.value.sources : props.filteredSources) ?? []);
+
+const hasHentaiSource = computed(() =>
+    filterSources.value.length > 0 &&
+    filterSources.value.some(t => hentaiSources.value.includes(t)));
+const onlyHentaiSources = computed(() =>
+    filterSources.value.length > 0 &&
+    filterSources.value.every(t => hentaiSources.value.includes(t)));
 
 const filters = computed({
     get: () => props.modelValue,
-    set: (value: MangaSearchFilter) => emits('update:modelValue', value)
+    set: (value: T) => emits('update:modelValue', value)
 });
 
 const tagsInclude = computed({
@@ -87,7 +96,7 @@ const tagsInclude = computed({
 });
 
 const tagsIncludeAnd = computed({
-    get: () => filters.value.tagsAnd ?? true,
+    get: () => ('tagsAnd' in filters.value && filters.value.tagsAnd) ?? true,
     set: (value: boolean) => {
         filters.value = {
             ...filters.value,
@@ -107,7 +116,7 @@ const tagsExclude = computed({
 });
 
 const tagsExcludeAnd = computed({
-    get: () => filters.value.tagsExAnd ?? true,
+    get: () => ('tagsExAnd' in filters.value && filters.value.tagsExAnd) ?? true,
     set: (value: boolean) => {
         filters.value = {
             ...filters.value,

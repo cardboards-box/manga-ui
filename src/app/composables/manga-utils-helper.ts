@@ -3,7 +3,8 @@ import type {
     MangaBoxType, MangaSearchFilter, MangaVolumes,
     MbChapter, MbManga, MbMangaExt,
     MbTypeManga, MbTypeMangaSearch, MbTypeProgress,
-    ProgressChapter
+    ProgressChapter,
+    RecommendationFilter
 } from '../models';
 
 type ExplodeKey<T extends MangaBoxType<any, any>> = T['related'][number]['type'];
@@ -251,12 +252,17 @@ export function useMangaUtils() {
      * Get the recommendations for the given manga ID or the person's profile if no ID is given
      * @param id The ID of the manga to get recommendations for, or undefined to get profile recommendations
      */
-    async function recommendations(id?: string, size: number = 20) {
+    async function recommendations(id?: string, filter?: RecommendationFilter) {
+        filter ??= {
+            size: 20,
+        };
+
         const tags = blackListTags.value ?? [];
+        filter.tagsEx = [...new Set([...(filter.tagsEx ?? []), ...tags])];
 
         const action = id
-            ? () => api.promise.manga.recommendations(id, size, tags)
-            : () => api.promise.manga.personalRecs(size, tags);
+            ? () => api.promise.manga.recommendations(id, filter)
+            : () => api.promise.manga.personalRecs(filter);
 
         return await action();
     }
