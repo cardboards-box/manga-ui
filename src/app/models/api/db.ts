@@ -213,3 +213,8 @@ export interface MbListExt extends MbDbObject {
     mangaCount: number;
     clonedCount: number;
 }
+
+export interface MbApiKey extends MbDbObject {
+    name: string;
+    profileId: string;
+}

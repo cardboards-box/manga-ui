@@ -15,6 +15,8 @@ import type {
     RespReverseResult, MangaSearchFilter,
     RespMangaRecommendations, RecommendationFilter,
     RespList, RespListSearch, RespLists,
+    RespApiKeys, RespApiKey, 
+    RespApiKeyKey, ReqMangaApiKey,
 
     ComicFormat, ContentRating,
     RelationshipType, ChapterOrderBy,
@@ -121,6 +123,12 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             remove: (listId: string, mangaId: string) => del<RespList>(`list/${listId}/${mangaId}`),
             search: (filter: ListSearchFilter) => post<RespListSearch>('list/search', filter),
             searchUrl: (filter: ListSearchFilter) => get<RespListSearch>('list', filter)
+        }, 
+        apiKeys: {
+            get: () => get<RespApiKeys>('api-key'),
+            remove: (id: string) => del<BoxedEmpty>(`api-key/${id}`),
+            create: (req: ReqMangaApiKey) => post<RespApiKey>('api-key', req),
+            key: (id: string) => get<RespApiKeyKey>(`api-key/${id}/key`),
         }
     }
 }

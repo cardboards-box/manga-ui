@@ -63,8 +63,8 @@ export default defineNuxtConfig({
     ],
     runtimeConfig: {
         public: {
-            apiUrl: 'http://192.168.1.137:10101',
-            imageUrl: 'http://192.168.1.137:10101',
+            apiUrl: 'https://v2.mangabox.app',
+            imageUrl: 'https://v2.mangabox.app',
             baseUrl: baseUrl,
             firebase: FIREBASE_CONFIG,
             prod: process.env.NODE_ENV === 'production',

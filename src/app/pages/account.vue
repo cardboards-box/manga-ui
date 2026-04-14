@@ -10,6 +10,11 @@
                 <span>Roles:</span>
                 <span v-for="role of roles">{{ role }}</span>
             </div>
+            <IconBtn 
+                icon="key"
+                text="Api Keys"
+                link="/keys"
+            />
         </div>
     </div>
 </div>

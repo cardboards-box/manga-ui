@@ -1,5 +1,5 @@
 import type { Boxed, BoxedArray, BoxedPaged } from './base';
-import type { MbMangaExt, MbProfile, MbTag, MbSource, MbList } from './db';
+import type { MbMangaExt, MbProfile, MbTag, MbSource, MbList, MbApiKey } from './db';
 import type {
     MbTypeChapter, MbTypeImage,
     MbTypeMangaSearch, MbTypeProgress,
@@ -42,6 +42,12 @@ export interface RespLists extends BoxedArray<MbList> { }
 
 export interface RespListSearch extends BoxedPaged<MbTypeListSearch> { }
 
+export interface RespApiKeys extends BoxedArray<MbApiKey> { }
+
+export interface RespApiKey extends Boxed<MbApiKey> { }
+
+export interface RespApiKeyKey extends Boxed<string> { }
+
 export interface ReqMangaLoad {
     url: string;
     force?: boolean;
@@ -50,6 +56,10 @@ export interface ReqMangaLoad {
 export interface ReqMangaSetDisplay {
     mangaId: string;
     title?: string;
+}
+
+export interface ReqMangaApiKey {
+    name: string;
 }
 
 export interface RespMetadataEnums<T = number> extends BoxedArray<EnumDescription<T>> { }
