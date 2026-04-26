@@ -1,5 +1,6 @@
 import type { ClassOptions, booleanish, booleanishext, StyleOptions } from "../models";
 import { ImageScroll } from "../models";
+import { parallelForEachAsync, parallelForEachVoidAsync } from '~/helpers';
 
 export const useUtils = () => {
     const config = useRuntimeConfig();
@@ -628,5 +629,7 @@ export const useUtils = () => {
         writeToClipboard,
         baseUrl,
         clamp,
+        parallelForEach: parallelForEachAsync,
+        parallelForEachVoid: parallelForEachVoidAsync,
     }
 }

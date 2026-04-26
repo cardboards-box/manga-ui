@@ -22,7 +22,8 @@ import type {
     RelationshipType, ChapterOrderBy,
     VolumeState, MangaOrderBy,
     MangaState, RespStats,
-    ListSearchFilter, ListType, ListOrderBy
+    ListSearchFilter, ListType, ListOrderBy,
+    MbImage
 } from '../models';
 
 type NuxtApiHandle = ReturnType<typeof useApiHelper>;
@@ -64,7 +65,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
         },
         image: {
             fetch: (id: string) => get<RespImage>(`image/${id}/meta`),
-            downloadUrl: (id: string) => `/api/image/${id}`,
+            downloadUrl: (id: string | MbImage) => `/api/image/${typeof id === 'string' ? id : id.id}`,
             stripUrl: (ids: string[]) => {
                 const pars: Record<string, string> = {};
                 for(let i = 0; i < ids.length; i++) {

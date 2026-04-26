@@ -190,6 +190,35 @@
                                 </option>
                             </SelectBox>
                         </div>
+                        <template 
+                            v-if="[
+                                PageStyle.SinglePageMaxSize, 
+                                PageStyle.LongStripMaxSize
+                            ].includes(pageStyle)"
+                        >
+                            <div class="control">
+                                <label class="no-bot">Image Width (px)</label>
+                                <label class="no-bot mute">0 disables max width</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="5000"
+                                    step="50"
+                                    v-model="maxImageWidth"
+                                />
+                            </div>
+                            <div class="control">
+                                <label class="no-bot">Image Height (px)</label>
+                                <label class="no-bot mute">0 disables max height</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="5000"
+                                    step="50"
+                                    v-model="maxImageHeight"
+                                />
+                            </div>
+                        </template>
                         <div class="control">
                             <label class="no-bot">Image Filter</label>
                             <SelectBox v-model="filter">
@@ -239,7 +268,8 @@ import {
     PAGE_STYLES,
     PROGRESS_BAR_STYLES,
     FilterStyle, FILTER_STYLES,
-    ComicFormat
+    ComicFormat,
+    PageStyle
 } from '~/models';
 import type { ClassOptions } from '~/models';
 const { fullscreen, serClasses } = useUtils();
@@ -256,7 +286,9 @@ const {
     brightness, pageStyle, filterStyle: filter,
     customFilter, progressBarStyle: progressBar,
     scrollAmount, showTutorial,
-    pageMenuOver, regionMargin
+    pageMenuOver, regionMargin,
+    maxImageHeight,
+    maxImageWidth
 } = useAppSettings();
 
 const props = defineProps<{

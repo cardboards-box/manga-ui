@@ -25,6 +25,7 @@ interface MangaSettings {
     infiniteScroll: boolean;
     proxyUrl: string | undefined;
     blackListTags: string[] | undefined;
+    preloadImages: number;
 }
 
 interface Settings {
@@ -57,7 +58,8 @@ const DEFAULTS: MangaSettings = {
     maxImageWidth: undefined,
     infiniteScroll: true,
     proxyUrl: undefined,
-    blackListTags: []
+    blackListTags: [],
+    preloadImages: 5,
 }
 
 export const useAppSettings = () => {
@@ -90,7 +92,8 @@ export const useAppSettings = () => {
             maxImageHeight: getSetNumbNull('max-image-height', DEFAULTS.maxImageHeight, () => commit()),
             infiniteScroll: getSetBool('infinite-scroll', DEFAULTS.infiniteScroll, () => commit()),
             proxyUrl: getSet<string>('proxy-url', DEFAULTS.proxyUrl, () => commit()),
-            blackListTags: getSetJson<string[]>('blacklist-tags', DEFAULTS.blackListTags, () => commit())
+            blackListTags: getSetJson<string[]>('blacklist-tags', DEFAULTS.blackListTags, () => commit()),
+            preloadImages: getSetNumb('preload-images', DEFAULTS.preloadImages, () => commit())
         }
     })();
 

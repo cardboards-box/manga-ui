@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ClassOptions, StyleOptions } from '~/models';
+import type { ClassOptions, MbImage, StyleOptions } from '~/models';
 type CssUnit = string | undefined;
 type WH = { width: CssUnit, height: CssUnit };
 type Size<T = {}> = CssUnit | (WH & T);
@@ -35,7 +35,7 @@ const DEFAULT_IMAGE = '/broken.png';
 const { serClasses, serStyles, scale, cssUnit, isExternal } = useUtils();
 
 const props = withDefaults(defineProps<{
-    src?: string;
+    src?: string | MbImage;
     default?: string;
     error?: string;
     'class'?: ClassOptions;
@@ -86,7 +86,8 @@ const outputResult = computed(() => {
     if (result.value) return result.value;
     if (state.value === 'loading') return props.default;
     if (state.value === 'error') return props.error || DEFAULT_IMAGE;
-    return actSrc.value;
+    if (typeof actSrc.value === 'string') return actSrc.value;
+    return actSrc.value.url;
 });
 
 const getClampValue = (target: HTMLElement) => {
@@ -187,7 +188,6 @@ const {
     state,
     result,
     size,
-    duration,
     refresh
 } = useImageHelper(actSrc, {
     onLoad,

@@ -45,7 +45,7 @@ export const PAGE_STYLES: EnumDescription<PageStyle>[] = [
     },
     {
         value: PageStyle.LongStrip,
-        name: 'Long Strip',
+        name: 'Long Strip (Fit to browser width)',
         description: 'Displays the pages in a long vertical strip'
     },
     {

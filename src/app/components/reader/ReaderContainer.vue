@@ -1,12 +1,12 @@
 <template>
     <Error v-if="error" :message="error" />
-    <div v-else
+    <div 
         class="manga-reader flex fill"
         v-swipe
         @tap="pageClick"
         @swipe-left="move(true)"
         @swipe-right="move(false)"
-        ref="clickarea"
+        ref="clickArea"
         :class="classes"
         :style="{
             '--manga-filter': imageFilter,
@@ -15,59 +15,24 @@
         }"
     >
         <Loading v-if="isLoading" />
-        <template v-else-if="pageStyle === PageStyle.SinglePageFit">
-            <div
-                class="image image-filter"
-                :style="{
-                    'background-image': `url(${imageUrl(currentPage)})`
-                }"
-            />
-        </template>
-
-        <template v-else-if="isLongStrip">
-            <Image
-                v-for="image of pages"
-                :src="image"
-                class="image-filter"
-            />
-        </template>
-
-        <template v-else-if="pageStyle === PageStyle.DoublePage">
-            <div
-                class="image image-filter"
-                :style="{
-                    'background-image': `url(${imageUrl(currentPage)})`
-                }"
-            />
-            <div
-                class="image image-filter"
-                v-if="preloadPages.length > 0"
-                :style="{
-                    'background-image': `url(${imageUrl(preloadPages[0])})`,
-                }"
-            />
-        </template>
-
-        <template v-else>
-            <Image :src="currentPage" class="image-filter" />
-        </template>
-
-        <Image
-            v-if="!isLongStrip"
-            v-for="image of preloadPages"
-            :src="image"
-            class="hidden"
+        <Error v-else-if="!currentPage" :message="'No page found'" />
+        <ReaderSinglePage 
+            v-else-if="mode === 'single'" 
+            :images="images" 
+            :current="currentPage" 
+            :open="menuOpen"
         />
 
         <div class="progress-bar" :class="progressBar" v-if="!isLongStrip">
             <NuxtLink
-                v-for="page of pages"
-                :to="`/chapter/${chapter?.id}?page=${page.ordinal}`"
-                :class="{ 'active': page.ordinal <= (currentPage?.ordinal || 0) }"
+                v-for="page of images"
+                :key="page.image.id"
+                :to="pageLink(page.image)"
+                :class="determineStateClass(page)"
                 class="progress"
             />
         </div>
-
+        
         <div class="tutorial" v-if="showTutorial">
             <div
                 class="region flex"
@@ -120,14 +85,16 @@
 <script setup lang="ts">
 import { PageStyle, FilterStyle, } from '~/models';
 import type { ClassOptions, MbImage, booleanish } from '~/models';
+import ReaderSinglePage from './ReaderSinglePage.vue';
 
 const api = useMangaApi();
-const { isTrue, scrollers, serClasses } = useUtils();
+const { get } = useImageCache();
+const { isTrue, scrollers, serClasses, parallelForEach } = useUtils();
 const {
     invertControls, forwardOnly,
     brightness, pageStyle, filterStyle: filter,
     customFilter, progressBarStyle: progressBar,
-    scrollAmount, showTutorial
+    scrollAmount, showTutorial, preloadImages
 } = useAppSettings();
 const {
     currentPage, pages, preloadPages,
@@ -145,17 +112,34 @@ const emits = defineEmits<{
     (e: 'update:modelValue', v: boolean): void;
 }>();
 
-const clickarea = ref<HTMLElement | undefined>();
+const _images = ref<PageImage[]>([]);
+const images = computed(() => _images.value.toSorted((a, b) => a.image.ordinal - b.image.ordinal));
+const clickArea = ref<HTMLElement | undefined>();
 const isLoading = computed(() => isTrue(props.loading));
 const menuOpen = computed({
     get: () => props.modelValue,
     set: (v) => emits('update:modelValue', v)
 });
-const isLongStrip = computed(() => [
-    PageStyle.LongStrip,
-    PageStyle.LongStripNaturalSize,
-    PageStyle.LongStripMaxSize
-].includes(pageStyle.value));
+
+const mode = computed(() => {
+    switch(pageStyle.value) {
+        case PageStyle.SinglePageFitToWidth:
+        case PageStyle.SinglePageNaturalSize:
+        case PageStyle.SinglePageFitToHeight:
+        case PageStyle.SinglePageFit:
+        case PageStyle.SinglePageMaxSize:
+            return 'single';
+
+        case PageStyle.LongStrip:
+        case PageStyle.LongStripNaturalSize:
+        case PageStyle.LongStripMaxSize:
+            return 'long-strip';
+
+        default: return 'double';
+    }
+});
+
+const isLongStrip = computed(() => mode.value === 'long-strip');
 
 const imageFilter = computed(() => {
     let filters: { [key: string]: string } = {
@@ -183,14 +167,20 @@ const imageFilter = computed(() => {
         .join(' ');
 });
 
-const classes = computed(() => serClasses(props.class, pageStyle.value));
+const pageLink = (page: MbImage) => `/chapter/${chapter.value?.id}?page=${page.ordinal}`;
 
-const { top: scrollUp, bottom: scrollDown } = scrollers(clickarea, scrollAmount, scrollAmount);
+type ClassMap = `${('error' | 'loading' | 'initial' | 'loaded')} ${('read' | 'current' | 'unread')}`;
+const determineStateClass = (page: PageImage): ClassMap => {
+    const index = images.value.findIndex(i => i.image.id === page.image.id);
+    const currentIndex = images.value.findIndex(i => i.image.id === currentPage.value?.id);
 
-const imageUrl = (image?: MbImage) => {
-    if (!image) return '';
-    return api.promise.image.downloadUrl(image.id);
+    const readState = index < currentIndex ? 'read' : index === currentIndex ? 'current' : 'unread';
+    //return `${page.state} read`;
+    return `${page.state} ${readState}`;
 }
+
+const classes = computed(() => serClasses(props.class, pageStyle.value));
+const { top: scrollUp, bottom: scrollDown } = scrollers(clickArea, scrollAmount, scrollAmount);
 
 const move = (forward: boolean, chapter: boolean = false) => {
     const pp = () => goNext(chapter ? 'chapter': 'page');
@@ -202,7 +192,7 @@ const move = (forward: boolean, chapter: boolean = false) => {
 }
 
 const pageClick = (event: MouseEvent) => {
-    if (!clickarea.value) return;
+    if (!clickArea.value) return;
 
     const output = inRegions(event);
     if(output.includes('center')) {
@@ -261,83 +251,89 @@ const arrowKeyHandler = (ev: KeyboardEvent, down: boolean) => {
 const arrowKeyDown = (ev: KeyboardEvent) => arrowKeyHandler(ev, true);
 const arrowKeyUp = (ev: KeyboardEvent) => arrowKeyHandler(ev, false);
 
+const loadImage = async (image: PageImage) => {
+    if (image.state !== 'initial') return;
+
+    image.state = 'loading';
+    try {
+        image.response = await get(image.image);
+        image.state = 'loaded';
+    } catch (error) {
+        image.state = 'error';
+        console.error(`Failed to load image ${image.image.id}`, {
+            image,
+            error
+        });
+    } finally {
+        _images.value = [..._images.value];
+    }
+}
+
+const mergeImageUpdates = (pages: MbImage[]) => {
+    const current = [..._images.value];
+    const output = [];
+
+    for(const image of pages) {
+        const found = current.find(i => i.image.id === image.id);
+        const result = found ? found : {
+            image,
+            state: 'initial' as const
+        };
+        output.push(result);
+    }
+
+    _images.value = output;
+    tapLoad();
+}
+
+const tapLoad = async () => {
+    const images = _images.value.toSorted((a, b) => a.image.ordinal - b.image.ordinal);
+
+    await parallelForEach(images, loadImage, {
+        maxDegreesOfParallelism: preloadImages.value,
+        startFromIndex: images.findIndex(i => i.image.id === currentPage.value?.id),
+    });
+}
+
 onMounted(() => nextTick(() => {
     window.addEventListener('keyup', arrowKeyUp);
     window.addEventListener('keydown', arrowKeyDown);
+
+    watch([pages, preloadPages], 
+        () => mergeImageUpdates(pages.value), 
+        { deep: true, immediate: true });
 }));
 
 onUnmounted(() => {
     window.removeEventListener('keyup', arrowKeyUp);
     window.removeEventListener('keydown', arrowKeyDown);
-})
+});
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 $progress-height: 10px;
 $navwidth: 400px;
+$progress-margin: 1px;
+
+$loading-primary: var(--color-primary);
+$loading-secondary: transparent;
+$loading-speed: 0.5s;
+$current-border-fade-speed: 1.25s;
+
 .manga-reader {
     position: relative;
-    overflow: auto;
+    overflow: hidden;
     max-width: 100%;
+    max-height: 100%;
     transition: all 150ms;
 
-    img { max-width: 100%; }
-
-    .image {
-        flex: 1;
-        background-position: center;
-        background-size: contain;
-        background-repeat: no-repeat;
+    .pages {
+        width: 100%;
+        height: 100%;
     }
 
     .image-filter {
         filter: var(--manga-filter);
-    }
-
-    &.single-page {
-        img {
-            margin: 0 auto;
-            &.hidden { display: none; }
-        }
-    }
-
-    &.long-strip { flex-flow: column; }
-
-    &.fit-to-width {
-        img {
-            width: 100%;
-            max-width: 100%;
-            max-height: unset;
-            margin: auto;
-        }
-    }
-
-    &.fit-to-height {
-        img {
-            margin: auto;
-            max-width: unset;
-            max-height: 100%;
-            height: 100%;
-        }
-    }
-
-    &.natural-size {
-        img {
-            margin: auto;
-            max-width: unset;
-
-            &.hidden {
-                position: absolute;
-                left: -100%;
-            }
-        }
-    }
-
-    &.custom-size {
-        img {
-            max-width: var(--manga-max-width);
-            max-height: var(--manga-max-height);
-        }
     }
 
     .progress-bar {
@@ -347,20 +343,38 @@ $navwidth: 400px;
 
         .progress {
             flex: 1;
-            background-color: var(--bg-color-accent);
+            box-sizing: border-box;
+            background-color: var(--color-primary);
             transition: all 250ms;
             cursor: pointer;
 
-            &.active { background-color: var(--color-primary-trans); }
+            // Loading states
+            &.loading {
+                background: repeating-linear-gradient(90deg, #{$loading-primary} 0 calc(25% - 5px), #{$loading-secondary} 0 25%) left/calc(4*100%/3) 100%;
+                animation: loading-animation #{$loading-speed} infinite linear;
+            }
+            &.initial { background: color-mix(in srgb, var(--color-primary) 20%, transparent); }
+            &.error { background-color: var(--color-warning); }
+            &.loaded { background-color: var(--color-primary); }
+
+            // read states
+            &.read { border: 1px solid var(--color-primary); }
+            &.current {
+                border: 3px solid var(--color);
+                animation: current-border-fade #{$current-border-fade-speed} infinite ease-in-out;
+            }
+            &.unread { border: 1px dashed var(--color); }
         }
 
-        &.bottom {
+        &.bottom, &.top {
             width: 100%;
             height: $progress-height;
-            bottom: 0;
             left: 0;
 
-            .progress { height: 100%; }
+            .progress { 
+                height: 100%; 
+                margin: 0 $progress-margin;
+            }
             &:hover { height: #{$progress-height * 2}; }
         }
 
@@ -373,11 +387,19 @@ $navwidth: 400px;
             .progress {
                 width: 100%;
                 height: 100%;
+                margin: $progress-margin 0;
+
+                &.loading {
+                    background: repeating-linear-gradient(180deg, #{$loading-primary} 0 calc(25% - 5px), #{$loading-secondary} 0 25%) top/100% calc(4*100%/3);
+                    animation: loading-animation-vertical #{$loading-speed} infinite linear;
+                }
             }
 
             &:hover { width: #{$progress-height * 2}; }
         }
 
+        &.top { top: 0; }
+        &.bottom { bottom: 0; }
         &.left { left: 0; }
         &.right { right: 0; }
     }
@@ -409,5 +431,19 @@ $navwidth: 400px;
 
 @media only screen and (max-width: 600px) {
     .manga-reader { max-width: 100% !important; }
+}
+
+@keyframes loading-animation {
+    100% { background-position: right; }
+}
+
+@keyframes loading-animation-vertical {
+    100% { background-position: bottom; }
+}
+
+@keyframes current-border-fade {
+    0% { border-color: var(--color); }
+    50% { border-color: var(--color-primary); }
+    100% { border-color: var(--color); }
 }
 </style>

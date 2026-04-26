@@ -11,7 +11,7 @@
         class="page-wrapper flex fill-parent"
         :class="{ 'open': menuOpen, 'over': pageMenuOver }"
     >
-        <Reader
+        <ReaderContainer
             v-model="menuOpen"
             :class="{ 'over': pageMenuOver, 'reader': true, 'open': menuOpen }"
             :loading="isLoading"

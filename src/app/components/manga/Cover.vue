@@ -56,7 +56,7 @@ const uri = computed(() => {
 
     if (!image.value) return DEFAULT_IMAGE;
 
-    return api.promise.image.downloadUrl(image.value.id);
+    return image.value;
 });
 
 const isPorn = computed(() => !!props.isPorn || shouldBlur(props.manga));

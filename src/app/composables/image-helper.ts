@@ -1,11 +1,14 @@
+import type { MbImage } from "~/models";
+
 type ImageError = {
     code: number;
     message: string;
 }
 
 export const useImageHelper = (
-    src: Ref<string | undefined>,
+    src: Ref<string | undefined | MbImage>,
     opts?: {
+        cover?: Ref<boolean> | boolean,
         onLoad?: (url: string) => void,
         onError?: (error: ImageError) => void,
         onAborted?: () => void,
@@ -13,6 +16,8 @@ export const useImageHelper = (
         imediate?: boolean
     }
 ) => {
+    const { get } = useImageCache();
+
     let abortCtrl: AbortController;
     const start = ref(Date.now());
     const pending = ref(false);
@@ -32,13 +37,6 @@ export const useImageHelper = (
         if (!pending.value) return;
         abortCtrl?.abort();
     }
-
-    const sizeFromBlob = async (blob: Blob) => {
-        const btmp = await createImageBitmap(blob);
-        const output = { width: btmp.width, height: btmp.height };
-        btmp.close();
-        return output;
-    };
 
     const fetchImage = async () => {
         try {
@@ -60,22 +58,23 @@ export const useImageHelper = (
 
             abortCtrl = new AbortController();
 
-            const resp = await fetch(src.value, { signal: abortCtrl.signal });
+            const resp = await get(src.value, abortCtrl);
             duration.value = Date.now() - start.value;
 
-            if (!resp.ok) {
-                error.value = { code: resp.status, message: resp.statusText };
+            if (!resp.image) {
+                error.value = { code: resp.code, message: resp.message };
                 pending.value = false;
                 opts?.onError?.(error.value);
                 return;
             }
 
-            const blob = new Blob([await resp.arrayBuffer()], {
-                type: resp.headers.get('content-type') ?? 'image/png'
-            });
+            const blob = resp.image.blob;
 
             opts?.onBlob?.(blob);
-            size.value = await sizeFromBlob(blob);
+            size.value = { 
+                width: resp.image.width,
+                height: resp.image.height 
+            };
             result.value = URL.createObjectURL(blob);
             pending.value = false;
             opts?.onLoad?.(result.value);
