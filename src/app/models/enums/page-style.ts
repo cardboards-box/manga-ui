@@ -39,11 +39,11 @@ export const PAGE_STYLES: EnumDescription<PageStyle>[] = [
         name: 'Single Page (Custom Image Size)',
         description: 'Displays the page at a custom image size'
     },
-    {
-        value: PageStyle.DoublePage,
-        name: '2 Pages Side-by-Side',
-        description: 'Displays two pages side by side'
-    },
+    // {
+    //     value: PageStyle.DoublePage,
+    //     name: '2 Pages Side-by-Side',
+    //     description: 'Displays two pages side by side'
+    // },
     {
         value: PageStyle.LongStrip,
         name: 'Long Strip (Fit to browser width)',
