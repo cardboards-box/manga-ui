@@ -1,5 +1,5 @@
 <template>
-<div class="flex" :class="{ 'fill-parent': !inline }">
+<div class="flex" :class="{ 'fill-parent': !inline }" :id="id">
     <div class="center flex loading-comp">
         <img src="/kitsu.gif" alt="Loading Kitsu!" />
         <p>{{ message || 'Loading...' }}</p>
@@ -9,8 +9,9 @@
 
 <script setup lang="ts">
 defineProps<{
-    inline?: boolean
-    message?: string
+    inline?: boolean;
+    message?: string;
+    id?: string;
 }>();
 </script>
 

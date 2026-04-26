@@ -25,7 +25,8 @@ const props = defineProps<{
     message: string,
     showReset?: booleanish,
     resetText?: string,
-    resetIcon?: string
+    resetIcon?: string,
+    id?: string;
 }>();
 
 const emits = defineEmits<{

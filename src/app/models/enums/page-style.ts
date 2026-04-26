@@ -8,6 +8,7 @@ export enum PageStyle {
     SinglePageMaxSize = 'single-page max-size',
     DoublePage = 'double-page',
     LongStrip = 'long-strip',
+    LongStripFit = 'long-strip fit',
     LongStripNaturalSize = 'long-strip natural-size',
     LongStripMaxSize = 'long-strip max-size',
 }
@@ -52,6 +53,11 @@ export const PAGE_STYLES: EnumDescription<PageStyle>[] = [
         value: PageStyle.LongStripNaturalSize,
         name: 'Long Strip (Natural Image Size)',
         description: 'Displays the pages in a long vertical strip at their natural image size'
+    },
+    {
+        value: PageStyle.LongStripFit,
+        name: 'Long Strip (Capped to browser width)',
+        description: 'Displays the pages in a long vertical strip fit to the browser width'
     },
     {
         value: PageStyle.LongStripMaxSize,

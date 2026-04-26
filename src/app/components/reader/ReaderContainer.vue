@@ -17,19 +17,31 @@
         <Loading v-if="isLoading" />
         <Error v-else-if="!currentPage" :message="'No page found'" />
         <ReaderSinglePage 
-            v-else-if="mode === 'single'" 
+            v-else-if="mode === 'single-page'" 
             :images="images" 
             :current="currentPage" 
             :open="menuOpen"
         />
+        <ReaderLongStrip
+            v-else-if="mode === 'long-strip'"
+            :images="images"
+            v-model:current="pageCheck"
+            v-model:percentage="percentage"
+            :open="menuOpen"
+            :tag-page="tagPage"
+        />
 
-        <div class="progress-bar" :class="progressBar" v-if="!isLongStrip">
+        <div class="progress-bar" :class="progressBar">
             <NuxtLink
                 v-for="page of images"
                 :key="page.image.id"
                 :to="pageLink(page.image)"
                 :class="determineStateClass(page)"
                 class="progress"
+            />
+            <div 
+                class="progress-percent"
+                v-if="isLongStrip"
             />
         </div>
         
@@ -85,9 +97,7 @@
 <script setup lang="ts">
 import { PageStyle, FilterStyle, } from '~/models';
 import type { ClassOptions, MbImage, booleanish } from '~/models';
-import ReaderSinglePage from './ReaderSinglePage.vue';
 
-const api = useMangaApi();
 const { get } = useImageCache();
 const { isTrue, scrollers, serClasses, parallelForEach } = useUtils();
 const {
@@ -98,8 +108,8 @@ const {
 } = useAppSettings();
 const {
     currentPage, pages, preloadPages,
-    error, regions, inRegions, goNext, goPrev,
-    chapter
+    error, regions, inRegions, findNext,
+    chapter, setPageNumber, findPrev,
 } = useReaderHelper();
 
 const props = defineProps<{
@@ -113,6 +123,15 @@ const emits = defineEmits<{
 }>();
 
 const _images = ref<PageImage[]>([]);
+const percentage = ref(0);
+const tagPage = ref(0);
+const pageCheck = computed({
+    get: () => currentPage.value,
+    set: (value: MbImage | undefined) => {
+        if (!value?.ordinal) return;
+        setPageNumber(value.ordinal);
+    }
+})
 const images = computed(() => _images.value.toSorted((a, b) => a.image.ordinal - b.image.ordinal));
 const clickArea = ref<HTMLElement | undefined>();
 const isLoading = computed(() => isTrue(props.loading));
@@ -121,25 +140,10 @@ const menuOpen = computed({
     set: (v) => emits('update:modelValue', v)
 });
 
-const mode = computed(() => {
-    switch(pageStyle.value) {
-        case PageStyle.SinglePageFitToWidth:
-        case PageStyle.SinglePageNaturalSize:
-        case PageStyle.SinglePageFitToHeight:
-        case PageStyle.SinglePageFit:
-        case PageStyle.SinglePageMaxSize:
-            return 'single';
-
-        case PageStyle.LongStrip:
-        case PageStyle.LongStripNaturalSize:
-        case PageStyle.LongStripMaxSize:
-            return 'long-strip';
-
-        default: return 'double';
-    }
-});
+const mode = computed<'single-page' | 'long-strip' | 'double-page'>(() => <any>pageStyle.value?.split(' ')[0] ?? 'single-page');
 
 const isLongStrip = computed(() => mode.value === 'long-strip');
+const fullPercent = computed(() => `${percentage.value}%`);
 
 const imageFilter = computed(() => {
     let filters: { [key: string]: string } = {
@@ -175,20 +179,34 @@ const determineStateClass = (page: PageImage): ClassMap => {
     const currentIndex = images.value.findIndex(i => i.image.id === currentPage.value?.id);
 
     const readState = index < currentIndex ? 'read' : index === currentIndex ? 'current' : 'unread';
-    //return `${page.state} read`;
     return `${page.state} ${readState}`;
 }
 
 const classes = computed(() => serClasses(props.class, pageStyle.value));
 const { top: scrollUp, bottom: scrollDown } = scrollers(clickArea, scrollAmount, scrollAmount);
 
-const move = (forward: boolean, chapter: boolean = false) => {
-    const pp = () => goNext(chapter ? 'chapter': 'page');
-    const pn = () => goPrev(chapter ? 'chapter': 'page');
+const moveToRoute = (route: { route: string; id?: string; page?: number }) => {
+    if (!isLongStrip.value 
+        || route.route !== 'chapter' 
+        || chapter.value?.id !== route.id) {
+        let next = `/${route.route}/${route.id}`;
+        if (route.page) next += `?page=${route.page}`;
+        navigateTo(next);
+        return;
+    }
+
+    const page = route.page ?? 1;
+    setPageNumber(page);
+    tagPage.value = page;
+}
+
+const move = (forward: boolean) => {
+    const pp = () => findNext('page');
+    const pn = () => findPrev('page');
     const n = invertControls.value ? pn: pp;
     const b = invertControls.value ? pp: pn;
-
-    (forward ? n : b)();
+    const route = (forward ? n : b)();
+    moveToRoute(route);
 }
 
 const pageClick = (event: MouseEvent) => {
@@ -201,7 +219,8 @@ const pageClick = (event: MouseEvent) => {
     }
 
     if (forwardOnly.value) {
-        goNext(isLongStrip.value ? 'chapter' : 'page');
+        const route = findNext('page');
+        moveToRoute(route);
         return;
     }
 
@@ -209,12 +228,12 @@ const pageClick = (event: MouseEvent) => {
     let isForward = output.includes('right') || (output.includes('bottom') && !output.includes('left'));
 
     if (isBack) {
-        move(false, isLongStrip.value);
+        move(false);
         return;
     }
 
     if (isForward) {
-        move(true, isLongStrip.value);
+        move(true);
         return;
     }
 }
@@ -319,6 +338,8 @@ $loading-primary: var(--color-primary);
 $loading-secondary: transparent;
 $loading-speed: 0.5s;
 $current-border-fade-speed: 1.25s;
+$progress-percent: v-bind(fullPercent);
+$progress-percent-dot-size: 8px;
 
 .manga-reader {
     position: relative;
@@ -366,6 +387,23 @@ $current-border-fade-speed: 1.25s;
             &.unread { border: 1px dashed var(--color); }
         }
 
+        .progress-percent {
+            position: absolute;
+
+            &::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: $progress-percent-dot-size;
+                height: $progress-percent-dot-size;
+                border-radius: 50%;
+                background-color: var(--color-warning);
+                border: 1px solid var(--color);
+                transform: translate(-50%, -50%);
+            }
+        }
+
         &.bottom, &.top {
             width: 100%;
             height: $progress-height;
@@ -375,6 +413,14 @@ $current-border-fade-speed: 1.25s;
                 height: 100%; 
                 margin: 0 $progress-margin;
             }
+
+            .progress-percent {
+                left: $progress-percent;
+                bottom: 0;
+                width: 2px;
+                height: 100%;
+            }
+
             &:hover { height: #{$progress-height * 2}; }
         }
 
@@ -393,6 +439,13 @@ $current-border-fade-speed: 1.25s;
                     background: repeating-linear-gradient(180deg, #{$loading-primary} 0 calc(25% - 5px), #{$loading-secondary} 0 25%) top/100% calc(4*100%/3);
                     animation: loading-animation-vertical #{$loading-speed} infinite linear;
                 }
+            }
+
+            .progress-percent {
+                top: $progress-percent;
+                left: 0;
+                width: 100%;
+                height: 2px;
             }
 
             &:hover { width: #{$progress-height * 2}; }

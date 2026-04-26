@@ -338,9 +338,7 @@ export function useReaderHelper() {
         pending.value = false;
     }
 
-    /**
-     * What to do after navigating to a new page
-     */
+    /** What to do after navigating to a new page */
     function afterNav() {
         tap();
         cleanup();
@@ -419,10 +417,11 @@ export function useReaderHelper() {
     }
 
     /**
-     * Determines the next chapter/volume/page and navigates to it
-     * @param type The type of ordinal to navigate by (page, chapter, or volume)
+     * Finds the next best route for the current manga
+     * @param type The type of route to find
+     * @returns The route parts
      */
-    function goNext(type: OrdinalType = 'page') {
+    function findNext(type: OrdinalType = 'page') {
         const nextVolume = () => {
             if (!currentVolume.value) return;
 
@@ -439,7 +438,11 @@ export function useReaderHelper() {
             const best = findBestChapter(fullChapter.value!, next.chapters[0]!.versions);
             if (!best) return;
 
-            return `/chapter/${best.id}?page=1`;
+            return {
+                route: 'chapter',
+                id: best.id,
+                page: 1
+            }
         }
 
         const nextChapter = () => {
@@ -456,7 +459,11 @@ export function useReaderHelper() {
             const best = findBestChapter(fullChapter.value!, next.versions);
             if (!best) return;
 
-            return `/chapter/${best.id}?page=1`;
+            return {
+                route: 'chapter',
+                id: best.id,
+                page: 1
+            };
         }
 
         const nextPage = () => {
@@ -470,11 +477,26 @@ export function useReaderHelper() {
             const next = pages.value[currentIndex + 1];
             if (!next) return;
 
-            return `/chapter/${fullChapter.value!.entity.id}?page=${next.ordinal}`;
+            return {
+                route: 'chapter',
+                id: fullChapter.value!.entity.id,
+                page: next.ordinal
+            };
         }
 
-        const next = (type === 'page' ? nextPage() : type === 'chapter' ? nextChapter() : nextVolume())
-            ?? `/manga/${manga.value?.entity.id}`;
+        return (type === 'page' ? nextPage() : type === 'chapter' ? nextChapter() : nextVolume())
+            ?? { route: 'manga', id: manga.value?.entity.id, page: undefined };
+    }
+
+    /**
+     * Determines the next chapter/volume/page and navigates to it
+     * @param type The type of ordinal to navigate by (page, chapter, or volume)
+     */
+    function goNext(type: OrdinalType = 'page') {
+        const route = findNext(type);
+
+        let next = `/${route.route}/${route.id}`;
+        if (route.page) next += `?page=${route.page}`;
 
         navigateTo(next);
     }
@@ -487,10 +509,11 @@ export function useReaderHelper() {
     }
 
     /**
-     * Determines the previous chapter/volume/page and navigates to it
-     * @param type The type of ordinal to navigate by (page, chapter, or volume)
+     * Finds the previous best route for the current manga
+     * @param type The type of route to find
+     * @returns The route parts
      */
-    function goPrev(type: OrdinalType = 'page') {
+    function findPrev(type: OrdinalType = 'page') {
         const prevVolume = () => {
             if (!currentVolume.value) return;
 
@@ -507,7 +530,11 @@ export function useReaderHelper() {
             const best = findBestChapter(fullChapter.value!, prev.chapters[prev.chapters.length - 1]!.versions);
             if (!best) return;
 
-            return `/chapter/${best.id}?page=-1`;
+            return {
+                route: 'chapter',
+                id: best.id,
+                page: -1
+            }
         }
 
         const prevChapter = () => {
@@ -522,7 +549,11 @@ export function useReaderHelper() {
             const best = findBestChapter(fullChapter.value!, prev.versions);
             if (!best) return;
 
-            return `/chapter/${best.id}?page=-1`;
+            return {
+                route: 'chapter',
+                id: best.id,
+                page: -1
+            };
         }
 
         const prevPage = () => {
@@ -536,12 +567,27 @@ export function useReaderHelper() {
             const prev = pages.value[currentIndex - 1];
             if (!prev) return;
 
-            return `/chapter/${fullChapter.value!.entity.id}?page=${prev.ordinal}`;
+            return {
+                route: 'chapter',
+                id: fullChapter.value!.entity.id,
+                page: prev.ordinal
+            };
         }
 
-        const prev = (type === 'page' ? prevPage() : type === 'chapter' ? prevChapter() : prevVolume())
-            ?? `/manga/${manga.value?.entity.id}`;
-        navigateTo(prev);
+        return (type === 'page' ? prevPage() : type === 'chapter' ? prevChapter() : prevVolume())
+            ?? { route: 'manga', id: manga.value?.entity.id, page: undefined };
+    }
+
+    /**
+     * Determines the previous chapter/volume/page and navigates to it
+     * @param type The type of ordinal to navigate by (page, chapter, or volume)
+     */
+    function goPrev(type: OrdinalType = 'page') {
+        const prev = findPrev(type);
+        
+        let next = `/${prev.route}/${prev.id}`;
+        if (prev.page) next += `?page=${prev.page}`;
+        navigateTo(next);
     }
 
     /** Updates the progress of the current chapter and manga */
@@ -617,6 +663,28 @@ export function useReaderHelper() {
         return getRelateds(fullChapters.value[id]!, 'MbImage').toSorted((a,b) => a.ordinal - b.ordinal);
     }
 
+    /**
+     * Sets the page number, silently updates the URL, and updates the progress
+     * @param page The page number
+     * @returns void
+     */
+    function setPageNumber(page: number) {
+        params.value = {
+            ...params.value!,
+            page
+        };
+
+        const currentUrl = new URL(window.location.href);
+        const nextQueryPage = String(page);
+        if (currentUrl.searchParams.get('page') === nextQueryPage) return;
+
+        currentUrl.searchParams.set('page', nextQueryPage);
+        window.history.replaceState(window.history.state, '', currentUrl.toString());
+
+        tap();
+        updateProgress();
+    }
+
     return {
         manga: computed(() => manga.value?.entity),
         mangaExtended: computed(() => manga.value ? getRelated(manga.value, 'MbMangaExt') : undefined),
@@ -635,11 +703,14 @@ export function useReaderHelper() {
         fetch,
         currentPage,
         goNext,
+        findNext,
         goPrev,
+        findPrev,
         goStart,
         forceReset,
         bookmarkPage,
         selectLinks,
         inRegions,
+        setPageNumber,
     }
 }
