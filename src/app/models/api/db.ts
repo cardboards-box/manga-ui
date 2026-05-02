@@ -1,5 +1,7 @@
 import type { MbDbObject, MbDbObjectLegacy } from './base';
 
+export const APPLICATION_START_DATE = new Date(2022, 0, 1);
+
 /** Indicates that a user advisory is recommended */
 export enum ContentRating {
     /** No advisory is necessary */

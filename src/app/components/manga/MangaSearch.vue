@@ -65,9 +65,38 @@
                 </div>
             </Drawer>
 
+            <Drawer title="Date Filters" storage-key="manga-filter-mdates" default-closed>
+                <DateFilter
+                    v-model:before="searchFilters.mBefore"
+                    v-model:after="searchFilters.mAfter"
+                    message="Manga Added Between:"
+                    :max="new Date()"
+                    :min="APPLICATION_START_DATE"
+                />
+                <DateFilter
+                    v-model:before="searchFilters.cFirstBefore"
+                    v-model:after="searchFilters.cFirstAfter"
+                    message="First Chapter Added Between:"
+                    :max="new Date()"
+                    :min="APPLICATION_START_DATE"
+                />
+                <DateFilter
+                    v-model:before="searchFilters.cLastBefore"
+                    v-model:after="searchFilters.cLastAfter"
+                    message="Latest Chapter Added Between:"
+                    :max="new Date()"
+                    :min="APPLICATION_START_DATE"
+                />
+            </Drawer>
+
             <div class="flex row margin-top margin-bottom">
                 <label>Minimum Chapter Count:</label>
                 <input type="number" v-model="searchFilters.chapMin" />
+            </div>
+
+            <div class="flex row margin-top margin-bottom">
+                <label>Maximum Chapter Count:</label>
+                <input type="number" v-model="searchFilters.chapMax" />
             </div>
 
             <label>Manga Sources:</label>
@@ -105,7 +134,7 @@
 
 <script setup lang="ts">
 import type { LocationQueryValue } from 'vue-router';
-import { MangaOrderBy, STATE_ROLLUP } from '~/models';
+import { MangaOrderBy, STATE_ROLLUP, APPLICATION_START_DATE } from '~/models';
 import type { booleanish, MangaSearchFilter, StateRollup } from '~/models';
 
 const api = useMangaApi();
