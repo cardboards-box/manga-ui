@@ -1,5 +1,5 @@
 /*
-AI Disclosure; 
+AI Disclosure;
 This file was created entirely by AI (ChatGPT), because I am too lazy.
 */
 
@@ -39,6 +39,11 @@ export type ParallelForEachSettings<T, TResult> = {
      * Defaults to false.
      */
     throwParameterErrors?: boolean | undefined;
+
+    /**
+     * Whether or not to reverse the order of items after the startFromIndex batch is created.
+     */
+    reverseFill?: boolean | undefined;
 
     /**
      * Called when an item completes successfully.
@@ -147,9 +152,15 @@ export async function parallelForEachAsync<T, TResult>(
         return [];
     }
 
+    const beginWith = Array.from({ length: items.length - startFromIndex }, (_, offset) => startFromIndex + offset);
+    const continueWith = Array.from({ length: startFromIndex - startIndex }, (_, offset) => startIndex + offset);
+    if (settings?.reverseFill) {
+        continueWith.reverse();
+    }
+
     const orderedIndexes = [
-        ...Array.from({ length: items.length - startFromIndex }, (_, offset) => startFromIndex + offset),
-        ...Array.from({ length: startFromIndex - startIndex }, (_, offset) => startIndex + offset)
+        ...beginWith,
+        ...continueWith
     ];
 
     const results = new Array<PromiseSettledResult<TResult>>(totalCount);

@@ -1,6 +1,6 @@
 <template>
     <Error v-if="error" :message="error" />
-    <div 
+    <div
         class="manga-reader flex fill"
         v-swipe
         @tap="pageClick"
@@ -16,10 +16,10 @@
     >
         <Loading v-if="isLoading" />
         <Error v-else-if="!currentPage" :message="'No page found'" />
-        <ReaderSinglePage 
-            v-else-if="mode === 'single-page'" 
-            :images="images" 
-            :current="currentPage" 
+        <ReaderSinglePage
+            v-else-if="mode === 'single-page'"
+            :images="images"
+            :current="currentPage"
             :open="menuOpen"
         />
         <ReaderLongStrip
@@ -39,12 +39,12 @@
                 :class="determineStateClass(page)"
                 class="progress"
             />
-            <div 
+            <div
                 class="progress-percent"
                 v-if="isLongStrip"
             />
         </div>
-        
+
         <div class="tutorial" v-if="showTutorial">
             <div
                 class="region flex"
@@ -186,8 +186,8 @@ const classes = computed(() => serClasses(props.class, pageStyle.value));
 const { top: scrollUp, bottom: scrollDown } = scrollers(clickArea, scrollAmount, scrollAmount);
 
 const moveToRoute = (route: { route: string; id?: string; page?: number }) => {
-    if (!isLongStrip.value 
-        || route.route !== 'chapter' 
+    if (!isLongStrip.value
+        || route.route !== 'chapter'
         || chapter.value?.id !== route.id) {
         let next = `/${route.route}/${route.id}`;
         if (route.page) next += `?page=${route.page}`;
@@ -311,6 +311,7 @@ const tapLoad = async () => {
     await parallelForEach(images, loadImage, {
         maxDegreesOfParallelism: preloadImages.value,
         startFromIndex: images.findIndex(i => i.image.id === currentPage.value?.id),
+        reverseFill: true
     });
 }
 
@@ -318,8 +319,8 @@ onMounted(() => nextTick(() => {
     window.addEventListener('keyup', arrowKeyUp);
     window.addEventListener('keydown', arrowKeyDown);
 
-    watch([pages, preloadPages], 
-        () => mergeImageUpdates(pages.value), 
+    watch([pages, preloadPages],
+        () => mergeImageUpdates(pages.value),
         { deep: true, immediate: true });
 }));
 
@@ -409,8 +410,8 @@ $progress-percent-dot-size: 8px;
             height: $progress-height;
             left: 0;
 
-            .progress { 
-                height: 100%; 
+            .progress {
+                height: 100%;
                 margin: 0 $progress-margin;
             }
 
