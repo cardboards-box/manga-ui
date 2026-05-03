@@ -15,7 +15,7 @@ import type {
     RespReverseResult, MangaSearchFilter,
     RespMangaRecommendations, RecommendationFilter,
     RespList, RespListSearch, RespLists,
-    RespApiKeys, RespApiKey, 
+    RespApiKeys, RespApiKey,
     RespApiKeyKey, ReqMangaApiKey,
 
     ComicFormat, ContentRating,
@@ -88,7 +88,8 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             favorite: (id: string) => get<RespProgress>(`manga/${id}/favorite`),
             unfavorite: (id: string) => del<RespProgress>(`manga/${id}/favorite`),
             recompute: (ids?: string[], since?: number) => get<RespMangaRecompute>(`manga/recompute`, { ids, since }),
-            displayTitle: (id: string, title?: string) => put<RespMangaSet>('manga/display-title', { mangaId: id, display: title })
+            displayTitle: (id: string, title?: string) => put<RespMangaSet>('manga/display-title', { mangaId: id, display: title }),
+            relate: (a: string, b: string) => get<RespManga>(`manga/${a}/relate/${b}`),
         },
         metaData: {
             contentRating: () => get<RespMetadataEnums<ContentRating>>('metadata/content-rating'),
@@ -124,7 +125,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             remove: (listId: string, mangaId: string) => del<RespList>(`list/${listId}/${mangaId}`),
             search: (filter: ListSearchFilter) => post<RespListSearch>('list/search', filter),
             searchUrl: (filter: ListSearchFilter) => get<RespListSearch>('list', filter)
-        }, 
+        },
         apiKeys: {
             get: () => get<RespApiKeys>('api-key'),
             remove: (id: string) => del<BoxedEmpty>(`api-key/${id}`),

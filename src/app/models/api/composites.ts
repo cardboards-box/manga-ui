@@ -7,7 +7,7 @@ import type {
     MbPerson, MbProfile,
     MbSource, MbTag,
     MbList, MbListItem, MbListExt,
-    RelationshipType
+    RelationshipType, MbWork
 } from './db';
 
 export interface MbRelated<TType = string, TData = any> {
@@ -31,6 +31,8 @@ type RelatedRelatedPerson = MbRelated<'MbRelatedPerson', MbRelatedPerson>;
 type RelatedList = MbRelated<'MbList', MbList>;
 type RelatedListItem = MbRelated<'MbListItem', MbListItem>;
 type RelatedListExt = MbRelated<'MbListExt', MbListExt>;
+type RelatedRelatedManga = MbRelated<'MbRelatedManga', MbRelatedManga>;
+type RelatedWork = MbRelated<'MbWork', MbWork>;
 
 export type MangaBoxRelationship =
     RelatedChapter |
@@ -48,7 +50,9 @@ export type MangaBoxRelationship =
     RelatedRelatedPerson |
     RelatedList |
     RelatedListItem |
-    RelatedListExt;
+    RelatedListExt |
+    RelatedRelatedManga |
+    RelatedWork;
 
 export interface MangaBoxType<T, TRelated extends MbRelated = MangaBoxRelationship> {
     entity: T;
@@ -63,7 +67,7 @@ export type MbTypeChapter = MangaBoxType<MbChapter, RelatedManga | RelatedSource
 export type MbTypeProgress = MangaBoxType<MbMangaProgress, RelatedChapterProgress | RelatedList>;
 export type MbTypeProgressMulti = MangaBoxType<MbMangaProgress, RelatedList>;
 export type MbTypeImage = MangaBoxType<MbImage, RelatedChapter | RelatedManga | RelatedSource>;
-export type MbTypeManga = MangaBoxType<MbManga, RelatedSource | RelatedRelatedPerson | RelatedTag | RelatedMangaExt | RelatedImage>;
+export type MbTypeManga = MangaBoxType<MbManga, RelatedSource | RelatedRelatedPerson | RelatedTag | RelatedMangaExt | RelatedImage | RelatedWork | RelatedRelatedManga>;
 export type MbTypeMangaSearch = MangaBoxType<MbManga, RelatedSource | RelatedTag | RelatedMangaExt | RelatedImage>;
 export type MbTypeMangaExt = MangaBoxType<MbMangaExt, RelatedManga | RelatedChapter | RelatedMangaProgress | RelatedChapterProgress>;
 export type MbTypeList = MangaBoxType<MbList, RelatedListItem | RelatedTag | RelatedImage | RelatedListExt>;
@@ -216,6 +220,12 @@ export interface Stats {
         sources: number;
         people: number;
     }[]
+}
+
+export interface MbRelatedManga {
+    mangaId: string;
+    workId: string;
+    sourceId: string;
 }
 
 export const ALL_STATES = [MangaState.Bookmarked, MangaState.Completed, MangaState.InProgress, MangaState.Favorited] as const;

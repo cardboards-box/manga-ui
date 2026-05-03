@@ -9,6 +9,7 @@
                 v-for="s in sorts"
                 :link="url(s.key)"
                 :other-classes="s.key === actSort ? 'active' : ''"
+                :title="s.title"
                 no-boarder
             />
         </div>
@@ -64,12 +65,12 @@ const volumes = computed(() => props.volumes?.volumes ?? []);
 const allCollapsed = computed(() => !!volumes.value.find(t => !t.collapse));
 const loading = computed(() => isTrue(props.pending));
 
-const sorts : { key: ChapterOrderBy, icon: string }[] = [
-    { key: ChapterOrderBy.Ordinal, icon: 'list' },
-    { key: ChapterOrderBy.Date, icon: 'calendar_month' },
-    { key: ChapterOrderBy.Language, icon: 'translate' },
-    { key: ChapterOrderBy.Title, icon: 'sort_by_alpha' },
-    { key: ChapterOrderBy.Read, icon: 'done_all' }
+const sorts : { key: ChapterOrderBy, icon: string, title: string }[] = [
+    { key: ChapterOrderBy.Ordinal, icon: 'list', title: 'Chapter Number' },
+    { key: ChapterOrderBy.Date, icon: 'calendar_month', title: 'Release Date' },
+    //{ key: ChapterOrderBy.Language, icon: 'translate', title: 'Language (useless since everything is EN)' },
+    { key: ChapterOrderBy.Title, icon: 'sort_by_alpha', title: 'Chapter Title' },
+    { key: ChapterOrderBy.Read, icon: 'done_all', title: 'Read Status' }
 ];
 
 const url = (s?: ChapterOrderBy, a?: boolean) => {

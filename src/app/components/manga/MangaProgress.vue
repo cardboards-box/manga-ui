@@ -116,18 +116,18 @@ const {
 } = useCurrentManga();
 
 const props = defineProps<{
-    modelValue: boolean;
+    adminMode: boolean;
 }>();
 
 const emits = defineEmits<{
-    (e: 'update:modelValue', value: boolean): void;
+    (e: 'update:adminMode', value: boolean): void;
 }>();
 
 const admin = computed({
-    get: () => isAdmin.value ? props.modelValue : false,
+    get: () => isAdmin.value ? props.adminMode : false,
     set: (value: boolean) => {
         if (!isAdmin.value) return;
-        emits('update:modelValue', value);
+        emits('update:adminMode', value);
     }
 });
 

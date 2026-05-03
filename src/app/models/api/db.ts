@@ -116,6 +116,8 @@ export interface MbManga extends MbDbObjectLegacy {
     sourceCreated?: Date | string;
     /** Whether or not the chapter ordinals reset for each volume */
     ordinalVolumeReset: boolean;
+    /** Indicates that the same manga is available on other sources */
+    workId?: string;
 }
 
 //I gave up doing comments... Just refer to the API
@@ -218,3 +220,5 @@ export interface MbApiKey extends MbDbObject {
     name: string;
     profileId: string;
 }
+
+export interface MbWork extends MbDbObject { }

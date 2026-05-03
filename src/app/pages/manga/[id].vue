@@ -7,7 +7,9 @@
                 <Cover :image="cover" type="background" width="100%" height="400px" />
                 <a class="title" :href="manga.url" target="_blank">{{ title }}</a>
                 <div class="drawers margin-top">
-                    <MangaProgress v-model="adminMode" />
+                    <MangaProgress
+                        v-model:admin-mode="adminMode"
+                    />
                     <Drawer title="Description" v-if="description" default-closed storage-key="manga-desc">
                         <Markdown :content="description" />
                     </Drawer>
@@ -113,6 +115,14 @@
                         <Icon>recommend</Icon>
                         <span>Recommended</span>
                     </button>
+                    <button
+                        v-if="hasRelated"
+                        :class="{ 'active': tab === 'related' }"
+                        @click="tab = 'related'"
+                    >
+                        <Icon>family_history</Icon>
+                        <span>Related</span>
+                    </button>
                 </div>
                 <VolumeList
                     v-show="tab === 'chapters'"
@@ -172,6 +182,16 @@
                         </Cover>
                     </ClientOnly>
                 </div>
+                <div class="related flex row" v-show="tab === 'related'">
+                    <Error v-if="relatedMangaError" :message="relatedMangaError" />
+                    <CardList
+                        v-else
+                        :pending="relatedMangaLoading"
+                        :manga="relatedMangaValues"
+                        :content-ratings="contentRatings"
+                        title="Related Manga"
+                    />
+                </div>
             </div>
         </main>
     </div>
@@ -179,7 +199,7 @@
 
 <script setup lang="ts">
 import { ChapterOrderBy } from '~/models';
-import type { MbImage, ProgressChapter } from '~/models';
+import type { MbImage, ProgressChapter, MbTypeMangaSearch } from '~/models';
 
 const route = useRoute();
 const api = useMangaApi();
@@ -192,7 +212,7 @@ const {
     refresh, manga, extended,
     error, volumes, cover, tags,
     pending, throttled, params,
-    bookmarks, covers
+    bookmarks, covers, relatedManga
 } = useCurrentManga();
 const { pending: nuxtPending } = useAsyncData(
     `manga-${route.params.id}-fetch`,
@@ -203,16 +223,20 @@ const { data: cached } = useAsyncData(async () => await cache.get());
 const contentRatings = computed(() => cached.value?.contentRatings ?? []);
 const rating = computed(() => contentRatings.value.find(t => t.value === manga.value?.contentRating));
 
-
 const rawLoading = ref(false);
 const loading = computed(() => nuxtPending.value || pending.value || rawLoading.value);
 const title = computed(() => extended.value?.displayTitle ?? manga.value?.title ?? 'Manga Not Found!');
 const description = computed(() => manga.value?.description ?? 'Find your next binge on MangaBox!');
 const coverImage = computed(() => cover.value ? wrapUrl(apiUrl, cover.value?.url) : 'https://mangabox.app/broken.png');
-const tab = ref<'chapters' | 'covers' | 'recommendations'>('chapters');
+const hasRelated = computed(() => relatedManga.value && relatedManga.value.length > 0);
+const tab = ref<'chapters' | 'covers' | 'recommendations' | 'related'>('chapters');
 const adminMode = ref(false);
 const selectedChapters = ref<string[]>([]);
 const selectedTitle = ref('');
+
+const relatedMangaValues = ref<MbTypeMangaSearch[]>([]);
+const relatedMangaLoading = ref(false);
+const relatedMangaError = ref<string>();
 
 useHead({ title });
 
@@ -223,15 +247,26 @@ if (import.meta.server) useSeoMeta({
     twitterCard: 'summary_large_image'
 });
 
-watch(() => route.params.id, () => throttled(false));
-watch(() => route.query.asc, () => throttled(false));
-watch(() => route.query.sort, () => throttled(false));
-watch(canRead, () => throttled(false));
+const loadRelated = async () => {
+    if (!relatedManga.value) return;
 
-onMounted(() => setTimeout(() => nextTick(() => {
-    if (!canRead.value || (!error.value && manga.value)) return;
-    refresh(true);
-}), 200));
+    relatedMangaLoading.value = true;
+    relatedMangaError.value = undefined;
+
+    try {
+        const related = relatedManga.value.map(r => r.mangaId);
+        const result = await api.promise.manga.search({ ids: related });
+        if (!api.isSuccess(result))
+            throw new Error(api.errorMessage(result) ?? 'Failed to load related manga!');
+
+        const relatedData = api.data(result);
+        relatedMangaValues.value = relatedData.data ?? [];
+    } catch (e) {
+        relatedMangaError.value = e?.toString();
+    } finally {
+        relatedMangaLoading.value = false;
+    }
+}
 
 const saveTitle = async () => {
     if (!manga.value) return;
@@ -270,6 +305,17 @@ const deleteCover = async (cover: MbImage) => {
     rawLoading.value = false;
     throttled(true);
 }
+
+watch(() => route.params.id, () => throttled(false));
+watch(() => route.query.asc, () => throttled(false));
+watch(() => route.query.sort, () => throttled(false));
+watch(() => relatedManga.value, () => loadRelated(), { immediate: true, deep: true });
+watch(canRead, () => throttled(false));
+
+onMounted(() => setTimeout(() => nextTick(() => {
+    if (!canRead.value || (!error.value && manga.value)) return;
+    refresh(true);
+}), 200));
 </script>
 
 <style lang="scss" scoped>
@@ -312,6 +358,8 @@ const deleteCover = async (cover: MbImage) => {
         }
 
         .content-container {
+            max-width: min(1010px, 100vw);
+
             .tab-list {
                 margin-top: var(--margin);
                 margin-bottom: var(--margin);
@@ -342,6 +390,11 @@ const deleteCover = async (cover: MbImage) => {
             }
 
             .recommendations {
+                max-width: 100%;
+                padding-right: calc(var(--margin) * 2);
+            }
+
+            .related {
                 max-width: 100%;
                 padding-right: calc(var(--margin) * 2);
             }

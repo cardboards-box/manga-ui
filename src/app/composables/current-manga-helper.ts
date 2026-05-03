@@ -203,6 +203,7 @@ export function useCurrentManga() {
         invalidate: computed(() => invalidate.value),
         partialLoading: computed(() => partialLoading.value),
         progressData: computed(() => calculateProgress(volumes.value, extended.value, 0)),
+        relatedManga: computed(() => manga.value ? getRelateds(manga.value, 'MbRelatedManga') : []),
         forceRefresh,
         favourited,
         resetProgress,

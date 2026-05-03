@@ -51,7 +51,6 @@ import type { RecommendationFilter } from '~/models';
 const api = useMangaApi();
 const cache = useCacheHelper();
 const { recommendations } = useMangaUtils();
-const { addParams } = useSettingsHelper();
 
 const props = defineProps<{
     id?: string;
