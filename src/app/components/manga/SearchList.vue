@@ -62,7 +62,7 @@
             </div>
         </div>
 
-        <div class="pager-wrapper margin-bottom" v-if="canPaginate && !pending">
+        <div class="pager-wrapper margin-bottom" v-if="canPaginate  && (pagination?.total ?? 0) > 1 && !pending">
             <Pager
                 :page="pagination!.page"
                 :pages="pagination!.pages"
