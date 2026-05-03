@@ -90,6 +90,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             recompute: (ids?: string[], since?: number) => get<RespMangaRecompute>(`manga/recompute`, { ids, since }),
             displayTitle: (id: string, title?: string) => put<RespMangaSet>('manga/display-title', { mangaId: id, display: title }),
             relate: (a: string, b: string) => get<RespManga>(`manga/${a}/relate/${b}`),
+            unrelate: (a: string, b: string) => del<RespManga>(`manga/${a}/relate/${b}`),
         },
         metaData: {
             contentRating: () => get<RespMetadataEnums<ContentRating>>('metadata/content-rating'),

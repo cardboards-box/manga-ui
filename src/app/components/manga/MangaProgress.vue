@@ -57,6 +57,14 @@
                     color="shade"
                     @click="doListPopup"
                 />
+                <IconBtn
+                    v-if="isAdmin"
+                    :loading="partialLoading"
+                    icon="family_history"
+                    text="Manage Related Manga"
+                    color="shade"
+                    :link="`/manga/${manga.id}/relate`"
+                />
             </div>
         </Drawer>
         <Drawer title="Progress" v-if="canRead" storage-key="manga-progress">
