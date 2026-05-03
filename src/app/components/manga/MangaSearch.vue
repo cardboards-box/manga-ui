@@ -6,7 +6,6 @@
         :manga="results"
         :pending="loading"
         v-model="headerStuck"
-        @onscrolled="onScroll"
         @reload="() => refresh()"
         @load-page="(v) => updateRoute({ page: v })"
         @back="back"
@@ -113,7 +112,6 @@ const route = useRoute();
 const router = useRouter();
 const { canRead } = useAuthHelper();
 const { addParams } = useSettingsHelper();
-const { infiniteScroll } = useAppSettings();
 const cache = useCacheHelper();
 const { throttle, isTrue } = useUtils();
 const { searchManga } = useMangaUtils();
@@ -193,16 +191,6 @@ const mangaStateText = computed(() => {
 })
 
 const srcs = computed(() => sources.value.map(t => ({ name: t.name, value: t.id, description: t.baseUrl })));
-
-const onScroll = () => {
-    if (results.value.length === 0 ||
-        pages.value <= page.value||
-        loading.value ||
-        !infiniteScroll.value)
-        return;
-
-    page.value++;
-}
 
 const updateRoute = (merge?: Partial<MangaSearchFilter>) => {
     const fil = { ...filter.value, ...merge };

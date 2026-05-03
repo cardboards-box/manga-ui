@@ -22,7 +22,6 @@ interface MangaSettings {
     lastCheck: Date | undefined;
     maxImageWidth: number | undefined;
     maxImageHeight: number | undefined;
-    infiniteScroll: boolean;
     proxyUrl: string | undefined;
     blackListTags: string[] | undefined;
     preloadImages: number;
@@ -56,7 +55,6 @@ const DEFAULTS: MangaSettings = {
     lastCheck: new Date(),
     maxImageHeight: undefined,
     maxImageWidth: undefined,
-    infiniteScroll: true,
     proxyUrl: undefined,
     blackListTags: [],
     preloadImages: 5,
@@ -90,7 +88,6 @@ export const useAppSettings = () => {
             lastCheck: getSetDate('last-check', null, () => commit()),
             maxImageWidth: getSetNumbNull('max-image-width', DEFAULTS.maxImageWidth, () => commit()),
             maxImageHeight: getSetNumbNull('max-image-height', DEFAULTS.maxImageHeight, () => commit()),
-            infiniteScroll: getSetBool('infinite-scroll', DEFAULTS.infiniteScroll, () => commit()),
             proxyUrl: getSet<string>('proxy-url', DEFAULTS.proxyUrl, () => commit()),
             blackListTags: getSetJson<string[]>('blacklist-tags', DEFAULTS.blackListTags, () => commit()),
             preloadImages: getSetNumb('preload-images', DEFAULTS.preloadImages, () => commit())

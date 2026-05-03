@@ -75,11 +75,6 @@
                                 Fill Card-List Page
                             </CheckBox>
                         </div>
-                        <div class="control checkbox">
-                            <CheckBox v-model="infiniteScroll">
-                                Card-List Infinite Scroll
-                            </CheckBox>
-                        </div>
                         <div class="control span">
                             <label class="no-bot">Proxy URL</label>
                             <input type="text" v-model="proxyUrl" placeholder="Proxy URL (use placeholders: {image}, {group}, {referer})" />
@@ -109,7 +104,6 @@ import {
 
 const {
     blurPornCovers,
-
     invertControls,
     forwardOnly,
     brightness,
@@ -121,7 +115,6 @@ const {
     fillPage,
     filterStyle: filter,
     customFilter,
-    infiniteScroll,
     proxyUrl,
     blackListTags,
 } = useAppSettings();

@@ -17,12 +17,6 @@
                 @click="() => fill = !fill"
                 :icon="!fill ? 'fullscreen' : 'fullscreen_exit'"
             />
-            <IconBtn
-                v-if="canPaginate"
-                @click="() => infinite = !infinite"
-                :icon="!infinite ? 'all_inclusive' : 'page_control'"
-                title="Infinite Scroll / Pagination"
-            />
             <slot name="extra-buttons" />
         </div>
 
@@ -30,7 +24,7 @@
             <slot name="header" />
         </header>
 
-        <div class="pager-wrapper" v-if="canPaginate && !infinite && (pagination?.total ?? 0) > 1">
+        <div class="pager-wrapper" v-if="canPaginate && (pagination?.total ?? 0) > 1">
             <Pager
                 :page="pagination!.page"
                 :pages="pagination!.pages"
@@ -68,7 +62,7 @@
             </div>
         </div>
 
-        <div class="pager-wrapper margin-bottom" v-if="canPaginate && !infinite && !pending">
+        <div class="pager-wrapper margin-bottom" v-if="canPaginate && !pending">
             <Pager
                 :page="pagination!.page"
                 :pages="pagination!.pages"
@@ -86,7 +80,7 @@
 import type { booleanish, StyleOptions } from '~/models';
 
 const { isTrue, serStyles } = useUtils();
-const { fillPage, infiniteScroll } = useAppSettings();
+const { fillPage } = useAppSettings();
 
 const stickyheader = ref<HTMLElement>();
 const emits = defineEmits<{
@@ -116,11 +110,6 @@ const props = defineProps<{
         total: number;
     };
 }>();
-
-const infinite = computed<boolean>({
-    get: () => infiniteScroll.value,
-    set: (value: boolean) => infiniteScroll.value = value
-});
 
 const shouldShowGrid = computed(() => isTrue(props.showGrid));
 

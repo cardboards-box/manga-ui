@@ -4,8 +4,7 @@
         v-else
         :title="title"
         :lists="data"
-         v-model="headerStuck"
-        @onscrolled="onScroll"
+        v-model="headerStuck"
         @reload="() => refresh()"
         @load-page="(v) => updateRoute({ page: v })"
         @back="back"
@@ -55,7 +54,6 @@ import { ListType } from '~/models';
 const route = useRoute();
 const { canRead } = useAuthHelper();
 const { throttle } = useUtils();
-const { infiniteScroll } = useAppSettings();
 const cache = useCacheHelper();
 const { search, parseFilters, updateRoute, clearFilters } = useListHelper();
 
@@ -93,16 +91,6 @@ const error = computed({
 });
 
 const back = () => history.back();
-
-const onScroll = () => {
-    if (data.value.length === 0 ||
-        pages.value <= page.value||
-        loading.value ||
-        !infiniteScroll.value)
-        return;
-
-    page.value++;
-}
 
 const doSearch = () => {
     updateRoute(searchFilters.value);
