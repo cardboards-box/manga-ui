@@ -1,23 +1,23 @@
 <template>
-<Loading v-if="loading" />
-<Error v-else-if="!canRead || error" :message="error ?? 'Not found!'" />
-<div v-else class="center rounded bg-accent pad flex row import">
-    <h2>Don't see your favourite manga? Add it!</h2>
-    <div class="control fill">
-        <label>Manga URL</label>
-        <input type="url" placeholder="Manga Home Page URL" v-model="url" />
+    <Loading v-if="loading" />
+    <Error v-else-if="!canRead || error" :message="error ?? 'Not found!'" />
+    <div v-else class="center rounded bg-accent pad flex row import">
+        <h2>Don't see your favourite manga? Add it!</h2>
+        <div class="control fill">
+            <label>Manga URL</label>
+            <input type="url" placeholder="Manga Home Page URL" v-model="url" />
+        </div>
+        <p>We support Manga from the following sites:</p>
+        <ul>
+            <li v-for="prov in sources" :key="prov.slug">
+                <a :href="prov.baseUrl" target="_blank">{{ prov.name }}</a>
+                {{ prov.slug === 'nhentai' ? '(Yes, really...)' : '' }}
+            </li>
+        </ul>
+        <footer class="flex">
+            <IconBtn icon="add" pad-left @click="addManga"  />
+        </footer>
     </div>
-    <p>We support Manga from the following sites:</p>
-    <ul>
-        <li v-for="prov in sources" :key="prov.slug">
-            <a :href="prov.baseUrl" target="_blank">{{ prov.name }}</a>
-            {{ prov.slug === 'nhentai' ? '(Yes, really...)' : '' }}
-        </li>
-    </ul>
-    <footer class="flex">
-        <IconBtn icon="add" pad-left @click="addManga"  />
-    </footer>
-</div>
 </template>
 
 <script setup lang="ts">

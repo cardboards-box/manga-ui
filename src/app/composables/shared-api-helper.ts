@@ -23,7 +23,7 @@ import type {
     VolumeState, MangaOrderBy,
     MangaState, RespStats,
     ListSearchFilter, ListType, ListOrderBy,
-    MbImage
+    MbImage, ReqListImportMd, RespListImport
 } from '../models';
 
 type NuxtApiHandle = ReturnType<typeof useApiHelper>;
@@ -125,7 +125,8 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             add: (listId: string, mangaId: string) => get<RespList>(`list/${listId}/${mangaId}`),
             remove: (listId: string, mangaId: string) => del<RespList>(`list/${listId}/${mangaId}`),
             search: (filter: ListSearchFilter) => post<RespListSearch>('list/search', filter),
-            searchUrl: (filter: ListSearchFilter) => get<RespListSearch>('list', filter)
+            searchUrl: (filter: ListSearchFilter) => get<RespListSearch>('list', filter),
+            importMd: (req: ReqListImportMd) => post<RespListImport>('list/import/md', req)
         },
         apiKeys: {
             get: () => get<RespApiKeys>('api-key'),

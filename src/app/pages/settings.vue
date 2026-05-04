@@ -132,6 +132,7 @@
                             icon="delete"
                             color="primary"
                             text="Clear Page Cache"
+                            title="Clears all page images from the cache, leaving covers alone"
                             @click="clear(false)"
                         />
                         <IconBtn
@@ -139,6 +140,7 @@
                             icon="delete"
                             color="danger"
                             text="Clear All Cache"
+                            title="Clears all page images and cover images from the cache"
                             @click="clear(true)"
                         />
                     </div>

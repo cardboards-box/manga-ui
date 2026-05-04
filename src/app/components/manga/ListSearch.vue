@@ -45,6 +45,10 @@
                 </button>
             </div>
         </InputGroup>
+
+        <template #list-item="{ list }">
+            <slot :list="list" />
+        </template>
     </ListList>
 </template>
 

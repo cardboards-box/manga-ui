@@ -6,7 +6,9 @@
         :link="link"
         :description="entity.description"
     >
-        <slot />
+        <template #title>
+            <slot />
+        </template>
         <CardLine title="Visibility" :style="actStyle">{{ entity.isPublic ? 'Public' : 'Private' }}</CardLine>
         <CardLine title="Created" :style="actStyle">
             <Date :date="entity.createdAt" utc />,

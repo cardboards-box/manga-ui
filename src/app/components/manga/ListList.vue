@@ -16,7 +16,9 @@
         :styles="listStyle"
     >
         <template #default="{ item }">
-            <ListCard :list="item" />
+            <ListCard :list="item">
+                <slot name="list-item" :list="item" />
+            </ListCard>
         </template>
 
         <template #extra-buttons>

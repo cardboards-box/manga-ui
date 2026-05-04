@@ -47,15 +47,18 @@
 </NuxtLink>
 
 <NuxtLink to="/list" active-class="active" @click="clicked">
-    <Icon>list</Icon>
+    <Icon>format_list_bulleted</Icon>
     <p>Lists</p>
 </NuxtLink>
-
-
 
 <NuxtLink class="sub" to="/list/mine" active-class="active" @click="clicked" v-if="canRead">
     <Icon>patient_list</Icon>
     <p>My Lists</p>
+</NuxtLink>
+
+<NuxtLink class="sub" to="/list/import" active-class="active" @click="clicked" v-if="canRead">
+    <Icon>format_list_bulleted_add</Icon>
+    <p>Import MD List</p>
 </NuxtLink>
 
 <NuxtLink to="/stats" active-class="active" @click="clicked">

@@ -62,6 +62,18 @@ export interface ReqMangaApiKey {
     name: string;
 }
 
+export interface ReqListImportMd {
+    mdListId: string;
+    isPublic: boolean;
+    name?: string;
+    description?: string;
+}
+
+export interface MbListImportResponse {
+    failures: { [key: string]: string; };
+    list: MbTypeList;
+}
+
 export interface RespMetadataEnums<T = number> extends BoxedArray<EnumDescription<T>> { }
 
 export interface RespMetadataTags extends BoxedArray<MbTag> { }
@@ -69,3 +81,5 @@ export interface RespMetadataTags extends BoxedArray<MbTag> { }
 export interface RespMetadataSource extends BoxedArray<MbSource> { }
 
 export interface RespStats extends Boxed<Stats> { }
+
+export interface RespListImport extends Boxed<MbListImportResponse> { }
