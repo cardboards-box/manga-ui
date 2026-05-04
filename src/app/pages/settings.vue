@@ -88,6 +88,61 @@
                 <Tab title="Theme" icon="palette" scrollable keep-alive>
                     <ThemeEditor />
                 </Tab>
+                <Tab title="Image Cache" icon="database" scrollable keep-alive>
+                    <div class="flex">
+                        <h3 class="center-vert fill">Image Cache Info</h3>
+                        <IconBtn
+                            icon="refresh"
+                            color="shade"
+                            title="Refresh Cache Info"
+                            @click="refreshMeta"
+                        />
+                    </div>
+                    <div class="flex margin">
+                        <span class="center-vert"><b>Total Images: </b></span>
+                        <span class="margin-left center-vert">{{ meta.totalCount }}</span>
+                    </div>
+                    <div class="flex margin">
+                        <span class="center-vert"><b>Total Covers: </b></span>
+                        <span class="margin-left center-vert">{{ meta.coverCount }}</span>
+                    </div>
+                    <div class="flex margin">
+                        <span class="center-vert"><b>Total Pages: </b></span>
+                        <span class="margin-left center-vert">{{ meta.totalCount - meta.coverCount }}</span>
+                    </div>
+                    <div class="flex margin">
+                        <span class="center-vert"><b>Total Size: </b></span>
+                        <span class="margin-left center-vert">{{ fileSize }}</span>
+                    </div>
+                    <div class="flex margin" v-if="cacheMinDate">
+                        <span class="center-vert"><b>First Cache Date: </b></span>
+                        <span class="margin-left center-vert">
+                            <Date :date="cacheMinDate" utc /> - <Date :date="cacheMinDate" format="R" utc />
+                        </span>
+                    </div>
+                    <div class="flex margin" v-if="cacheMaxDate">
+                        <span class="center-vert"><b>Last Cache Date: </b></span>
+                        <span class="margin-left center-vert">
+                            <Date :date="cacheMaxDate" utc /> - <Date :date="cacheMaxDate" format="R" utc />
+                        </span>
+                    </div>
+                    <div class="flex">
+                        <div class="fill" />
+                        <IconBtn
+                            icon="delete"
+                            color="primary"
+                            text="Clear Page Cache"
+                            @click="clear(false)"
+                        />
+                        <IconBtn
+                            class="margin-left"
+                            icon="delete"
+                            color="danger"
+                            text="Clear All Cache"
+                            @click="clear(true)"
+                        />
+                    </div>
+                </Tab>
             </Tabs>
         </ClientOnly>
     </div>
@@ -101,6 +156,8 @@ import {
     FilterStyle,
     LIST_STYLES
 } from '~/models';
+
+const { fileSizeMicro } = useUtils();
 
 const {
     blurPornCovers,
@@ -119,7 +176,17 @@ const {
     blackListTags,
 } = useAppSettings();
 
+const {
+    meta,
+    refreshMeta,
+    clear
+} = useImageCache();
+
 useHead({ title: 'Configure the reader your way.' });
+
+const cacheMinDate = computed(() => meta.value.minDate ? new Date(meta.value.minDate) : null);
+const cacheMaxDate = computed(() => meta.value.maxDate ? new Date(meta.value.maxDate) : null);
+const fileSize = computed(() => fileSizeMicro(meta.value.storedSize));
 </script>
 
 <style lang="scss" scoped>

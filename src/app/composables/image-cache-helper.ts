@@ -77,19 +77,19 @@ export const useImageCache = () => {
         try {
             const { image, meta } = createKeys(url);
             await $db.setItem(image, resp.image.blob);
-            await $db.setItem(meta, { 
-                width: resp.image.width, 
-                height: resp.image.height, 
-                size: resp.image.size, 
+            await $db.setItem(meta, {
+                width: resp.image.width,
+                height: resp.image.height,
+                size: resp.image.size,
                 cover: resp.image.cover,
                 stored: resp.image.stored
             });
             currentMetaData.value.totalCount++;
             if (resp.image.cover) currentMetaData.value.coverCount++;
             currentMetaData.value.storedSize += resp.image.size;
-            if (resp.image.stored < currentMetaData.value.minDate) 
+            if (resp.image.stored < currentMetaData.value.minDate)
                 currentMetaData.value.minDate = resp.image.stored;
-            if (resp.image.stored > currentMetaData.value.maxDate) 
+            if (resp.image.stored > currentMetaData.value.maxDate)
                 currentMetaData.value.maxDate = resp.image.stored;
             return { ...resp, cached: true };
         } catch (error) {
@@ -127,17 +127,17 @@ export const useImageCache = () => {
             }
             const blob = await response.blob();
             const image = await createImageBitmap(blob);
-            const current: ImageResponse = { 
-                image: { 
-                    blob, 
-                    width: image.width, 
+            const current: ImageResponse = {
+                image: {
+                    blob,
+                    width: image.width,
                     height: image.height,
                     size: blob.size,
                     cover,
                     stored: Date.now()
-                }, 
-                code: response.status, 
-                message: 'Success' 
+                },
+                code: response.status,
+                message: 'Success'
             };
             image.close();
             if (import.meta.client)
@@ -158,7 +158,7 @@ export const useImageCache = () => {
      * @param url The URL of the image
      * @returns The cached image data
      */
-    async function fetchCached(url: string): Promise<ImageResponse | undefined> { 
+    async function fetchCached(url: string): Promise<ImageResponse | undefined> {
         try {
             if (!import.meta.client) return undefined;
 
@@ -198,7 +198,7 @@ export const useImageCache = () => {
         ctrl ??= new AbortController();
         const url = typeof image === 'string' ? image : api.promise.image.downloadUrl(image);
         const cover = typeof image !== 'string' && !image.chapterId;
-        
+
         const cached = await fetchCached(url);
         if (cached) return cached;
 
@@ -209,7 +209,7 @@ export const useImageCache = () => {
      * Reads the current metadata from the database and updates the state
      * @returns The current metadata
      */
-    async function readMetadata() {
+    async function readMetadata(): Promise<DatabaseMetadata> {
         try {
             const { meta } = createKeys('');
             const keys = await $db.keys();
@@ -223,9 +223,9 @@ export const useImageCache = () => {
                 current.totalCount++;
                 if (meta.cover) current.coverCount++;
                 current.storedSize += meta.size;
-                if (meta.stored < current.minDate) 
+                if (meta.stored < current.minDate)
                     current.minDate = meta.stored;
-                if (meta.stored > current.maxDate) 
+                if (meta.stored > current.maxDate)
                     current.maxDate = meta.stored;
             }
 

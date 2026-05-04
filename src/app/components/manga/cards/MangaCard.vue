@@ -28,7 +28,7 @@
         </CardLine>
         <template v-if="ext">
             <CardLine title="Latest Chapter" :style="actStyle">
-                <Date :date="ext.lastChapterCreated" utc />
+                <Date :date="ext.lastChapterCreated" utc /> - <Date :date="ext.lastChapterCreated" format="R" utc />
             </CardLine>
             <CardLine title="Stats" :style="actStyle">
                 {{ ext.chapterCount }} Chapter{{ ext.chapterCount !== 1 ? 's' : '' }}
