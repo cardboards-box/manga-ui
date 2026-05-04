@@ -255,6 +255,14 @@ function parseFilters(): MangaSearchFilter {
         return <any>values;
     }
 
+    const getDate = (value: LocationQueryValue | LocationQueryValue[]): Date | undefined => {
+        const str = Array.isArray(value) ? value[0]?.toString() : value?.toString();
+        if (!str) return undefined;
+
+        const date = new Date(str);
+        return isNaN(date.getTime()) ? undefined : date;
+    };
+
     const filter = {...defaultFilters.value};
 
     const pars: {
@@ -277,7 +285,14 @@ function parseFilters(): MangaSearchFilter {
         'states': { prop: 'states', massage: (v) => getArray(v, t => +t) },
         'statesinclude': { prop: 'statesInclude', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
         'statesand': { prop: 'statesAnd', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
-        'chapmin': { prop: 'chapMin', massage: (v) => +(v ?? 0) }
+        'chapmin': { prop: 'chapMin', massage: (v) => +(v ?? 0) },
+        'chapmax': { prop: 'chapMax', massage: (v) => +(v ?? 0) },
+        'mbefore': { prop: 'mBefore', massage: getDate },
+        'mafter': { prop: 'mAfter', massage: getDate },
+        'cfirstbefore': { prop: 'cFirstBefore', massage: getDate },
+        'cfirstafter': { prop: 'cFirstAfter', massage: getDate },
+        'clastbefore': { prop: 'cLastBefore', massage: getDate },
+        'clastafter': { prop: 'cLastAfter', massage: getDate }
     };
 
     for(const key in route.query) {

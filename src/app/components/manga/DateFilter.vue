@@ -5,33 +5,33 @@
                 v-model="useDate"
             />
             <label class="center-vert fill">{{ message }}</label>
-            <div 
-                class="center-vert margin-right" 
+            <div
+                class="center-vert margin-right shown-date"
                 v-if="beforeDate && afterDate"
             >
                 (&nbsp;
                 <Date :date="beforeDate" format="D" class="mute" />
-                &nbsp;-&nbsp; 
+                &nbsp;-&nbsp;
                 <Date :date="afterDate" format="D" class="mute" />
                 &nbsp;)
             </div>
         </div>
-        <div class="flex" v-if="beforeDate && afterDate">
-            <CalendarPicker
-                v-model="afterDate"
-                :range-min="min"
-                :range-max="beforeDate"
-            />
-
-            <div class="fill">
-                <label class="center-vert fill">to</label>
+        <div class="flex calendar-selector margin-top" v-if="beforeDate && afterDate">
+            <div class="center picker">
+                <CalendarPicker
+                    v-model="afterDate"
+                    :range-min="min"
+                    :range-max="beforeDate"
+                />
             </div>
-
-            <CalendarPicker
-                v-model="beforeDate"
-                :range-min="afterDate"
-                :range-max="max"
-            />
+            <p class="center between">Between</p>
+            <div class="center picker">
+                <CalendarPicker
+                    v-model="beforeDate"
+                    :range-min="afterDate"
+                    :range-max="max"
+                />
+            </div>
         </div>
     </div>
 </template>
@@ -87,4 +87,18 @@ const afterDate = computed({
 
 <style lang="scss" scoped>
 
+@media screen and (max-width: 820px) {
+    .shown-date {
+        display: none;
+    }
+
+    .calendar-selector {
+        flex-direction: column;
+        align-items: center;
+
+        .between {
+            margin: 0.5rem 0;
+        }
+    }
+}
 </style>
