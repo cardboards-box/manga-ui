@@ -64,9 +64,38 @@
                 </div>
             </Drawer>
 
+            <Drawer title="Date Filters" storage-key="manga-filter-mdates" default-closed>
+                <DateFilter
+                    v-model:before="searchFilters.mBefore"
+                    v-model:after="searchFilters.mAfter"
+                    message="Manga Added Between:"
+                    :max="new Date()"
+                    :min="APPLICATION_START_DATE"
+                />
+                <DateFilter
+                    v-model:before="searchFilters.cFirstBefore"
+                    v-model:after="searchFilters.cFirstAfter"
+                    message="First Chapter Added Between:"
+                    :max="new Date()"
+                    :min="APPLICATION_START_DATE"
+                />
+                <DateFilter
+                    v-model:before="searchFilters.cLastBefore"
+                    v-model:after="searchFilters.cLastAfter"
+                    message="Latest Chapter Added Between:"
+                    :max="new Date()"
+                    :min="APPLICATION_START_DATE"
+                />
+            </Drawer>
+
             <div class="flex row margin-top margin-bottom">
                 <label>Minimum Chapter Count:</label>
                 <input type="number" v-model="searchFilters.chapMin" />
+            </div>
+
+            <div class="flex row margin-top margin-bottom">
+                <label>Maximum Chapter Count:</label>
+                <input type="number" v-model="searchFilters.chapMax" />
             </div>
 
             <label>Manga Sources:</label>
@@ -104,7 +133,7 @@
 
 <script setup lang="ts">
 import type { LocationQueryValue } from 'vue-router';
-import { MangaOrderBy, STATE_ROLLUP } from '~/models';
+import { MangaOrderBy, STATE_ROLLUP, APPLICATION_START_DATE } from '~/models';
 import type { booleanish, MangaSearchFilter, StateRollup } from '~/models';
 
 const api = useMangaApi();
@@ -226,6 +255,14 @@ function parseFilters(): MangaSearchFilter {
         return <any>values;
     }
 
+    const getDate = (value: LocationQueryValue | LocationQueryValue[]): Date | undefined => {
+        const str = Array.isArray(value) ? value[0]?.toString() : value?.toString();
+        if (!str) return undefined;
+
+        const date = new Date(str);
+        return isNaN(date.getTime()) ? undefined : date;
+    };
+
     const filter = {...defaultFilters.value};
 
     const pars: {
@@ -248,7 +285,14 @@ function parseFilters(): MangaSearchFilter {
         'states': { prop: 'states', massage: (v) => getArray(v, t => +t) },
         'statesinclude': { prop: 'statesInclude', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
         'statesand': { prop: 'statesAnd', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
-        'chapmin': { prop: 'chapMin', massage: (v) => +(v ?? 0) }
+        'chapmin': { prop: 'chapMin', massage: (v) => +(v ?? 0) },
+        'chapmax': { prop: 'chapMax', massage: (v) => +(v ?? 0) },
+        'mbefore': { prop: 'mBefore', massage: getDate },
+        'mafter': { prop: 'mAfter', massage: getDate },
+        'cfirstbefore': { prop: 'cFirstBefore', massage: getDate },
+        'cfirstafter': { prop: 'cFirstAfter', massage: getDate },
+        'clastbefore': { prop: 'cLastBefore', massage: getDate },
+        'clastafter': { prop: 'cLastAfter', massage: getDate }
     };
 
     for(const key in route.query) {

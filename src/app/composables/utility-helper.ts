@@ -571,6 +571,18 @@ export const useUtils = () => {
         return Math.min(Math.max(num, min), max);
     }
 
+    /**
+     * Splits the given array into chunks of the given size
+     * @param arr The array to split into chunks
+     * @param size The size of each chunk
+     * @returns The array split into chunks
+     */
+    const chunk = <T>(arr: T[], size: number) => {
+        return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+            arr.slice(i * size, i * size + size)
+        );
+    }
+
     (() => {
         const doResize = () => {
             if (window && 'resize-watcher' in window) return;
@@ -629,6 +641,7 @@ export const useUtils = () => {
         writeToClipboard,
         baseUrl,
         clamp,
+        chunk,
         parallelForEach: parallelForEachAsync,
         parallelForEachVoid: parallelForEachVoidAsync,
     }
