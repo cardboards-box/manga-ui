@@ -8,6 +8,8 @@ interface MangaSettings {
     brightness: number;
     scrollAmount: number;
     pageStyle: PageStyle;
+    autoLongStrip: boolean;
+    autoLongStripStyle: PageStyle;
     filterStyle: FilterStyle;
     progressBarStyle: ProgressBarStyle;
     customFilter: string | undefined;
@@ -58,6 +60,8 @@ const DEFAULTS: MangaSettings = {
     proxyUrl: undefined,
     blackListTags: [],
     preloadImages: 5,
+    autoLongStrip: true,
+    autoLongStripStyle: PageStyle.LongStripFit,
 }
 
 export const useAppSettings = () => {
@@ -74,6 +78,8 @@ export const useAppSettings = () => {
             brightness: getSetNumb('manga-brightness', DEFAULTS.brightness, () => commit()),
             scrollAmount: getSetNumb('scroll-amount', DEFAULTS.scrollAmount, () => commit()),
             pageStyle: getSet<PageStyle>('image-size', DEFAULTS.pageStyle, () => commit()),
+            autoLongStrip: getSetBool('auto-long-strip', DEFAULTS.autoLongStrip, () => commit()),
+            autoLongStripStyle: getSet<PageStyle>('auto-long-strip-style', DEFAULTS.autoLongStripStyle, () => commit()),
             filterStyle: getSet<FilterStyle>('image-filter', DEFAULTS.filterStyle, () => commit()),
             progressBarStyle: getSet<ProgressBarStyle>('progress-bar', DEFAULTS.progressBarStyle, () => commit()),
             customFilter: getSet<string>('custom-filter', DEFAULTS.customFilter, () => commit()),

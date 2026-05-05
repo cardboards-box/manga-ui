@@ -44,6 +44,48 @@
                                 </option>
                             </SelectBox>
                         </div>
+                        <div class="control checkbox">
+                            <CheckBox v-model="autoLongStrip">
+                                Switch to Long-Strip Style Automatically
+                            </CheckBox>
+                        </div>
+                        <div class="control">
+                            <label class="no-bot">Auto Long-Strip Image Style</label>
+                            <SelectBox v-model="autoLongStripStyle">
+                                <option v-for="style in PAGE_STYLES_LONGSTRIP" :value="style.value">
+                                    {{ style.name }}
+                                </option>
+                            </SelectBox>
+                        </div>
+                        <template
+                            v-if="
+                                [PageStyle.SinglePageMaxSize, PageStyle.LongStripMaxSize].includes(pageStyle) ||
+                                (autoLongStrip && PageStyle.LongStripMaxSize === autoLongStripStyle)
+                            "
+                        >
+                            <div class="control">
+                                <label class="no-bot">Image Width (px)</label>
+                                <label class="no-bot mute">0 disables max width</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="5000"
+                                    step="50"
+                                    v-model="maxImageWidth"
+                                />
+                            </div>
+                            <div class="control">
+                                <label class="no-bot">Image Height (px)</label>
+                                <label class="no-bot mute">0 disables max height</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="5000"
+                                    step="50"
+                                    v-model="maxImageHeight"
+                                />
+                            </div>
+                        </template>
                         <div class="control">
                             <label class="no-bot">Image Filter</label>
                             <SelectBox v-model="filter">
@@ -70,6 +112,7 @@
                                 </option>
                             </SelectBox>
                         </div>
+
                         <div class="control checkbox">
                             <CheckBox v-model="fillPage">
                                 Fill Card-List Page
@@ -154,9 +197,11 @@
 import {
     PROGRESS_BAR_STYLES,
     PAGE_STYLES,
+    PAGE_STYLES_LONGSTRIP,
     FILTER_STYLES,
     FilterStyle,
-    LIST_STYLES
+    LIST_STYLES,
+    PageStyle
 } from '~/models';
 
 const { fileSizeMicro } = useUtils();
@@ -168,6 +213,8 @@ const {
     brightness,
     scrollAmount,
     pageStyle,
+    autoLongStrip,
+    autoLongStripStyle,
     progressBarStyle: progressBar,
     listStyle,
     showTutorial,
@@ -176,6 +223,8 @@ const {
     customFilter,
     proxyUrl,
     blackListTags,
+    maxImageHeight,
+    maxImageWidth,
 } = useAppSettings();
 
 const {
@@ -189,6 +238,10 @@ useHead({ title: 'Configure the reader your way.' });
 const cacheMinDate = computed(() => meta.value.minDate ? new Date(meta.value.minDate) : null);
 const cacheMaxDate = computed(() => meta.value.maxDate ? new Date(meta.value.maxDate) : null);
 const fileSize = computed(() => fileSizeMicro(meta.value.storedSize));
+
+onMounted(() => {
+    refreshMeta();
+});
 </script>
 
 <style lang="scss" scoped>

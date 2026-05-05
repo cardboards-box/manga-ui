@@ -65,3 +65,5 @@ export const PAGE_STYLES: EnumDescription<PageStyle>[] = [
         description: 'Displays the pages in a long vertical strip at a custom image size'
     },
 ];
+
+export const PAGE_STYLES_LONGSTRIP = [...PAGE_STYLES.filter(s => s.value.toLowerCase().includes('long-strip'))] as const;

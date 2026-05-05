@@ -21,6 +21,7 @@
             :images="images"
             :current="currentPage"
             :open="menuOpen"
+            :style="pageStyle"
         />
         <ReaderLongStrip
             v-else-if="mode === 'long-strip'"
@@ -29,6 +30,7 @@
             v-model:percentage="percentage"
             :open="menuOpen"
             :tag-page="tagPage"
+            :style="curPageStyle"
         />
 
         <div class="progress-bar" :class="progressBar">
@@ -104,12 +106,14 @@ const {
     invertControls, forwardOnly,
     brightness, pageStyle, filterStyle: filter,
     customFilter, progressBarStyle: progressBar,
-    scrollAmount, showTutorial, preloadImages
+    scrollAmount, showTutorial, preloadImages,
+    autoLongStrip, autoLongStripStyle
 } = useAppSettings();
 const {
     currentPage, pages, preloadPages,
     error, regions, inRegions, findNext,
     chapter, setPageNumber, findPrev,
+    hasLongStripTag,
 } = useReaderHelper();
 
 const props = defineProps<{
@@ -140,7 +144,14 @@ const menuOpen = computed({
     set: (v) => emits('update:modelValue', v)
 });
 
-const mode = computed<'single-page' | 'long-strip' | 'double-page'>(() => <any>pageStyle.value?.split(' ')[0] ?? 'single-page');
+const curPageStyle = computed(() => {
+    if (autoLongStrip.value && hasLongStripTag.value)
+        return autoLongStripStyle.value;
+
+    return pageStyle.value;
+});
+
+const mode = computed<'single-page' | 'long-strip' | 'double-page'>(() => <any>curPageStyle.value?.split(' ')[0] ?? 'single-page');
 
 const isLongStrip = computed(() => mode.value === 'long-strip');
 const fullPercent = computed(() => `${percentage.value}%`);
@@ -182,7 +193,7 @@ const determineStateClass = (page: PageImage): ClassMap => {
     return `${page.state} ${readState}`;
 }
 
-const classes = computed(() => serClasses(props.class, pageStyle.value));
+const classes = computed(() => serClasses(props.class, curPageStyle.value));
 const { top: scrollUp, bottom: scrollDown } = scrollers(clickArea, scrollAmount, scrollAmount);
 
 const moveToRoute = (route: { route: string; id?: string; page?: number }) => {
@@ -243,7 +254,7 @@ const arrowKeyHandler = (ev: KeyboardEvent, down: boolean) => {
         PageStyle.LongStrip,
         PageStyle.SinglePageFitToWidth,
         PageStyle.SinglePageNaturalSize
-    ].indexOf(pageStyle.value) !== -1;
+    ].indexOf(curPageStyle.value) !== -1;
 
     switch(ev.key) {
         case 'ArrowLeft': if(!down) move(false); return;

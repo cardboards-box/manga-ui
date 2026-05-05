@@ -1,9 +1,9 @@
 <template>
-    <div 
-        class="reader-single-page flex fill fill-parent" 
+    <div
+        class="reader-single-page flex fill fill-parent"
         ref="container"
     >
-        <div 
+        <div
             class="img-container center"
             :class="{
                 'scrollable-x': imageSize.scrollX,
@@ -11,7 +11,7 @@
             }"
             v-if="currentUrl"
         >
-            <img 
+            <img
                 :src="currentUrl"
                 :width="imageSize.width"
                 :height="imageSize.height"
@@ -37,7 +37,6 @@ type SizeR = {
 }
 
 const {
-    pageStyle,
     maxImageHeight,
     maxImageWidth
 } = useAppSettings();
@@ -46,6 +45,7 @@ const props = defineProps<{
     images: PageImage[];
     current: MbImage;
     open: boolean;
+    style: PageStyle;
 }>();
 
 /** The container the image should be displayed in */
@@ -54,13 +54,15 @@ const container = ref<HTMLDivElement>();
 const resizeTrigger = ref(true);
 /** The observer for watching the container's size */
 const resize = ref<ResizeObserver>();
+/** The page style for the reader */
+const pageStyle = computed(() => props.style);
 /** The current page to display */
 const currentPage = computed(() => props.images.find(i => i.image === props.current));
 /** The current state of the image to currently display */
 const currentState = computed(() => currentPage.value?.state ?? 'inital');
 /** The URL of the current image */
-const currentUrl = computed(() => currentPage.value?.response?.image?.blob 
-    ? URL.createObjectURL(currentPage.value.response.image?.blob) 
+const currentUrl = computed(() => currentPage.value?.response?.image?.blob
+    ? URL.createObjectURL(currentPage.value.response.image?.blob)
     : undefined);
 /** The available space for the image */
 const space = computed(() => {
@@ -75,9 +77,9 @@ const space = computed(() => {
 const imageSize = computed(() => {
     resizeTrigger.value;
 
-    if (!currentPage.value?.response?.image) 
-        return { 
-            width: undefined, 
+    if (!currentPage.value?.response?.image)
+        return {
+            width: undefined,
             height: undefined,
             scrollX: false,
             scrollY: false
@@ -106,7 +108,7 @@ const imageSize = computed(() => {
     } else if (pageStyle.value === PageStyle.SinglePageNaturalSize) {
         max = undefined;
     }
-    
+
     const bounds = boundRatio(imageSize, max, {
         allowUpscale
     });

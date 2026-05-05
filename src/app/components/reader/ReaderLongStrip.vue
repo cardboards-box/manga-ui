@@ -1,37 +1,37 @@
 <template>
-    <div 
-        class="reader-long-strip flex fill fill-parent" 
+    <div
+        class="reader-long-strip flex fill fill-parent"
         ref="container"
     >
-        <div 
+        <div
             class="img-container center scrollable-y"
             :class="{ 'scrollable-x': anyScrollX }"
             ref="imageContainer"
         >
-            <template 
+            <template
                 v-for="image of boundImages"
             >
-                <img 
+                <img
                     v-if="image && image.url"
                     :id="`manga-image-${image.ordinal}`"
                     :src="image.url"
                     :width="image.width"
                     :height="image.height"
                 />
-                <Loading 
+                <Loading
                     v-else-if="image.state === 'loading'"
-                    :id="`manga-image-${image.ordinal}`" 
+                    :id="`manga-image-${image.ordinal}`"
                     message="Image is loading..."
                 />
-                <Loading 
-                    v-else-if="image.state === 'initial'" 
-                    :id="`manga-image-${image.ordinal}`" 
-                    message="Image not yet loaded." 
+                <Loading
+                    v-else-if="image.state === 'initial'"
+                    :id="`manga-image-${image.ordinal}`"
+                    message="Image not yet loaded."
                 />
-                <Error 
-                    v-else 
-                    :id="`manga-image-${image.ordinal}`" 
-                    message="Failed to load page." 
+                <Error
+                    v-else
+                    :id="`manga-image-${image.ordinal}`"
+                    message="Failed to load page."
                 />
             </template>
         </div>
@@ -52,7 +52,6 @@ type SizeR = {
 }
 
 const {
-    pageStyle,
     maxImageHeight,
     maxImageWidth
 } = useAppSettings();
@@ -63,6 +62,7 @@ const props = defineProps<{
     current: MbImage | undefined;
     percentage: number;
     tagPage: number;
+    style: PageStyle;
 }>();
 
 const emits = defineEmits<{
@@ -72,6 +72,8 @@ const emits = defineEmits<{
 
 /** The container the image should be displayed in */
 const container = ref<HTMLDivElement>();
+/** The page style for the reader */
+const pageStyle = computed(() => props.style);
 /** The container for the images */
 const imageContainer = ref<HTMLDivElement>();
 /** Trigger for resizing the image */
@@ -104,17 +106,17 @@ const boundImages = computed(() => {
     resizeTrigger.value;
     return props.images.map(i => {
         const current = i.response?.image;
-        if (!current) 
-            return { 
+        if (!current)
+            return {
                 state: i.state,
                 url: undefined,
-                width: undefined, 
+                width: undefined,
                 height: undefined,
                 scrollX: false,
                 scrollY: false,
                 ordinal: i.image.ordinal
             };
-        
+
         const imageSize = current;
         const spaceSize = space.value;
         const spaceSizeW = { width: spaceSize.width, height: undefined };
@@ -135,7 +137,7 @@ const boundImages = computed(() => {
         } else if (pageStyle.value === PageStyle.LongStripFit) {
             max = spaceSizeW;
         }
-        
+
         const bounds = boundRatio(imageSize, max, {
             allowUpscale
         });
@@ -197,7 +199,7 @@ function getCurrentVisibleOrdinal(): { ordinal: number, percent: number } | unde
     const imageTop = closestElement.offsetTop;
     const percent = imageHeight <= 0
         ? 0
-        : Math.min(100, Math.max(0, 
+        : Math.min(100, Math.max(0,
             ((scroller.scrollTop - imageTop) / imageHeight) * 100));
 
     return {
@@ -348,7 +350,7 @@ onUnmounted(() => {
         display: flex;
         flex-direction: column;
         align-items: center;
-        
+
         img {
             filter: var(--manga-filter);
         }

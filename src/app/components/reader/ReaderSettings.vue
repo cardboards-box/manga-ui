@@ -190,11 +190,24 @@
                                 </option>
                             </SelectBox>
                         </div>
-                        <template 
-                            v-if="[
-                                PageStyle.SinglePageMaxSize, 
-                                PageStyle.LongStripMaxSize
-                            ].includes(pageStyle)"
+                        <div class="control checkbox">
+                            <CheckBox v-model="autoLongStrip">
+                                Switch to Long-Strip Style Automatically
+                            </CheckBox>
+                        </div>
+                        <div class="control">
+                            <label class="no-bot">Auto Long-Strip Image Style</label>
+                            <SelectBox v-model="autoLongStripStyle">
+                                <option v-for="style in PAGE_STYLES_LONGSTRIP" :value="style.value">
+                                    {{ style.name }}
+                                </option>
+                            </SelectBox>
+                        </div>
+                        <template
+                            v-if="
+                                [PageStyle.SinglePageMaxSize, PageStyle.LongStripMaxSize].includes(pageStyle) ||
+                                (autoLongStrip && PageStyle.LongStripMaxSize === autoLongStripStyle)
+                            "
                         >
                             <div class="control">
                                 <label class="no-bot">Image Width (px)</label>
@@ -265,7 +278,7 @@
 
 <script setup lang="ts">
 import {
-    PAGE_STYLES,
+    PAGE_STYLES, PAGE_STYLES_LONGSTRIP,
     PROGRESS_BAR_STYLES,
     FilterStyle, FILTER_STYLES,
     ComicFormat,
@@ -287,8 +300,8 @@ const {
     customFilter, progressBarStyle: progressBar,
     scrollAmount, showTutorial,
     pageMenuOver, regionMargin,
-    maxImageHeight,
-    maxImageWidth
+    maxImageHeight, maxImageWidth,
+    autoLongStrip, autoLongStripStyle
 } = useAppSettings();
 
 const props = defineProps<{

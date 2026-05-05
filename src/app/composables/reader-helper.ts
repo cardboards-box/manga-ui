@@ -99,6 +99,9 @@ export function useReaderHelper() {
         return regions;
     });
 
+    const tags = computed(() => manga.value ? getRelateds(manga.value, 'MbTag') : []);
+    const hasLongStripTag = computed(() => tags.value.some(t => t.slug === 'long-strip'));
+
     /** Force update all of the cached items */
     function tap() {
         const ACTIONS = [
@@ -584,7 +587,7 @@ export function useReaderHelper() {
      */
     function goPrev(type: OrdinalType = 'page') {
         const prev = findPrev(type);
-        
+
         let next = `/${prev.route}/${prev.id}`;
         if (prev.page) next += `?page=${prev.page}`;
         navigateTo(next);
@@ -697,6 +700,8 @@ export function useReaderHelper() {
         bookmarks,
         progress,
         pages,
+        tags,
+        hasLongStripTag,
         getPages,
         preloadPages,
         regions,
