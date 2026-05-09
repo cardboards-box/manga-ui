@@ -196,7 +196,7 @@ export const useNotificationHelper = () => {
             if (token.handlerSet.value) return;
 
             try {
-                $fire.onMessage($fire.messaging, (payload) => {
+                $fire.onMessage((payload) => {
                     notificationReceived(payload);
                 });
                 token.handlerSet.value = true;

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, isSupported, type MessagePayload } from 'firebase/messaging';
 
 type RequestResponse = {
     error?: string;
@@ -9,21 +9,46 @@ type RequestResponse = {
 
 export default defineNuxtPlugin(() => {
     const config = useRuntimeConfig();
-    const firebase = initializeApp(config.public.firebase);
-    const messaging = getMessaging(firebase);
+
+    const { firebase, messaging, enabled } = attemptRegister();
+
+    function attemptRegister() {
+        try {
+            const firebase = initializeApp(config.public.firebase);
+            const messaging = getMessaging(firebase);
+            return {
+                firebase,
+                messaging,
+                enabled: true
+            }
+        } catch (error) {
+            console.warn('Failed to initialize Firebase', { error });
+            return {
+                enabled: false,
+                firebase: undefined,
+                messaging: undefined
+            }
+        }
+    }
 
     async function serviceWorkerRegistration() {
-        if (!('serviceWorker' in navigator))
-            return {
-                error: 'Service workers are not supported in this browser'
-            };
-
-        if (!await isSupported())
-            return {
-                error: 'Firebase messaging is not supported in this browser'
-            };
-
         try {
+            if (!enabled || !messaging || !firebase) {
+                return {
+                    error: 'Firebase initialization failed, messaging is not enabled'
+                }
+            }
+
+            if (!('serviceWorker' in navigator))
+                return {
+                    error: 'Service workers are not supported in this browser'
+                };
+
+            if (!await isSupported())
+                return {
+                    error: 'Firebase messaging is not supported in this browser'
+                };
+
             const swConfig = config.public.prod ? {
                 url: '/sw.js',
                 mode: <WorkerType>'classic'
@@ -53,6 +78,12 @@ export default defineNuxtPlugin(() => {
 
     async function checkToken(): Promise<RequestResponse> {
         try {
+            if (!enabled || !messaging || !firebase) {
+                return {
+                    error: 'Firebase initialization failed, messaging is not enabled'
+                }
+            }
+
             if (Notification.permission !== 'granted') {
                 return {
                     error: 'Notification permission not granted'
@@ -86,6 +117,12 @@ export default defineNuxtPlugin(() => {
 
     async function requestPermission(): Promise<RequestResponse> {
         try {
+            if (!enabled || !messaging || !firebase) {
+                return {
+                    error: 'Firebase initialization failed, messaging is not enabled'
+                }
+            }
+
             const permission = await Notification.requestPermission();
             if (permission !== 'granted') {
                 return {
@@ -119,13 +156,33 @@ export default defineNuxtPlugin(() => {
         }
     }
 
+    async function onMessageHandler(callback: (payload: MessagePayload) => void) {
+        try {
+            if (!enabled || !messaging || !firebase) {
+                return {
+                    error: 'Firebase initialization failed, messaging is not enabled'
+                }
+            }
+
+            if (!await isSupported()) {
+                console.warn('Firebase messaging is not supported in this browser');
+                return false;
+            }
+
+            onMessage(messaging, callback);
+            return true;
+        } catch (error) {
+            console.error('Failed to set up onMessage listener', { error });
+            return false;
+        }
+    }
+
     return {
         provide: {
             fire: {
-                messaging,
                 requestPermission,
                 checkToken,
-                onMessage,
+                onMessage: onMessageHandler
             }
         }
     }
