@@ -68,7 +68,7 @@ export const useNotificationHelper = () => {
         const body = payload.notification?.body || 'You have received a new notification. Click to view.';
         const icon = payload.notification?.image || '/logo.png';
 
-        const noti = new Notification(title, {
+        const noti = new Notification('foreground: ' + title, {
             body,
             data: payload.data,
             icon,
