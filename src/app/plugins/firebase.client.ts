@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
 
 type RequestResponse = {
     error?: string;
@@ -16,6 +16,11 @@ export default defineNuxtPlugin(() => {
         if (!('serviceWorker' in navigator))
             return {
                 error: 'Service workers are not supported in this browser'
+            };
+
+        if (!await isSupported())
+            return {
+                error: 'Firebase messaging is not supported in this browser'
             };
 
         try {

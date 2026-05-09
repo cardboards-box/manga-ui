@@ -180,7 +180,6 @@ const settingsError = ref<string>();
 
 const style = ref(ListStyle.Expanded);
 
-
 const { data: cached } = useAsyncData(async () => await cache.get());
 const contentRatings = computed(() => cached.value?.contentRatings ?? []);
 
@@ -217,6 +216,8 @@ watch(currentUser, () => {
     favourites.value = currentUser.value.notifyFavourites;
     inProgress.value = currentUser.value.notifyInProgress;
 }, { immediate: true });
+
+useHead({ title: 'Notifications' });
 
 </script>
 
