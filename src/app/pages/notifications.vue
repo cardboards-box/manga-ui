@@ -1,5 +1,5 @@
 <template>
-    <div class="max-width">
+    <div class="max-width" v-if="$fire.enabled">
         <ClientOnly>
             <Tabs>
                 <Tab title="General" icon="settings" keep-alive>
@@ -146,6 +146,9 @@
                 </Tab>
             </Tabs>
         </ClientOnly>
+    </div>
+    <div class="max-width" v-else>
+        <Error message="Notifications aren't enabled on this device!" />
     </div>
 </template>
 

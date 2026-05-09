@@ -205,6 +205,8 @@ export const useNotificationHelper = () => {
             }
         }
 
+        if (!$fire.enabled) return;
+
         await Promise.all([
             doTokenCheck(),
             doDeviceCheck(),
@@ -276,6 +278,7 @@ export const useNotificationHelper = () => {
     }
 
     return {
+        enabled: $fire.enabled,
         refresh,
         prompt,
         token: {

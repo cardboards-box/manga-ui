@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage, isSupported, type MessagePayload } from 'firebase/messaging';
+import { initializeApp, type FirebaseApp } from "firebase/app";
+import { getMessaging, getToken, onMessage, isSupported, type MessagePayload, type Messaging } from 'firebase/messaging';
 
 type RequestResponse = {
     error?: string;
@@ -7,18 +7,21 @@ type RequestResponse = {
     exception?: Error;
 }
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin(async () => {
     const config = useRuntimeConfig();
 
-    const { firebase, messaging, enabled } = attemptRegister();
+    const { firebase, messaging, enabled, worker } = await attemptRegister();
 
-    function attemptRegister() {
+    async function attemptRegister() {
         try {
             const firebase = initializeApp(config.public.firebase);
             const messaging = getMessaging(firebase);
+            const worker = await serviceWorkerRegistration();
+
             return {
                 firebase,
                 messaging,
+                worker,
                 enabled: true
             }
         } catch (error) {
@@ -26,19 +29,14 @@ export default defineNuxtPlugin(() => {
             return {
                 enabled: false,
                 firebase: undefined,
-                messaging: undefined
+                messaging: undefined,
+                worker: undefined
             }
         }
     }
 
     async function serviceWorkerRegistration() {
         try {
-            if (!enabled || !messaging || !firebase) {
-                return {
-                    error: 'Firebase initialization failed, messaging is not enabled'
-                }
-            }
-
             if (!('serviceWorker' in navigator))
                 return {
                     error: 'Service workers are not supported in this browser'
@@ -78,7 +76,7 @@ export default defineNuxtPlugin(() => {
 
     async function checkToken(): Promise<RequestResponse> {
         try {
-            if (!enabled || !messaging || !firebase) {
+            if (!enabled || !messaging || !firebase || !worker) {
                 return {
                     error: 'Firebase initialization failed, messaging is not enabled'
                 }
@@ -90,16 +88,15 @@ export default defineNuxtPlugin(() => {
                 }
             }
 
-            const registration = await serviceWorkerRegistration();
-            if (registration.error || !registration.registration) {
+            if (worker.error || !worker.registration) {
                 return {
-                    error: registration?.error ?? 'Service worker registration failed'
+                    error: worker.error ?? 'Service worker registration failed'
                 }
             }
 
             const token = await getToken(messaging, {
                 vapidKey: config.public.firebase.vapidKey,
-                serviceWorkerRegistration: registration.registration
+                serviceWorkerRegistration: worker.registration
             });
             if (!token) {
                 return {
@@ -117,7 +114,7 @@ export default defineNuxtPlugin(() => {
 
     async function requestPermission(): Promise<RequestResponse> {
         try {
-            if (!enabled || !messaging || !firebase) {
+            if (!enabled || !messaging || !firebase || !worker) {
                 return {
                     error: 'Firebase initialization failed, messaging is not enabled'
                 }
@@ -130,16 +127,15 @@ export default defineNuxtPlugin(() => {
                 }
             }
 
-            const registration = await serviceWorkerRegistration();
-            if (registration.error || !registration.registration) {
+            if (worker.error || !worker.registration) {
                 return {
-                    error: registration?.error ?? 'Service worker registration failed'
+                    error: worker.error ?? 'Service worker registration failed'
                 }
             }
 
             const token = await getToken(messaging, {
                 vapidKey: config.public.firebase.vapidKey,
-                serviceWorkerRegistration: registration.registration
+                serviceWorkerRegistration: worker.registration
             });
             if (!token) {
                 return {
@@ -180,6 +176,7 @@ export default defineNuxtPlugin(() => {
     return {
         provide: {
             fire: {
+                enabled,
                 requestPermission,
                 checkToken,
                 onMessage: onMessageHandler
