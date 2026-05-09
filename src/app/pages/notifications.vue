@@ -85,6 +85,7 @@
                 </Tab>
                 <Tab title="Devices" icon="devices" scrollable keep-alive>
                     <p class="center text-center">Here are all of your current devices! ({{ devices.length }})</p>
+                    <Loading v-if="devicesLoading" class="margin-top" />
                     <Card
                         v-for="device in devices"
                         :key="device.id"
@@ -100,6 +101,15 @@
                             <span :style="`color: var(${device.active ? '--color-success' : '--color-danger'})`">{{ device.active ? 'Active' : 'Inactive' }}</span>
                         </CardLine>
 
+                        <template #title>
+                            <IconBtn
+                                icon="delete"
+                                inline
+                                color="danger"
+                                @click="unregister(device)"
+                                :disabled="devicesLoading"
+                            />
+                        </template>
                     </Card>
                 </Tab>
                 <Tab title="Subs" icon="notifications" scrollable keep-alive>
@@ -154,6 +164,7 @@
 
 <script setup lang="ts">
 import { ListStyle } from '~/models';
+import type { MbNotificationDevice } from '~/models';
 
 const { currentUser } = useAuthHelper();
 const notify = useNotificationHelper();
@@ -190,6 +201,7 @@ const contentRatings = computed(() => cached.value?.contentRatings ?? []);
 const refresh = () => notify.refresh();
 const request = () => notify.prompt();
 const register = () => notify.devices.register(deviceName.value);
+const unregister = (device: MbNotificationDevice) => notify.devices.unregister(device);
 
 const save = async () => {
     if (!currentUser.value || settingsLoading.value) return;

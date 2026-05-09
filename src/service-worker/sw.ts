@@ -3,7 +3,7 @@ import FIREBASE_CONFIG from '../firebase.config';
 import { clientsClaim } from 'workbox-core'
 import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute, NavigationRoute } from 'workbox-routing';
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
 
 declare const self: ServiceWorkerGlobalScope;
@@ -21,26 +21,11 @@ try {
     console.warn('Error while registering cache route', { error });
 }
 
-const app = initializeApp(FIREBASE_CONFIG);
+const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
 const messaging = getMessaging(app);
 
 onBackgroundMessage(messaging, async (payload) => {
     console.log('[sw.ts] Received background message ', payload);
-
-    const title = payload.notification?.title || 'New Notification Received!';
-    const body = payload.notification?.body || 'You have received a new notification. Click to view.';
-    const icon = payload.notification?.image || '/logo.png';
-
-    try {
-        await self.registration.showNotification(title, {
-            body,
-            data: payload.data,
-            icon,
-        });
-        console.log('Notification shown successfully');
-    } catch (error) {
-        console.error('Failed to show notification', { error });
-    }
 });
 
 self.addEventListener('notificationclick', (event) => {

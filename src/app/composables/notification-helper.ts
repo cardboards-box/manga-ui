@@ -68,10 +68,11 @@ export const useNotificationHelper = () => {
         const body = payload.notification?.body || 'You have received a new notification. Click to view.';
         const icon = payload.notification?.image || '/logo.png';
 
-        const noti = new Notification('foreground: ' + title, {
+        const noti = new Notification(title, {
             body,
             data: payload.data,
             icon,
+            tag: payload.messageId
         });
         noti.onclick = () => {
             console.log('Notification clicked', { payload });
@@ -277,6 +278,30 @@ export const useNotificationHelper = () => {
         }
     }
 
+    async function unregister(device: MbNotificationDevice) {
+        if (devices.loading.value)
+            return;
+
+        devices.loading.value = true;
+        devices.error.value = undefined;
+
+        try {
+            const resp = await api.promise.notifications.devices.remove(device.id);
+            if (!api.isSuccess(resp)) {
+                devices.error.value = api.errorMessage(resp) || 'Failed to unregister notification device';
+                return;
+            }
+
+            devices.loading.value = false;
+            await refresh();
+        } catch (error) {
+            devices.error.value = error?.toString() || 'An unknown error occurred while unregistering notification device';
+        } finally {
+            devices.loading.value = false;
+        }
+
+    }
+
     return {
         enabled: computed(() => $fire.enabled()),
         refresh,
@@ -293,6 +318,7 @@ export const useNotificationHelper = () => {
             loading: computed(() => devices.loading.value),
             current: currentDevice,
             register,
+            unregister,
         },
         subscriptions: {
             value: computed(() => subscriptions.value.value),

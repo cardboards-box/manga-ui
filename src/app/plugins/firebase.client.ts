@@ -47,6 +47,14 @@ export default defineNuxtPlugin(async () => {
                     error: 'Firebase messaging is not supported in this browser'
                 };
 
+            const existing = await navigator.serviceWorker.getRegistration();
+            if (existing) {
+                console.log('Service worker already registered, skipping registration');
+                return {
+                    registration: existing
+                }
+            }
+
             const swConfig = config.public.prod ? {
                 url: '/sw.js',
                 mode: <WorkerType>'classic'
