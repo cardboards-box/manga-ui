@@ -205,7 +205,7 @@ export const useNotificationHelper = () => {
             }
         }
 
-        if (!$fire.enabled) return;
+        if (!$fire.enabled()) return;
 
         await Promise.all([
             doTokenCheck(),
@@ -278,7 +278,7 @@ export const useNotificationHelper = () => {
     }
 
     return {
-        enabled: $fire.enabled,
+        enabled: computed(() => $fire.enabled()),
         refresh,
         prompt,
         token: {

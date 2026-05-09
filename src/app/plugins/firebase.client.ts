@@ -1,5 +1,5 @@
-import { initializeApp, type FirebaseApp } from "firebase/app";
-import { getMessaging, getToken, onMessage, isSupported, type MessagePayload, type Messaging } from 'firebase/messaging';
+import { initializeApp } from "firebase/app";
+import { getMessaging, getToken, onMessage, isSupported, type MessagePayload } from 'firebase/messaging';
 
 type RequestResponse = {
     error?: string;
@@ -176,7 +176,7 @@ export default defineNuxtPlugin(async () => {
     return {
         provide: {
             fire: {
-                enabled,
+                enabled: () => enabled,
                 requestPermission,
                 checkToken,
                 onMessage: onMessageHandler

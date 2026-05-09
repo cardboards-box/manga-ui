@@ -1,5 +1,5 @@
 <template>
-    <div class="max-width" v-if="$fire.enabled">
+    <div class="max-width" v-if="enabled">
         <ClientOnly>
             <Tabs>
                 <Tab title="General" icon="settings" keep-alive>
@@ -160,6 +160,7 @@ const notify = useNotificationHelper();
 const cache = useCacheHelper();
 const api = useMangaApi();
 
+const enabled = computed(() => notify.enabled);
 const devices = computed(() => notify.devices.value.value);
 const devicesLoading = computed(() => notify.devices.loading.value);
 const devicesError = computed(() => notify.devices.error.value);
