@@ -76,6 +76,11 @@
     <p>Discord Bot</p>
 </NuxtLink>
 
+<NuxtLink to="/notifications" active-class="active" @click="clicked" v-if="canRead">
+    <Icon>notifications</Icon>
+    <p>Notifications</p>
+</NuxtLink>
+
 
 <div class="fill"></div>
 

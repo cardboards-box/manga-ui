@@ -45,6 +45,7 @@ const formatted = computed(() => {
         'T': DateTime.TIME_24_WITH_SECONDS,
         'd': DateTime.DATE_SHORT,
         'D': DateTime.DATE_MED_WITH_WEEKDAY,
+        's': DateTime.DATETIME_SHORT,
         'f': DateTime.DATETIME_MED,
         'F': DateTime.DATETIME_FULL
     };

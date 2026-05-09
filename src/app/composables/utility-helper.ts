@@ -264,6 +264,27 @@ export const useUtils = () => {
     }
 
     /**
+     * Checks if the given string is a valid UUID
+     * @param uuid
+     * @returns whether or not the given string is a valid UUID
+     */
+    const isUuid = (uuid: string) => {
+        const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+        return uuidRegex.test(uuid);
+    }
+
+    /**
+     * Extracts a UUID from the given string if it exists
+     * @param input The input string
+     * @returns The extracted UUID or undefined if not found
+     */
+    const extractUuid = (input: string) => {
+        const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+        const found = input.match(uuidRegex);
+        return found ? found[0] : undefined;
+    }
+
+    /**
      * Gets all of the unique values from the given array based on the given predicate
      * @param arr The array to get the unique values from
      * @param pred The predicate to use to determine uniqueness
@@ -478,6 +499,57 @@ export const useUtils = () => {
     }
 
     /**
+     * Generates a random number from the given seed
+     * @param seed The seed to generate the random number from
+     * @returns The random number
+     */
+    const random = (seed: string) => {
+        const cyrb128 = (str: string) => {
+            let h1 = 1779033703, h2 = 3144134277,
+                h3 = 1013904242, h4 = 2773480762;
+            for (let i = 0, k; i < str.length; i++) {
+                k = str.charCodeAt(i);
+                h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+                h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+                h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+                h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+            }
+            h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+            h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+            h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+            h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+            h1 ^= (h2 ^ h3 ^ h4), h2 ^= h1, h3 ^= h1, h4 ^= h1;
+            return [h1>>>0, h2>>>0, h3>>>0, h4>>>0];
+        }
+
+        const sfc32 = (a: number, b: number, c: number, d: number) => {
+            return function() {
+                a |= 0; b |= 0; c |= 0; d |= 0;
+                let t = (a + b | 0) + d | 0;
+                d = d + 1 | 0;
+                a = b ^ b >>> 9;
+                b = c + (c << 3) | 0;
+                c = (c << 21 | c >>> 11);
+                c = c + t | 0;
+                return (t >>> 0) / 4294967296;
+            }
+        }
+
+        const seedArr = cyrb128(seed);
+        const rng = sfc32(seedArr[0]!, seedArr[1]!, seedArr[2]!, seedArr[3]!);
+
+        return (max?: number, min?: number) => {
+            const rand = rng();
+            if (max !== undefined) {
+                min ??= 0;
+                return Math.floor(rand * (max - min + 1) + min);
+            }
+
+            return rand;
+        }
+    }
+
+    /**
      * Converts a CSS value to a number
      * @param cssValue the CSS value
      * @param target the element to check against
@@ -583,6 +655,36 @@ export const useUtils = () => {
         );
     }
 
+    /**
+     * Converts a date to UTC
+     * @param date The date to convert
+     * @returns The UTC version of the date
+     */
+    const toUtc = (date: Date) => {
+        const utc = Date.UTC(
+            date.getUTCFullYear(),  date.getUTCMonth(),
+            date.getUTCDate(),      date.getUTCHours(),
+            date.getUTCMinutes(),   date.getUTCSeconds());
+        return new Date(utc);
+    }
+
+    /**
+     * Sorts the given array based on the given function and order
+     * @param arr The array to sort
+     * @param fn The function to sort by (should return a string or number)
+     * @param reverse Whether or not to reverse the sorting order
+     * @returns The sorted array
+     */
+    const sortBy = <T>(arr: T[], fn: (item: T) => string | number, reverse?: boolean) => {
+        if (arr.length <= 1) return arr;
+        const firstValue = fn(arr[0]!);
+        const compare = typeof firstValue === 'string'
+            ? (a: T, b: T) => (<string>fn(a)).localeCompare(<string>fn(b))
+            : (a: T, b: T) => (<number>fn(a)) - (<number>fn(b));
+        const output = arr.toSorted(compare);
+        return reverse ? output.reverse() : output;
+    }
+
     (() => {
         const doResize = () => {
             if (window && 'resize-watcher' in window) return;
@@ -642,6 +744,11 @@ export const useUtils = () => {
         baseUrl,
         clamp,
         chunk,
+        random,
+        toUtc,
+        sortBy,
+        isUuid,
+        extractUuid,
         parallelForEach: parallelForEachAsync,
         parallelForEachVoid: parallelForEachVoidAsync,
     }

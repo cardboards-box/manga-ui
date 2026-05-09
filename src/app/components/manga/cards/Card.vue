@@ -1,13 +1,17 @@
 <template>
     <div class="card" :class="style">
         <Cover
+            v-if="coverImage || coverUrl || coverManga"
             type="link"
             :image="coverImage"
             :url="coverUrl"
             :manga="coverManga"
             :link="link"
         />
-        <div class="details masked-overflow">
+        <div
+            class="details"
+            :class="{ 'masked-overflow': shouldMask }"
+        >
             <header>
                 <NuxtLink
                     v-if="hasLink"
@@ -32,10 +36,14 @@
 <script setup lang="ts">
 import type {
     ListStyle, MbImage,
-    MbTypeManga, MbTypeMangaSearch
+    MbTypeManga, MbTypeMangaSearch,
+    booleanish
 } from '~/models';
 
 type CoverOptions = MbImage | MbTypeManga | MbTypeMangaSearch | string;
+
+const api = useMangaApi();
+const { isTrue, extractUuid } = useUtils();
 
 const props = defineProps<{
     cover?: CoverOptions;
@@ -43,17 +51,27 @@ const props = defineProps<{
     title: string;
     link?: string;
     description?: string;
+    leaveUrlAlone?: booleanish;
+    noMask?: booleanish;
 }>();
 
 const hasLink = computed(() => !!props.link);
 const external = computed(() => hasLink.value && props.link!.toLocaleLowerCase().startsWith('http'));
+const shouldMask = computed(() => !isTrue(props.noMask));
 
 const coverImage = computed(() => props.cover &&
     typeof props.cover !== 'string' &&
     'ordinal' in props.cover ? props.cover : undefined);
 
-const coverUrl = computed(() => props.cover &&
-    typeof props.cover === 'string' ? props.cover : undefined);
+const coverUrl = computed(() => {
+    if (!props.cover || typeof props.cover !== 'string') return undefined;
+    if (isTrue(props.leaveUrlAlone)) return props.cover;
+
+    const uuid = extractUuid(props.cover);
+    if (!uuid) return props.cover;
+
+    return api.promise.image.downloadUrl(uuid);
+});
 
 const coverManga = computed(() => {
     if (!props.cover) return undefined;

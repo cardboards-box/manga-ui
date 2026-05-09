@@ -1,5 +1,5 @@
 <template>
-<div class="input-group" :class="{ open, stuck: isStuck }">
+<div class="input-group" :class="classes">
     <div class="input-header control fill no-top group center-items">
         <input
             class="fill"
@@ -48,8 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import type { booleanishext } from '~/models';
-const { isTrue } = useUtils();
+import type { booleanishext, ClassOptions } from '~/models';
+const { isTrue, serClasses } = useUtils();
 const slots = useSlots();
 
 const props = withDefaults(defineProps<{
@@ -60,7 +60,8 @@ const props = withDefaults(defineProps<{
     openIcon?: string,
     stuck?: booleanishext,
     disabled?: booleanishext,
-    isDrawer?: booleanishext
+    isDrawer?: booleanishext,
+    'class'?: ClassOptions
 }>(), {
     icon: 'search',
     openIcon: 'tune'
@@ -70,6 +71,10 @@ const isDrawer = computed(() => isTrue(props.isDrawer) || !!slots['default']);
 const isStuck = computed(() => isTrue(props.stuck));
 const isDisabled = computed(() => isTrue(props.disabled));
 const hasButton = computed(() => !!getCurrentInstance()?.vnode.props?.onSearch);
+const classes = computed(() => serClasses(props.class, {
+    'open': open.value,
+    'stuck': isStuck.value
+}));
 
 const emits = defineEmits<{
     (e: 'update:modelValue', v: string | undefined): void;

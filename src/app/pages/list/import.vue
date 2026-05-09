@@ -73,6 +73,7 @@ import type { ReqListImportMd, MbListImportResponse } from '~/models';
 const api = useMangaApi();
 const { canRead } = useAuthHelper();
 const { getRelateds } = useMangaUtils();
+const { extractUuid } = useUtils();
 
 useHead({ title: 'Import an MD list!' });
 
@@ -90,9 +91,7 @@ const mangaCount = computed(() => {
 })
 
 const importList = async () => {
-    const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-    const found = id.value.match(uuidRegex);
-    const uuid = found ? found[0] : undefined;
+    const uuid = extractUuid(id.value);
 
     if (!uuid) {
         error.value = 'Please provide a valid MD list URL or ID.';

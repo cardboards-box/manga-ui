@@ -182,6 +182,8 @@ export interface MbProfile extends MbDbObjectLegacy {
     settingsBlob?: string;
     admin: boolean;
     canRead: boolean;
+    notifyFavourites: boolean;
+    notifyInProgress: boolean;
 }
 
 export interface MbSource extends MbDbObject {
@@ -224,3 +226,16 @@ export interface MbApiKey extends MbDbObject {
 }
 
 export interface MbWork extends MbDbObject { }
+
+export interface MbNotificationDevice extends MbDbObject {
+    profileId: string;
+    name: string;
+    fcmToken: string;
+    active: boolean;
+}
+
+export interface MbNotificationSubscription extends MbDbObject {
+    profileId: string;
+    mangaId?: string;
+    personId?: string;
+}

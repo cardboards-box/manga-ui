@@ -23,7 +23,10 @@ import type {
     VolumeState, MangaOrderBy,
     MangaState, RespStats,
     ListSearchFilter, ListType, ListOrderBy,
-    MbImage, ReqListImportMd, RespListImport
+    MbImage, ReqListImportMd, RespListImport,
+    RespNotificationDevices, RespDeviceResult,
+    RespNotificationSubscriptions, RespSubscriptionResult,
+    ReqNotificationSettings
 } from '../models';
 
 type NuxtApiHandle = ReturnType<typeof useApiHelper>;
@@ -133,6 +136,25 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             remove: (id: string) => del<BoxedEmpty>(`api-key/${id}`),
             create: (req: ReqMangaApiKey) => post<RespApiKey>('api-key', req),
             key: (id: string) => get<RespApiKeyKey>(`api-key/${id}/key`),
+        },
+        notifications: {
+            settings: (settings: ReqNotificationSettings) => post<RespAuthMe>('notification/settings', settings),
+            devices: {
+                get: () => get<RespNotificationDevices>('notification/device'),
+                add: (token: string, name: string) => post<RespDeviceResult>('notification/device', { token, name }),
+                remove: (id: string) => del<BoxedEmpty>(`notification/device/${id}`),
+            },
+            subscriptions: {
+                get: () => get<RespNotificationSubscriptions>('notification/subscription'),
+                manga: {
+                    subscribe: (id: string) => get<RespSubscriptionResult>(`notification/manga/${id}`),
+                    unsubscribe: (id: string) => del<RespSubscriptionResult>(`notification/manga/${id}`),
+                },
+                person: {
+                    subscribe: (id: string) => get<RespSubscriptionResult>(`notification/person/${id}`),
+                    unsubscribe: (id: string) => del<RespSubscriptionResult>(`notification/person/${id}`),
+                }
+            }
         }
     }
 }

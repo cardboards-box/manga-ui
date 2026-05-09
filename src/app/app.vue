@@ -7,8 +7,9 @@
 
 <script setup lang="ts">
 const { fixBgImage, injectSettings } = useAppSettings();
-const { bump } = useAuthHelper();
+const { bump, canRead } = useAuthHelper();
 const { $pwa } = useNuxtApp();
+const { refresh } = useNotificationHelper();
 
 let watcher: NodeJS.Timeout | undefined = undefined;
 
@@ -35,6 +36,8 @@ onMounted(() => nextTick(async () => {
     watcher = setTimeout(async () => {
         selfupdateIfNecessary();
     }, 60 * 1000);
+
+    watch(canRead, () => refresh(), { immediate: true });
 }));
 
 onUnmounted(() => {

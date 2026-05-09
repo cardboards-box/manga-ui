@@ -1,5 +1,10 @@
 import type { Boxed, BoxedArray, BoxedPaged } from './base';
-import type { MbMangaExt, MbProfile, MbTag, MbSource, MbList, MbApiKey } from './db';
+import type {
+    MbMangaExt, MbProfile,
+    MbTag, MbSource,
+    MbList, MbApiKey,
+    MbNotificationDevice, MbNotificationSubscription,
+} from './db';
 import type {
     MbTypeChapter, MbTypeImage,
     MbTypeMangaSearch, MbTypeProgress,
@@ -8,6 +13,7 @@ import type {
     EnumDescription, Stats,
     MbTypeProgressMulti,
 } from './composites';
+import type { FcmError } from './../enums';
 
 export interface RespAuthResolve extends Boxed<{
     profile: MbProfile;
@@ -48,6 +54,26 @@ export interface RespApiKey extends Boxed<MbApiKey> { }
 
 export interface RespApiKeyKey extends Boxed<string> { }
 
+export interface RespNotificationDevices extends BoxedArray<MbNotificationDevice> { }
+
+export interface RespDeviceResult extends Boxed<{
+    device: MbNotificationDevice;
+    errors: SubscriptionError[];
+}> { }
+
+export interface RespNotificationSubscriptions extends BoxedArray<MbNotificationSubscription> { }
+
+export interface RespSubscriptionResult extends Boxed<{
+    subject: MbNotificationSubscription;
+    errors: SubscriptionError[];
+}> { }
+
+export interface SubscriptionError {
+    code?: FcmError;
+    reason?: string;
+    exception?: string;
+}
+
 export interface ReqMangaLoad {
     url: string;
     force?: boolean;
@@ -60,6 +86,11 @@ export interface ReqMangaSetDisplay {
 
 export interface ReqMangaApiKey {
     name: string;
+}
+
+export interface ReqNotificationSettings {
+    favourites: boolean;
+    inProgress: boolean;
 }
 
 export interface ReqListImportMd {

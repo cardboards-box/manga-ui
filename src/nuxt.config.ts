@@ -76,8 +76,8 @@ export default defineNuxtConfig({
         includeAssets: [], // do not precache all the JS, it's really stupid
         includeManifestIcons: false,
         manifest: webManifest({ baseUrl: baseUrl }),
-        srcDir: '../public',
-        filename: 'sw.js',
+        srcDir: '../service-worker',
+        filename: 'sw.ts',
         workbox: {
             navigateFallback: '/',
             globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
@@ -99,5 +99,28 @@ export default defineNuxtConfig({
         '/stats': { ssr: false },
         '/manga/recommendations': { ssr: false },
         '/list/mine': { ssr: false }
+    },
+    vite: {
+        optimizeDeps: {
+            include: [
+                'workbox-window',
+                'chart.js',
+                'vue-chartjs',
+                'firebase/app',
+                'localforage', // CJS
+                'hammerjs', // CJS
+                'vuedraggable', // CJS
+                'file-saver', // CJS
+                'workbox-core',
+                'workbox-precaching',
+                'workbox-routing',
+                'firebase/messaging',
+                'firebase/messaging/sw',
+                'luxon',
+                'marked',
+                'highlight.js',
+                'colortranslator',
+            ]
+        }
     }
 })
