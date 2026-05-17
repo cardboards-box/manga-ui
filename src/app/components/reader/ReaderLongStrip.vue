@@ -18,21 +18,31 @@
                     :width="image.width"
                     :height="image.height"
                 />
-                <Loading
-                    v-else-if="image.state === 'loading'"
-                    :id="`manga-image-${image.ordinal}`"
-                    message="Image is loading..."
-                />
-                <Loading
-                    v-else-if="image.state === 'initial'"
-                    :id="`manga-image-${image.ordinal}`"
-                    message="Image not yet loaded."
-                />
-                <Error
+                <div
                     v-else
+                    class="image-placeholder flex row"
                     :id="`manga-image-${image.ordinal}`"
-                    message="Failed to load page."
-                />
+                    :style="{
+                        'min-width': `min(${image.width ?? 0}px, 100%)`,
+                        'min-height': `${image.height ?? 0}px`
+                    }"
+                >
+                    <div class="center-horz margin-top">
+                        <Loading
+                            v-if="image.state === 'loading'"
+                            message="Image is loading..."
+                        />
+                        <Loading
+                            v-else-if="image.state === 'initial'"
+                            message="Image not yet loaded."
+                        />
+                        <Error
+                            v-else
+                            message="Failed to load page."
+                        />
+                    </div>
+                </div>
+
             </template>
         </div>
     </div>
@@ -318,7 +328,7 @@ onMounted(() => {
     }
 
     setTimeout(() => nextTick(() => {
-        syncProgressFromScroll();
+        //syncProgressFromScroll();
 
         if (!didInitialScroll.value) {
             didInitialScroll.value = scrollToCurrentPage();
@@ -345,6 +355,7 @@ onUnmounted(() => {
 
     .img-container {
         max-width: min(100%, 100vw);
+        min-width: min(100%, 100vw);
         max-height: min(100%, 100vh);
         overflow: hidden;
         display: flex;
@@ -363,6 +374,25 @@ onUnmounted(() => {
 
         &.scrollable-y {
             overflow-y: auto;
+        }
+
+        .image-placeholder {
+            padding-top: calc(var(--margin) * 4);
+            min-height: 100vh !important;
+            min-width: 300px;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                display: block;
+                min-width: calc(100% - var(--margin));
+                min-height: calc(100% - var(--margin));
+                border: 1px dashed var(--color-muted);
+                border-radius: var(--brd-radius);
+            }
         }
     }
 }

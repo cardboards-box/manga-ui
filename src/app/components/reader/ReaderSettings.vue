@@ -215,7 +215,14 @@
                                 <input
                                     type="number"
                                     min="0"
-                                    max="5000"
+                                    :max="browserWidth"
+                                    step="50"
+                                    v-model="maxImageWidth"
+                                />
+                                <input
+                                    type="range"
+                                    min="0"
+                                    :max="browserWidth"
                                     step="50"
                                     v-model="maxImageWidth"
                                 />
@@ -226,7 +233,14 @@
                                 <input
                                     type="number"
                                     min="0"
-                                    max="5000"
+                                    :max="browserHeight"
+                                    step="50"
+                                    v-model="maxImageHeight"
+                                />
+                                <input
+                                    type="range"
+                                    min="0"
+                                    :max="browserHeight"
                                     step="50"
                                     v-model="maxImageHeight"
                                 />
@@ -257,8 +271,8 @@
                                 <Icon>fullscreen</Icon>
                                 <p>Toggle Fullscreen</p>
                             </button>
-                            <button @click="resetPages">
-                                <Icon>sync</Icon>
+                            <button @click="resetPages" :disabled="pageLoading">
+                                <Icon :spin="pageLoading">sync</Icon>
                                 <p>Refresh Page Links</p>
                             </button>
                         </div>
@@ -285,7 +299,7 @@ import {
     PageStyle
 } from '~/models';
 import type { ClassOptions } from '~/models';
-const { fullscreen, serClasses } = useUtils();
+const { fullscreen, serClasses, getWidth, getHeight, resizeTrigger } = useUtils();
 const api = useMangaApi();
 const { download } = useApiHelper();
 const {
@@ -327,6 +341,14 @@ const id = computed(() => manga.value?.id);
 const chapterId = computed(() => chapter.value?.id);
 const chapterUrl = computed(() => api.promise.chapter.download(chapterId.value ?? '', ComicFormat.Zip));
 const classes = computed(() => serClasses(props.class, { 'open': menuOpen.value }));
+const browserWidth = computed(() => {
+    resizeTrigger.value;
+    return getWidth() * 2;
+});
+const browserHeight = computed(() => {
+    resizeTrigger.value;
+    return getHeight() * 2;
+});
 
 const isLink = (url: string) => url.toLowerCase().startsWith('http');
 

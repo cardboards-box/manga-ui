@@ -189,6 +189,20 @@ export const useUtils = () => {
     };
 
     /**
+     * Gets the current max height of the page from various document properties
+     * @returns The current max height of the page
+     */
+    const getHeight = () => {
+        return Math.max(
+            document.body.scrollHeight,
+            document.documentElement.scrollHeight,
+            document.body.offsetHeight,
+            document.documentElement.offsetHeight,
+            document.documentElement.clientHeight
+        );
+    }
+
+    /**
      * Checks if the current page size is under the given max width
      * @param maxWidth The max width to check against (defaults to 1050px)
      * @returns Whether or not the page is under the given max width
@@ -722,6 +736,7 @@ export const useUtils = () => {
         unshiftFlag,
         hasFlag,
         getWidth,
+        getHeight,
         isUnderMaxWidth,
         isExternal,
         keys,
