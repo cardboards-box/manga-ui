@@ -88,6 +88,17 @@ export interface MbImage extends MbDbObject {
     imageSize?: number;
     /** The MIME type of the image */
     mimeType?: string;
+    /** If slices of the image if applicable */
+    slices: {
+        /** The ID of the original image */
+        image: string;
+        /** The ordinal of the slice in the new image */
+        ordinal: number;
+        /** The start Y coordinate of the slice */
+        start: number;
+        /** The stop Y coordinate of the slice */
+        stop: number;
+    }[];
 }
 
 /** All of the manga that are present on MangaBox */

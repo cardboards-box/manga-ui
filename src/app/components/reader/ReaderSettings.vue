@@ -125,6 +125,10 @@
                                 <Icon :spin="bookmarking">bookmark</Icon>
                                 <p>Bookmark Page</p>
                             </button>
+                            <NuxtLink v-if="isAdmin" :to="`/chapter/${chapterId}/restitcher`">
+                                <Icon>split_scene</Icon>
+                                <p>Restitch Chapter</p>
+                            </NuxtLink>
                         </div>
                     </div>
                 </Tab>
@@ -302,6 +306,7 @@ import type { ClassOptions } from '~/models';
 const { fullscreen, serClasses, getWidth, getHeight, resizeTrigger } = useUtils();
 const api = useMangaApi();
 const { download } = useApiHelper();
+const { isAdmin } = useAuthHelper();
 const {
     manga, mangaExtended, cover,
     chapter, progress: stats,

@@ -153,6 +153,13 @@
                                     : selectedChapters.push(chapter.chapter.id);
                             }"
                         />
+                        <IconBtn
+                            class="cell margin-right"
+                            icon="split_scene"
+                            :link="`/chapter/${chapter.chapter.id}/restitcher`"
+                            color="primary"
+                            inline
+                        />
                     </template>
                 </VolumeList>
                 <div class="recommendations flex row" v-show="tab === 'recommendations'">

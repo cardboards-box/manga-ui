@@ -105,6 +105,18 @@ export interface MbListImportResponse {
     list: MbTypeList;
 }
 
+export interface MbSlice {
+    ordinal: number;
+    imageId: string;
+    startY: number;
+    endY: number;
+}
+
+export interface MbSlicedImage {
+    ordinal: number;
+    slices: MbSlice[];
+}
+
 export interface RespMetadataEnums<T = number> extends BoxedArray<EnumDescription<T>> { }
 
 export interface RespMetadataTags extends BoxedArray<MbTag> { }

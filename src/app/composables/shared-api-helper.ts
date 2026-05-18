@@ -26,7 +26,8 @@ import type {
     MbImage, ReqListImportMd, RespListImport,
     RespNotificationDevices, RespDeviceResult,
     RespNotificationSubscriptions, RespSubscriptionResult,
-    ReqNotificationSettings
+    ReqNotificationSettings,
+    MbSlicedImage
 } from '../models';
 
 type NuxtApiHandle = ReturnType<typeof useApiHelper>;
@@ -64,7 +65,8 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             fetch: (id: string, refetch?: boolean) => get<RespChapter>(`chapter/${id}`, { refetch }),
             delete: (id: string) => del<BoxedEmpty>(`chapter/${id}`),
             download: (id: string, format: ComicFormat) => wrapUrl(apiUrl, `chapter/${id}/download`, { format }),
-            bookmark: (id: string, pages: number[]) => put<RespProgress>('chapter/bookmarks', { chapterId: id, bookmarks: pages })
+            bookmark: (id: string, pages: number[]) => put<RespProgress>('chapter/bookmarks', { chapterId: id, bookmarks: pages }),
+            restitch: (id: string, slices: MbSlicedImage[]) => post<RespChapter>(`chapter/${id}/restitch`, slices)
         },
         image: {
             fetch: (id: string) => get<RespImage>(`image/${id}/meta`),
