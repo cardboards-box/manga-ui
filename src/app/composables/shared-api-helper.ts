@@ -115,7 +115,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             reset: (id: string) => del<RespProgress>(`progress/${id}/read`),
             read: (id: string) => get<RespProgress>(`progress/${id}/read`),
             fetch: (id: string) => get<RespProgress>(`progress/${id}`),
-            get: (ids: string[]) => get<RespProgresses>(`progress`, { ids }),
+            get: (ids: string[]) => post<RespProgresses>(`progress`, ids),
             update: (id: string, ordinal?: number) => put<RespProgress>(`progress`, { chapterId: id, pageOrdinal: ordinal })
         },
         reverse: {
