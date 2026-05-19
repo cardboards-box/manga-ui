@@ -21,6 +21,14 @@
                 :loading="loading || !!error"
             />
             <IconBtn
+                icon="pie_chart"
+                title="Auto Slice"
+                @click="autoSlice"
+                class="center-vert"
+                :disabled="slices.length === 0"
+                :loading="loading || !!error"
+            />
+            <IconBtn
                 icon="save"
                 title="Save Slices"
                 @click="save"
@@ -29,14 +37,13 @@
                 :loading="loading || !!error"
             />
         </div>
-
+        <Loading v-if="loading" />
+        <Error v-else-if="error" :message="error" @reset="_error = undefined" show-reset />
         <div
             class="image-container scrollable-y"
             :class="{ 'scrollable-x': anyScrollX }"
             ref="imageContainer"
         >
-            <Loading v-if="loading" />
-            <Error v-else-if="error" :message="error" />
             <template
                 v-for="(image, index) of boundImages"
                 :key="image.image.image.id"
@@ -418,6 +425,148 @@ function generateSlices() {
     }
 
     return outputs;
+}
+
+function autoSlice() {
+
+    type Height = {
+        /** The slice that came before the current one */
+        before: Slice | undefined;
+        /** The slice that created this height */
+        current: Slice | undefined;
+        /** The Y coordinate in the container where the slice starts */
+        start: number;
+        /** The height of the slice */
+        height: number;
+        /** The type of height */
+        type: 'first' | 'middle' | 'last';
+    }
+
+    type BoundImage = typeof boundImages.value[0] & {
+        startY: number;
+        endY: number;
+    };
+
+    function determineImages(): BoundImage[] {
+        const images = boundImages.value;
+
+        const output: BoundImage[] = [];
+        let y = 0;
+        for(const image of images) {
+            output.push({
+                ...image,
+                startY: y,
+                endY: y + (image.height ?? 0)
+            });
+            y += image.height ?? 0;
+        }
+        return output;
+    }
+
+    function getImageForRange(images: BoundImage[], startY: number, endY: number): BoundImage[] {
+        return images.filter(image => {
+            return (image.startY <= startY && image.endY > startY) ||
+                (image.startY < endY && image.endY >= endY) ||
+                (image.startY >= startY && image.endY <= endY);
+        });
+    }
+
+    function determineHeights(slices: Slice[], images: BoundImage[]): Height[] {
+        const output: Height[] = [];
+        const container = imageContainer.value!;
+        let lastSlice: Slice | undefined = undefined;
+        const ordered = slices.toSorted((a, b) => a.containerY - b.containerY);
+        for(const slice of ordered) {
+            const start = lastSlice?.containerY ?? 0;
+            const height = slice.containerY - start;
+            output.push({
+                before: lastSlice,
+                current: slice,
+                start,
+                height,
+                type: !lastSlice ? 'first' : 'middle',
+            })
+            lastSlice = slice;
+        }
+
+        if (lastSlice) {
+            const start = lastSlice.containerY;
+            const height = container.scrollHeight - start;
+            output.push({
+                before: lastSlice,
+                current: undefined,
+                start,
+                height,
+                type: 'last',
+            });
+        }
+
+        return output;
+    }
+
+    if (slices.value.length === 0) {
+        _error.value = 'No slices to auto-slice from!';
+        return;
+    }
+
+    const images = determineImages();
+    const heights = determineHeights(slices.value, images);
+    if (heights.length === 0) {
+        _error.value = 'Failed to determine slice heights for auto-slicing!';
+        return;
+    }
+
+    const largest = heights.reduce((prev, current) => current.height > prev.height ? current : prev);
+    if (!largest) {
+        _error.value = 'Failed to determine largest slice for auto-slicing!';
+        return;
+    }
+
+    const expected = heights.reduce((prev, current) => {
+        return current.height > prev.height && current.height < largest.height ? current : prev;
+    });
+
+    if (!expected) {
+        _error.value = 'Failed to determine expected slice for auto-slicing!';
+        return;
+    }
+
+    const output: Slice[] = [];
+
+    let start = largest.start;
+    const max = largest.start + largest.height;
+    while (start < max) {
+        let end = start + expected.height;
+        const covers = getImageForRange(images, start, end);
+        if (covers.length === 0) {
+            _error.value = 'Failed to determine images for auto-slicing!';
+            return;
+        }
+
+        const target = covers[covers.length - 1]!;
+
+        const imageIndex = images.findIndex(t => t.image.image.id === target.image.image.id);
+        if (imageIndex === -1) {
+            _error.value = 'Failed to determine image index for auto-slicing!';
+            return;
+        }
+
+        if (start + expected.height + 2 >= max) {
+            start = max;
+            break;
+        }
+
+        output.push({
+            imageIndex,
+            image: target.image.image,
+            containerY: end,
+            y: end - target.startY
+        });
+        start = end;
+        end = start + expected.height;
+    }
+
+    slices.value = [...slices.value, ...output];
 }
 
 async function save() {
