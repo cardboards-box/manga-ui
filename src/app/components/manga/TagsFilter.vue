@@ -1,26 +1,22 @@
 <template>
-    <Drawer
-        title="Manga Tags"
-        storage-key="search-manga-tags"
-        default-close
+    <div
+        class="flex row"
         v-if="tags.length > 0 && sources.length > 0"
     >
-        <template v-if="!onlyHentaiSources">
-            <label>Tags</label>
+        <lable>Manga Tags:</lable>
+        <Drawer
+            v-for="group in tagGroups"
+            :key="group.name"
+            :title="group.name"
+            :storage-key="`search-manga-tags-${group.key}`"
+            default-close
+        >
             <ButtonGroupTags
-                :options="safeTags"
+                :options="group.tags"
                 v-model:on="tagsInclude"
                 v-model:off="tagsExclude"
             />
-        </template>
-        <template v-if="hasHentaiSource">
-            <label class="margin-top">NSFW Tags</label>
-            <ButtonGroupTags
-                :options="hentaiTags"
-                v-model:on="tagsInclude"
-                v-model:off="tagsExclude"
-            />
-        </template>
+        </Drawer>
 
         <div class="flex margin-top" v-if="showMode">
             <div class="flex row margin-right">
@@ -43,19 +39,29 @@
                     off-icon="orbit"
                 />
             </div>
+            <div class="flex row margin-left">
+                <label>Other Actions</label>
+                <div class="button-tags">
+                    <button @click="reset">
+                        <Icon unsize="true" size="16px">refresh</Icon>
+                        <p>Reset Tags</p>
+                    </button>
+                </div>
+            </div>
         </div>
-    </Drawer>
+    </div>
 </template>
 
 <script setup lang="ts" generic="T extends MangaSearchFilter | RecommendationFilter">
-import type { booleanish, MangaSearchFilter, MbSource, MbTag, RecommendationFilter } from '~/models';
+import type { booleanish, MangaSearchFilter, MbSource, MbTag, MbTypeTag, RecommendationFilter } from '~/models';
 import { ContentRating } from '~/models';
 
 const { isTrue } = useUtils();
+const { getRelated } = useMangaUtils();
 
 const props = defineProps<{
     modelValue: T;
-    tags: MbTag[],
+    tags: MbTypeTag[];
     sources: MbSource[];
     filteredSources?: string[];
     hideMode?: booleanish;
@@ -67,18 +73,7 @@ const emits = defineEmits<{
 
 const showMode = computed(() => !isTrue(props.hideMode));
 
-const hentaiSources = computed(() => props.sources
-    .filter(source => source.defaultRating !== ContentRating.Safe)
-    .map(t => t.id));
-
 const filterSources = computed(() => ('sources' in filters.value ? filters.value.sources : props.filteredSources) ?? []);
-
-const hasHentaiSource = computed(() =>
-    filterSources.value.length > 0 &&
-    filterSources.value.some(t => hentaiSources.value.includes(t)));
-const onlyHentaiSources = computed(() =>
-    filterSources.value.length > 0 &&
-    filterSources.value.every(t => hentaiSources.value.includes(t)));
 
 const filters = computed({
     get: () => props.modelValue,
@@ -125,11 +120,89 @@ const tagsExcludeAnd = computed({
     }
 });
 
-const hentaiTags = computed(() => props.tags
-    .filter(t => hentaiSources.value.includes(t.sourceId))
-    .toSorted((a, b) => a.name.localeCompare(b.name)));
+type TagGroup = {
+    key: string;
+    name: string;
+    tags: MbTag[];
+};
 
-const safeTags = computed(() => props.tags
-    .filter(t => !hentaiSources.value.includes(t.sourceId))
-    .toSorted((a, b) => a.name.localeCompare(b.name)));
+const tagGroups = computed<TagGroup[]>(() => {
+    const groupKey = (source: string, sources: MbSource[]) => {
+        const s = sources.find(s => s.id === source);
+        return `group-${source}:Tags from '${s ? s.name : source}' source`;
+    }
+
+    const ratingkey = (rating: ContentRating) => {
+        const key = rating === ContentRating.Safe ? 'Safe' :
+            rating === ContentRating.Suggestive ? 'Suggestive' :
+            rating === ContentRating.Erotica ? 'Erotica' :
+            'Pornographic';
+
+        return `rating-${rating}:Tags with ${key} content`;
+    }
+
+    const otherKey = 'other:Other Tags';
+
+    const sources = props.sources;
+    const filteredSources = filterSources.value ?? [];
+    const ratings = filters.value?.ratings ?? [];
+
+    const filtered = props.tags.map(t => {
+        const related = getRelated(t, 'MbTagExt') ?? {
+            id: t.entity.id,
+            manga: 0,
+            shared: true
+        };
+
+        return {
+            tag: t.entity,
+            ext: related,
+        }
+    }).filter(t => {
+        if (filteredSources.length > 0
+            && !t.ext.shared
+            && !filteredSources.some(s => s === t.ext.source))
+            return false;
+
+        if (ratings.length > 0
+            && t.ext.rating !== undefined
+            && !ratings.some(r => r === t.ext.rating))
+            return false;
+
+        return true;
+    });
+
+    const groups: Record<string, MbTag[]> = {};
+    for(const tag of filtered) {
+        const keys = (() => {
+            const output = [];
+            if (tag.ext.rating) output.push(ratingkey(tag.ext.rating));
+            if (!tag.ext.shared && tag.ext.source) output.push(groupKey(tag.ext.source, sources));
+
+            if (output.length === 0) output.push(otherKey);
+            return output;
+        })();
+
+        for(const key of keys) {
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(tag.tag);
+        }
+    }
+
+    return Object.keys(groups).map(k => ({
+        key: k.split(':')[0]!,
+        name: k.split(':')[1]!,
+        tags: groups[k] ?? []
+    })).toSorted((a, b) => b.name.localeCompare(a.name));
+});
+
+const reset = () => {
+    filters.value = {
+        ...filters.value,
+        tags: [],
+        tagsAnd: true,
+        tagsEx: [],
+        tagsExAnd: false
+    } as T;
+}
 </script>

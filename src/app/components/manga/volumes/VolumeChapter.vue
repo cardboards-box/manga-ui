@@ -1,5 +1,5 @@
 <template>
-<div class="one-chapter" v-if="rest.length === 0">
+<div class="one-chapter" v-if="rest.length === 0 && partials.length === 0">
     <div class="progress" v-if="chapter.progress" :style="{ 'width': chapter.progress + '%' }">
         <span>{{ chapter.progress.toFixed(2) + '%' }}</span>
     </div>
@@ -36,13 +36,41 @@
                 v-for="version in rest"
                 :chapter="version.chapter"
                 :progress="version.progress"
-                :version="true"
+                :version="false"
                 :has-versions="false"
                 :has-slot="hasSlot"
                 v-model="chapter.open"
             >
                 <slot :chapter="version" />
             </VolumeCard>
+            <template
+                v-for="partial in partials"
+                :key="partial.chapter.chapter.id"
+            >
+                <VolumeCard
+                    :chapter="partial.chapter.chapter"
+                    :progress="partial.chapter.progress"
+                    :version="false"
+                    :has-versions="partial.rest.length > 0"
+                    :has-slot="hasSlot"
+                    v-model="partial.partial.open"
+                >
+                    <slot :chapter="partial.chapter" />
+                </VolumeCard>
+                <template v-if="partial.partial.open">
+                    <VolumeCard
+                        v-for="version in partial.rest"
+                        :chapter="version.chapter"
+                        :progress="version.progress"
+                        :version="true"
+                        :has-versions="false"
+                        :has-slot="hasSlot"
+                        v-model="partial.partial.open"
+                    >
+                        <slot :chapter="version" />
+                    </VolumeCard>
+                </template>
+            </template>
         </template>
     </div>
 </div>
@@ -59,10 +87,29 @@ const props = defineProps<{
     hasSlot?: booleanish;
 }>();
 
-const fullChapters = computed(() => chapters.value.filter(t => props.chapter.versions.includes(t.chapter.id)));
-const first = computed(() => fullChapters.value.find(t => t.chapter.id === props.chapter.versions[0]));
-const rest = computed(() => props.chapter.versions.slice(1)
+const fullChapters = computed(() => chapters.value.filter(t => [...props.chapter.whole, ...props.chapter.partial.flatMap(p => p.versions)].includes(t.chapter.id)));
+const first = computed(() => fullChapters.value.find(t =>
+    t.chapter.id === props.chapter.whole[0] ||
+    t.chapter.id === props.chapter.partial[0]?.versions[0]));
+const rest = computed(() => props.chapter.whole
+    .filter(t => t !== first.value?.chapter.id)
     .map(t => fullChapters.value.find(c => c.chapter.id === t)!)
+    .filter(t => !!t));
+const partials = computed(() => props.chapter.partial
+    .map(t => {
+        const chapter = fullChapters.value.find(c => c.chapter.id === t.versions[0]);
+        if (!chapter) return null;
+
+        const rest = t.versions
+            .filter(v => v !== chapter.chapter.id)
+            .map(v => fullChapters.value.find(c => c.chapter.id === v))
+            .filter(c => !!c);
+        return {
+            partial: t,
+            chapter,
+            rest
+        }
+    })
     .filter(t => !!t));
 </script>
 

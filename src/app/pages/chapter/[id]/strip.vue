@@ -22,17 +22,17 @@
                                 >
                                     <template v-for="chapter in volume.chapters">
                                         <template
-                                            v-if="chapter.versions.length === 1 && volumes?.chapters[chapter.versions[0]!]?.chapter"
+                                            v-if="chapter.whole.length === 1 && volumes?.chapters[chapter.whole[0]!]?.chapter"
                                         >
                                             <option
-                                                :value="chapter.versions[0]"
+                                                :value="chapter.whole[0]"
                                             >
-                                                {{ chapterTitle(volumes?.chapters[chapter.versions[0]!]!.chapter!) }}
+                                                {{ chapterTitle(volumes?.chapters[chapter.whole[0]!]!.chapter!) }}
                                             </option>
                                         </template>
                                         <template
-                                            v-else-if="chapter.versions.length > 1"
-                                            v-for="(version, index) in chapter.versions"
+                                            v-else-if="chapter.whole.length > 1"
+                                            v-for="(version, index) in chapter.whole"
                                         >
                                             <option
                                                 :value="version"
@@ -121,10 +121,10 @@ const nextChapId = computed(() => {
     for(const vol of volumes.value.volumes) {
         for (const chap of vol.chapters) {
             if (isCurrent) {
-                return chap.versions[0];
+                return chap.whole[0];
             }
 
-            if (chap.versions[0] === chapter.value?.id) {
+            if (chap.whole[0] === chapter.value?.id) {
                 isCurrent = true;
             }
         }
@@ -137,11 +137,11 @@ const prevChapId = computed(() => {
     let prev: string | undefined;
     for(const vol of volumes.value.volumes) {
         for (const chap of vol.chapters) {
-            if (chap.versions[0] === chapter.value?.id) {
+            if (chap.whole[0] === chapter.value?.id) {
                 return prev;
             }
 
-            prev = chap.versions[0];
+            prev = chap.whole[0];
         }
     }
 });

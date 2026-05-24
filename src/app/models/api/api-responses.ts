@@ -9,6 +9,7 @@ import type {
     MbTypeChapter, MbTypeImage,
     MbTypeMangaSearch, MbTypeProgress,
     MbTypeManga, MbTypeList, MbTypeListSearch,
+    MbTypeTag,
     MangaVolumes,
     EnumDescription, Stats,
     MbTypeProgressMulti,
@@ -119,7 +120,7 @@ export interface MbSlicedImage {
 
 export interface RespMetadataEnums<T = number> extends BoxedArray<EnumDescription<T>> { }
 
-export interface RespMetadataTags extends BoxedArray<MbTag> { }
+export interface RespMetadataTags extends BoxedArray<MbTypeTag> { }
 
 export interface RespMetadataSource extends BoxedArray<MbSource> { }
 

@@ -213,6 +213,14 @@ export interface MbTag extends MbDbObject {
     sourceId: string;
 }
 
+export interface MbTagExt {
+    id: string;
+    shared: boolean;
+    manga: number;
+    rating?: ContentRating;
+    source?: string;
+}
+
 export interface MbList extends MbDbObject {
     name: string;
     description?: string;

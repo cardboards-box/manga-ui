@@ -47,7 +47,7 @@ const search = ref('');
 const safeOnly = ref(false);
 const { data: cached } = useAsyncData(async () => await get());
 const allTags = computed(() => {
-    let tags = (cached.value?.tags ?? []).toSorted((a, b) => a.name.localeCompare(b.name));
+    let tags = (cached.value?.tags ?? []).map(t => t.entity).toSorted((a, b) => a.name.localeCompare(b.name));
     if (search.value) {
         tags = tags.filter(t => t.name.toLowerCase().includes(search.value.toLowerCase()));
     }

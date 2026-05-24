@@ -7,7 +7,8 @@ import type {
     MbPerson, MbProfile,
     MbSource, MbTag,
     MbList, MbListItem, MbListExt,
-    RelationshipType, MbWork
+    RelationshipType, MbWork,
+    MbTagExt
 } from './db';
 
 export interface MbRelated<TType = string, TData = any> {
@@ -33,6 +34,7 @@ type RelatedListItem = MbRelated<'MbListItem', MbListItem>;
 type RelatedListExt = MbRelated<'MbListExt', MbListExt>;
 type RelatedRelatedManga = MbRelated<'MbRelatedManga', MbRelatedManga>;
 type RelatedWork = MbRelated<'MbWork', MbWork>;
+type RelatedTagExt = MbRelated<'MbTagExt', MbTagExt>;
 
 export type MangaBoxRelationship =
     RelatedChapter |
@@ -72,12 +74,36 @@ export type MbTypeMangaSearch = MangaBoxType<MbManga, RelatedSource | RelatedTag
 export type MbTypeMangaExt = MangaBoxType<MbMangaExt, RelatedManga | RelatedChapter | RelatedMangaProgress | RelatedChapterProgress>;
 export type MbTypeList = MangaBoxType<MbList, RelatedListItem | RelatedTag | RelatedImage | RelatedListExt>;
 export type MbTypeListSearch = MangaBoxType<MbList, RelatedTag | RelatedImage | RelatedListExt>;
+export type MbTypeTag = MangaBoxType<MbTag, RelatedTagExt>;
+
+export interface VolumeChapterPartials {
+    ordinal: number;
+    versions: string[];
+    open?: boolean;
+}
 
 export interface VolumeChapter {
     open?: boolean;
     progress: number;
     ordinal: number;
-    versions: string[];
+    whole: string[];
+    partial: VolumeChapterPartials[];
+}
+
+export enum ChapterTransition {
+    /** The next chapter is in the same partial set */
+    Partial = 0,
+    /** The next chapter in the same volume */
+    Chapter = 1,
+    /** The next chapter is in a different volume */
+    Volume = 2,
+    /** There is no next chapter in the manga */
+    End = 3,
+}
+
+export interface ChapterSuggestion {
+    id?: string;
+    transition: ChapterTransition;
 }
 
 export enum VolumeState {
@@ -104,6 +130,9 @@ export interface MangaVolumes {
         [chapterId: string]: ProgressChapter;
     };
     volumes: MangaVolume[];
+    suggestions: {
+        [key: string]: ChapterSuggestion;
+    }
 }
 
 export enum ComicFormat {

@@ -53,6 +53,9 @@ export const useImageCache = () => {
         return { ...DEFAULT_META_DATA };
     });
 
+    /** The active image requests for request de-duping */
+    const activeRequests = useState<Record<string, Promise<ImageResponse>>>('active-image-requests', () => ({}));
+
     /**
      * Creates the cache keys for the given url
      * @param url The url of the image
@@ -194,15 +197,30 @@ export const useImageCache = () => {
      * @param ctrl The optional abort controller
      * @returns The response containing the image blob and metadata
      */
-    async function get(image: string | MbImage, ctrl?: AbortController): Promise<ImageResponse> {
-        ctrl ??= new AbortController();
+    function get(image: string | MbImage, ctrl?: AbortController): Promise<ImageResponse> {
+        const actualFetch = async (url: string, cover: boolean, ctrl?: AbortController) => {
+            ctrl ??= new AbortController();
+
+            const cached = await fetchCached(url);
+            if (cached) return cached;
+
+            return await fetchRawImage(url, cover, ctrl);
+        }
+
         const url = typeof image === 'string' ? image : api.promise.image.downloadUrl(image);
         const cover = typeof image !== 'string' && !image.chapterId;
+        if (activeRequests.value[url]) {
+            return activeRequests.value[url];
+        }
 
-        const cached = await fetchCached(url);
-        if (cached) return cached;
+        const fetchPromise = actualFetch(url, cover, ctrl);
+        activeRequests.value[url] = fetchPromise;
 
-        return await fetchRawImage(url, cover, ctrl);
+        fetchPromise.finally(() => {
+            delete activeRequests.value[url];
+        });
+
+        return fetchPromise;
     }
 
     /**

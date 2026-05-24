@@ -10,7 +10,7 @@ const CACHE_KEY = 'chapter-cache-';
 const PRE_LOAD_IMAGES = 5;
 const PRE_LOAD_CHAPTERS = 2;
 
-type OrdinalType = 'page' | 'chapter' | 'volume';
+type OrdinalType = 'page' | 'chapter';
 
 type Params = {
     id: string;
@@ -106,8 +106,12 @@ export function useReaderHelper() {
     function tap() {
         const ACTIONS = [
             () => mangaProgress.value = volumes.value?.progress,
-            () => currentVolume.value = !params.value?.id || !volumes.value ? undefined : volumes.value.volumes.find(t => t.chapters.some(c => c.versions.includes(params.value!.id))),
-            () => currentVolumeChapter.value = !currentVolume.value || !params.value?.id ? undefined : currentVolume.value.chapters.find(c => c.versions.includes(params.value!.id)),
+            () => currentVolume.value = !params.value?.id || !volumes.value ? undefined :
+                volumes.value.volumes.find(t => t.chapters.some(c =>
+                    [...c.whole, ...c.partial.flatMap(p => p.versions)].includes(params.value!.id))),
+            () => currentVolumeChapter.value = !currentVolume.value || !params.value?.id ? undefined :
+                currentVolume.value.chapters.find(c =>
+                    [...c.whole, ...c.partial.flatMap(p => p.versions)].includes(params.value!.id)),
             () => mangaExtended.value = manga.value ? getRelated(manga.value, 'MbMangaExt') : undefined,
             () => pages.value = fullChapter.value ? getRelateds(fullChapter.value, 'MbImage').toSorted((a,b) => a.ordinal - b.ordinal) : [],
             () => currentPage.value = pages.value.find(t => t.ordinal === params.value?.page),
@@ -135,7 +139,10 @@ export function useReaderHelper() {
                         const v = volumes.value.volumes[i]!;
                         if (v.chapters.length === 0) continue;
 
-                        const best = findBestChapter(fullChapter.value!, v.chapters[0]!.versions);
+                        const best = findBestChapter(fullChapter.value!, [
+                            ...v.chapters[0]!.whole,
+                            ...v.chapters[0]!.partial.flatMap(p => p.versions)
+                        ]);
                         if (!best) continue;
 
                         output.push({
@@ -156,7 +163,10 @@ export function useReaderHelper() {
                     const output: PageLink[] = [];
                     for(let i = 0; i < currentVolume.value.chapters.length; i++) {
                         const c = currentVolume.value.chapters[i]!;
-                        const best = findBestChapter(fullChapter.value!, c.versions);
+                        const best = findBestChapter(fullChapter.value!, [
+                            ...c.whole,
+                            ...c.partial.flatMap(p => p.versions)
+                        ]);
                         if (!best) continue;
 
                         output.push({
@@ -170,22 +180,37 @@ export function useReaderHelper() {
                 })();
                 const versionLinks = (() => {
                     if (!currentVolumeChapter.value ||
-                        currentVolumeChapter.value.versions.length <= 1)
+                        (currentVolumeChapter.value.whole.length <= 1 &&
+                         currentVolumeChapter.value.partial.length === 0))
                         return [];
 
                     const output: PageLink[] = [];
-                    for(let i = 0; i < currentVolumeChapter.value.versions.length; i++) {
-                        const v = currentVolumeChapter.value.versions[i]!;
-                        const c = volumes.value?.chapters[v];
+                    for(const id of currentVolumeChapter.value.whole) {
+                        const c = volumes.value?.chapters[id];
                         if (!c) continue;
 
                         output.push({
                             name: chapterTitle(c.chapter),
                             url: `/chapter/${c.chapter.id}?page=1`,
-                            index: i,
-                            current: v === fullChapter.value?.entity.id
+                            index: output.length,
+                            current: id === fullChapter.value?.entity.id
                         });
                     }
+
+                    for(const partial of currentVolumeChapter.value.partial) {
+                        for(const id of partial.versions) {
+                            const c = volumes.value?.chapters[id];
+                            if (!c) continue;
+
+                            output.push({
+                                name: chapterTitle(c.chapter),
+                                url: `/chapter/${c.chapter.id}?page=1`,
+                                index: output.length,
+                                current: id === fullChapter.value?.entity.id
+                            });
+                        }
+                    }
+
                     return output;
                 })();
                 const pageLinks = (() => {
@@ -398,13 +423,13 @@ export function useReaderHelper() {
         if (!fullChapter.value || !volumes.value) return;
 
         const flat = flatChapters.value;
-        const currentIndex = flat.findIndex(c => c.versions.includes(fullChapter.value!.entity.id));
+        const currentIndex = flat.findIndex(c => [...c.whole, ...c.partial.flatMap(t => t.versions)].includes(fullChapter.value!.entity.id));
         if (currentIndex === -1) return;
 
         const start = Math.max(0, currentIndex - PRE_LOAD_CHAPTERS);
         const end = Math.min(flat.length, currentIndex + PRE_LOAD_CHAPTERS + 1);
         const preloads = flat.slice(start, end)
-            .map(t => findBestChapter(fullChapter.value!, t.versions)!)
+            .map(t => findBestChapter(fullChapter.value!, [...t.whole, ...t.partial.flatMap(t => t.versions)])!)
             .filter(t => !!t && !fullChapters.value[t.id]);
         if (preloads.length === 0) return;
 
@@ -425,48 +450,25 @@ export function useReaderHelper() {
      * @returns The route parts
      */
     function findNext(type: OrdinalType = 'page') {
-        const nextVolume = () => {
-            if (!currentVolume.value) return;
+        const nextChapter = () => {
+            if (!volumes.value || !fullChapter.value) return;
 
-            const currentIndex = volumes.value!.volumes.indexOf(currentVolume.value);
-            if (currentIndex === -1) return;
+            const chapId = fullChapter.value.entity.id;
+            const suggestion = volumes.value.suggestions[chapId];
+            if (!suggestion) return;
 
-            if (currentIndex === volumes.value!.volumes.length - 1) return;
-
-            const next = volumes.value!.volumes[currentIndex + 1];
-            if (!next) return;
-
-            if (next.chapters.length === 0) return;
-
-            const best = findBestChapter(fullChapter.value!, next.chapters[0]!.versions);
-            if (!best) return;
+            if (!suggestion.id)
+                return {
+                    route: 'manga',
+                    id: manga.value?.entity.id,
+                    page: undefined
+                }
 
             return {
                 route: 'chapter',
-                id: best.id,
+                id: suggestion.id!,
                 page: 1
             }
-        }
-
-        const nextChapter = () => {
-            if (!currentVolumeChapter.value) return;
-
-            const currentIndex = currentVolume.value!.chapters.indexOf(currentVolumeChapter.value);
-            if (currentIndex === -1) return;
-
-            if (currentIndex === currentVolume.value!.chapters.length - 1) return nextVolume();
-
-            const next = currentVolume.value!.chapters[currentIndex + 1];
-            if (!next) return;
-
-            const best = findBestChapter(fullChapter.value!, next.versions);
-            if (!best) return;
-
-            return {
-                route: 'chapter',
-                id: best.id,
-                page: 1
-            };
         }
 
         const nextPage = () => {
@@ -487,7 +489,7 @@ export function useReaderHelper() {
             };
         }
 
-        return (type === 'page' ? nextPage() : type === 'chapter' ? nextChapter() : nextVolume())
+        return (type === 'page' ? nextPage() : nextChapter())
             ?? { route: 'manga', id: manga.value?.entity.id, page: undefined };
     }
 
@@ -517,46 +519,20 @@ export function useReaderHelper() {
      * @returns The route parts
      */
     function findPrev(type: OrdinalType = 'page') {
-        const prevVolume = () => {
-            if (!currentVolume.value) return;
-
-            const currentIndex = volumes.value!.volumes.indexOf(currentVolume.value);
-            if (currentIndex === -1) return;
-
-            if (currentIndex === 0) return;
-
-            const prev = volumes.value!.volumes[currentIndex - 1];
-            if (!prev) return;
-
-            if (prev.chapters.length === 0) return;
-
-            const best = findBestChapter(fullChapter.value!, prev.chapters[prev.chapters.length - 1]!.versions);
-            if (!best) return;
-
-            return {
-                route: 'chapter',
-                id: best.id,
-                page: -1
-            }
-        }
-
         const prevChapter = () => {
-            if (!currentVolumeChapter.value) return;
+            if (!volumes.value || !fullChapter.value) return;
 
-            const currentIndex = currentVolume.value!.chapters.indexOf(currentVolumeChapter.value);
-            if (currentIndex === -1) return;
-
-            if (currentIndex === 0) return prevVolume();
-
-            const prev = currentVolume.value!.chapters[currentIndex - 1]!;
-            const best = findBestChapter(fullChapter.value!, prev.versions);
-            if (!best) return;
-
-            return {
-                route: 'chapter',
-                id: best.id,
-                page: -1
-            };
+            const chapId = fullChapter.value.entity.id;
+            for(const key in volumes.value.suggestions) {
+                const suggestion = volumes.value.suggestions[key];
+                if (suggestion?.id === chapId) {
+                    return {
+                        route: 'chapter',
+                        id: key,
+                        page: 1
+                    }
+                }
+            }
         }
 
         const prevPage = () => {
@@ -577,7 +553,7 @@ export function useReaderHelper() {
             };
         }
 
-        return (type === 'page' ? prevPage() : type === 'chapter' ? prevChapter() : prevVolume())
+        return (type === 'page' ? prevPage() : prevChapter())
             ?? { route: 'manga', id: manga.value?.entity.id, page: undefined };
     }
 

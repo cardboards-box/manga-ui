@@ -149,7 +149,7 @@ export function useMangaUtils() {
         for(const volume of volumes.volumes) {
             let readCount = 0;
             for(const chapter of volume.chapters) {
-                const readChapters = chapter.versions
+                const readChapters = [...chapter.whole, ...chapter.partial.flatMap(t => t.versions)]
                     .map(t => volumes!.chapters[t]!)
                     .filter(t => t && t.progress?.lastRead);
                 if (readChapters.length === 0) continue;
@@ -201,11 +201,11 @@ export function useMangaUtils() {
         if (!volumes || !extended || !mangaProgress || !currentChapId) return DEFAULT;
 
         const chapter = volumes.chapters[currentChapId];
-        const currentVolume = volumes.volumes.find(t => t.chapters.some(c => c.versions.includes(currentChapId)));
-        const currentChapter = currentVolume?.chapters.find(c => c.versions.includes(currentChapId));
+        const currentVolume = volumes.volumes.find(t => t.chapters.some(c => [...c.whole, ...c.partial.flatMap(t => t.versions)].includes(currentChapId)));
+        const currentChapter = currentVolume?.chapters.find(c => [...c.whole, ...c.partial.flatMap(t => t.versions)].includes(currentChapId));
         if (!currentVolume || !currentChapter || !chapter) return DEFAULT;
 
-        const flatChapIndex = volumes.volumes.flatMap(v => v.chapters).findIndex(c => c.versions.includes(currentChapId));
+        const flatChapIndex = volumes.volumes.flatMap(v => v.chapters).findIndex(c => [...c.whole, ...c.partial.flatMap(t => t.versions)].includes(currentChapId));
         const totalProgress = mangaProgress.progressPercentage;
         const totalSlug = `${flatChapIndex + 1}/${extended.uniqueChapterCount} (${totalProgress.toFixed(2)}%)`;
 

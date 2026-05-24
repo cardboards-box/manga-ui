@@ -140,7 +140,9 @@ const admin = computed({
 });
 
 const chapter = computed(() => chapters.value.find(t => t.chapter.id === progress.value?.entity.lastReadChapterId));
-const chapterId = computed(() => chapter.value?.chapter.id ?? volumes.value?.volumes[0]?.chapters[0]?.versions[0]);
+const chapterId = computed(() => chapter.value?.chapter.id
+    ?? volumes.value?.volumes[0]?.chapters[0]?.whole[0]
+    ?? volumes.value?.volumes[0]?.chapters[0]?.partial[0]?.versions[0]);
 const link = computed(() => chapterId.value ? `/chapter/${chapterId.value}?page=${chapter.value?.progress?.pageOrdinal ?? 1}` : undefined);
 const popupIds = ref<string[]>([]);
 
