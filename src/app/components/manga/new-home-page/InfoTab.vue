@@ -46,10 +46,19 @@
             </div>
         </dl>
 
-        <div v-if="people.length">
-            <h2>People</h2>
-            <div class="tag-row">
-                <span v-for="person in people" :key="person.id">{{ person.name }}</span>
+        <div v-if="authors.length || artists.length" class="people-grid">
+            <div v-if="authors.length">
+                <h2>Authors</h2>
+                <div class="tag-row">
+                    <span v-for="person in authors" :key="person.id">{{ person.name }}</span>
+                </div>
+            </div>
+
+            <div v-if="artists.length">
+                <h2>Artists</h2>
+                <div class="tag-row">
+                    <span v-for="person in artists" :key="person.id">{{ person.name }}</span>
+                </div>
             </div>
         </div>
 
@@ -70,15 +79,19 @@
 </template>
 
 <script setup lang="ts">
+import { RelationshipType } from '~/models';
 import type { MbManga, MbMangaExt, MbRelatedPerson, MbSource, MbTag } from '~/models';
 
-defineProps<{
+const props = defineProps<{
     manga: MbManga;
     extended?: MbMangaExt;
     source?: MbSource;
     tags: MbTag[];
     people: MbRelatedPerson[];
 }>();
+
+const authors = computed(() => props.people.filter(person => person.type === RelationshipType.Author));
+const artists = computed(() => props.people.filter(person => person.type === RelationshipType.Artist));
 </script>
 
 <style scoped lang="scss">
@@ -132,6 +145,12 @@ defineProps<{
         }
     }
 
+    .people-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem 2rem;
+    }
+
     .tag-row {
         display: flex;
         flex-wrap: wrap;
@@ -151,8 +170,14 @@ defineProps<{
 }
 
 @media only screen and (max-width: 760px) {
-    .info-tab .details-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .info-tab {
+        .details-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .people-grid {
+            grid-template-columns: 1fr;
+        }
     }
 }
 
