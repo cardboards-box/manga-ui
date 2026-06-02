@@ -3,7 +3,7 @@
         class="flex row"
         v-if="tags.length > 0 && sources.length > 0"
     >
-        <lable>Manga Tags:</lable>
+        <label>Manga Tags:</label>
         <Drawer
             v-for="group in tagGroups"
             :key="group.name"

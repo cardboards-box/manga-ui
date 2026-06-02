@@ -64,7 +64,7 @@ export function useCurrentManga() {
         }
 
         const volumesProm = async (): Promise<MangaVolumes> => {
-            const def = { chapters: {}, volumes: [] };
+            const def = { chapters: {}, volumes: [], suggestions: {} };
             try {
                 const result = await api.promise.manga.chapters(pars.id, pars.sort, pars.asc);
                 if (!api.isSuccess(result)) return def;
