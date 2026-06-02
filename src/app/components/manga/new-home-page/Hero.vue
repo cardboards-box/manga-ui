@@ -51,7 +51,7 @@
 
                 <div class="hero-actions">
                     <IconBtn
-                        v-if="continueLink"
+                        v-if="canRead && continueLink"
                         icon="play_arrow"
                         text="Continue"
                         color="primary"
@@ -145,7 +145,7 @@ const currentChapter = computed(() => chapters.value.find(t => t.chapter.id === 
 const firstChapterId = computed(() => props.volumes?.volumes[0]?.chapters[0]?.whole[0]
     ?? props.volumes?.volumes[0]?.chapters[0]?.partial[0]?.versions[0]);
 const continueChapterId = computed(() => progress.value?.entity.lastReadChapterId ?? firstChapterId.value);
-const continueLink = computed(() => continueChapterId.value ? `/chapter/${continueChapterId.value}` : undefined);
+const continueLink = computed(() => canRead.value && continueChapterId.value ? `/chapter/${continueChapterId.value}` : undefined);
 const progressPercent = computed(() => progress.value?.entity.progressPercentage ?? progressData.value.total ?? 0);
 const currentLabel = computed(() => currentChapter.value ? chapterTitle(currentChapter.value.chapter) : 'Start from the first chapter');
 const progressFooter = computed(() => progressData.value.totalSlug || `${progressPercent.value.toFixed(0)}% complete`);

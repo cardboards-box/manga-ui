@@ -1,6 +1,6 @@
 <template>
     <section class="chapters-tab">
-        <header>
+        <header v-if="canRead">
             <span>
                 <strong>{{ readCount }}</strong>
                 of
@@ -25,9 +25,9 @@
                     <div class="volume-title">
                         <span>{{ volume.ordinal ? `Vol.${volume.ordinal}` : 'No Volume' }}</span>
                         <strong>{{ volume.chapters.length }} chapter{{ volume.chapters.length === 1 ? '' : 's' }}</strong>
-                        <em v-if="volume.state === VolumeState.InProgress">Reading</em>
+                        <em v-if="canRead && volume.state === VolumeState.InProgress">Reading</em>
                     </div>
-                    <div class="volume-progress">
+                    <div v-if="canRead" class="volume-progress">
                         <small>{{ volumeReadCount(volume) }}/{{ volume.chapters.length }} chapters</small>
                         <div><span :style="{ width: volumePercent(volume) + '%' }" /></div>
                         <small>{{ volumePercent(volume).toFixed(0) }}%</small>
@@ -45,10 +45,11 @@
                     >
                         <NuxtLink
                             class="chapter-link"
+                            :class="{ 'without-status': !canRead }"
                             :to="chapterUrl(primaryChapter(chapter)!)"
                             :target="chapterTarget(primaryChapter(chapter)!)"
                         >
-                            <span class="status-dot">
+                            <span v-if="canRead" class="status-dot">
                                 <Icon v-if="status(chapter) === 'read'" size="14px" unsize>check</Icon>
                                 <Icon v-else-if="status(chapter) === 'current'" size="14px" unsize>play_arrow</Icon>
                             </span>
@@ -57,7 +58,7 @@
                         </NuxtLink>
 
                         <div class="chapter-meta">
-                            <em v-if="status(chapter) === 'current'">Now Reading</em>
+                            <em v-if="canRead && status(chapter) === 'current'">Now Reading</em>
                             <small v-if="primaryChapter(chapter)!.chapter.pageCount">{{ primaryChapter(chapter)!.chapter.pageCount }}p</small>
                             <Date :date="primaryChapter(chapter)!.chapter.createdAt" utc format="r" />
                             <button
@@ -76,11 +77,11 @@
                             v-for="part in secondaryChapters(chapter)"
                             :key="part.chapter.id"
                             class="chapter-row version"
-                            :class="partStatus(part)"
+                            :class="[partStatus(part), { 'without-status': !canRead }]"
                             :to="chapterUrl(part)"
                             :target="chapterTarget(part)"
                         >
-                            <span class="status-dot small">
+                            <span v-if="canRead" class="status-dot small">
                                 <Icon v-if="partStatus(part) === 'read'" size="11px" unsize>check</Icon>
                                 <Icon v-else-if="partStatus(part) === 'current'" size="11px" unsize>play_arrow</Icon>
                             </span>
@@ -135,12 +136,14 @@ const chapterTarget = (chapter: ProgressChapter) => !canRead.value && (chapter.c
     : undefined;
 
 const partStatus = (chapter: ProgressChapter) => {
+    if (!canRead.value) return 'unread';
     if (chapter.chapter.id === progress.value?.entity.lastReadChapterId) return 'current';
     if (chapter.progress?.lastRead) return 'read';
     return 'unread';
 };
 
 const status = (chapter: VolumeChapter) => {
+    if (!canRead.value) return 'unread';
     if (fullChapters(chapter).some(t => partStatus(t) === 'current')) return 'current';
     if (chapter.progress >= 100 || fullChapters(chapter).some(t => partStatus(t) === 'read')) return 'read';
     return 'unread';
@@ -329,6 +332,10 @@ watch(
         padding: .65rem 0 .65rem .9rem;
         color: inherit;
         text-decoration: none;
+
+        &.without-status {
+            grid-template-columns: 58px minmax(0, 1fr);
+        }
     }
 
     strong {
@@ -409,6 +416,10 @@ watch(
     grid-template-columns: 20px 58px minmax(0, 1fr) auto;
     min-height: 38px;
     padding: .5rem .9rem .5rem 3.25rem;
+
+    &.without-status {
+        grid-template-columns: 58px minmax(0, 1fr) auto;
+    }
 }
 
 @media only screen and (max-width: 720px) {
@@ -417,6 +428,10 @@ watch(
 
         .chapter-link {
             grid-template-columns: 24px 50px minmax(0, 1fr);
+
+            &.without-status {
+                grid-template-columns: 50px minmax(0, 1fr);
+            }
         }
 
         .chapter-meta small,
