@@ -34,6 +34,12 @@
                 <p class="alt-title" v-if="subtitle">{{ subtitle }}</p>
 
                 <div class="meta-row">
+                    <span
+                        class="pill"
+                        :class="contentRatingClass"
+                    >
+                        {{ contentRatingText }}
+                    </span>
                     <NuxtLink
                         v-for="tag in displayTags"
                         :key="tag.id"
@@ -46,7 +52,6 @@
                     <span class="pill muted" v-if="extended?.uniqueChapterCount">
                         {{ extended.uniqueChapterCount }} chapters
                     </span>
-                    <span class="pill warning" v-if="manga.nsfw">NSFW</span>
                 </div>
 
                 <div class="hero-actions">
@@ -143,6 +148,7 @@
 </template>
 
 <script setup lang="ts">
+import { ContentRating } from '~/models';
 import type { MangaVolumes, MbImage, MbManga, MbMangaExt, MbRelatedPerson, MbSource, MbTag, MbTypeManga } from '~/models';
 
 const { canRead } = useAuthHelper();
@@ -184,6 +190,12 @@ const titleSizeClass = computed(() => {
 });
 const subtitle = computed(() => props.extended?.displayTitle ? props.manga.title : props.manga.altTitles[0]);
 const displayTags = computed(() => props.tags.slice(0, 4));
+const contentRatingText = computed(() => ContentRating[props.manga.contentRating] ?? 'Safe');
+const contentRatingClass = computed(() => {
+    if ([ContentRating.Pornographic, ContentRating.Erotica].includes(props.manga.contentRating)) return 'danger';
+    if (props.manga.contentRating === ContentRating.Suggestive) return 'warning';
+    return 'muted';
+});
 const currentChapter = computed(() => chapters.value.find(t => t.chapter.id === progress.value?.entity.lastReadChapterId));
 const firstChapterId = computed(() => props.volumes?.volumes[0]?.chapters[0]?.whole[0]
     ?? props.volumes?.volumes[0]?.chapters[0]?.partial[0]?.versions[0]);
@@ -392,6 +404,10 @@ onUnmounted(() => {
 
         &.muted { color: var(--color-muted-light); }
         &.warning {
+            border-color: var(--color-secondary-dark);
+            color: var(--color-secondary-dark);
+        }
+        &.danger {
             border-color: var(--color-warning);
             color: var(--color-warning);
         }
