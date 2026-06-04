@@ -178,7 +178,8 @@ const initializeOpenVolume = () => {
 const totalCount = computed(() => props.volumes?.volumes.reduce((sum, volume) => sum + volume.chapters.length, 0) ?? 0);
 const readCount = computed(() => props.volumes?.volumes.reduce((sum, volume) => sum + volumeReadCount(volume), 0) ?? 0);
 const percentRead = computed(() => totalCount.value ? (readCount.value / totalCount.value) * 100 : 0);
-const volumeReadCount = (volume: MangaVolume) => volume.chapters.filter(chapter => status(chapter) === 'read').length;
+const isChapterStarted = (chapter: VolumeChapter) => ['read', 'current'].includes(status(chapter));
+const volumeReadCount = (volume: MangaVolume) => volume.chapters.filter(isChapterStarted).length;
 const volumePercent = (volume: MangaVolume) => volume.chapters.length ? (volumeReadCount(volume) / volume.chapters.length) * 100 : 0;
 
 watch(

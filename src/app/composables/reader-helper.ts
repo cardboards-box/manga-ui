@@ -49,7 +49,7 @@ export function useReaderHelper() {
     const { regionMargin } = useAppSettings();
     const { canRead } = useAuthHelper();
     const { getRelated, getRelateds, mergeProgress, chapterTitle, calculateProgress } = useMangaUtils();
-    const { volumes: mvCache } = useCurrentManga();
+    const { applyProgress } = useCurrentManga();
 
     const manga = useState<MbTypeManga | undefined>(CACHE_KEY + 'manga', () => undefined);
     const volumes = useState<MangaVolumes | undefined>(CACHE_KEY + 'volumes', () => undefined);
@@ -619,7 +619,7 @@ export function useReaderHelper() {
         if (!progress) return;
 
         mergeProgress(volumes.value, progress);
-        mergeProgress(mvCache.value, progress);
+        applyProgress(progress);
     }
 
     /**

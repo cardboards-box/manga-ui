@@ -135,6 +135,23 @@ export function useCurrentManga() {
         return chapters.value[id];
     }
 
+    const currentProgress = computed<MbTypeProgress | undefined>(() => {
+        if (!progress.value || !volumes.value?.progress) return progress.value;
+
+        return {
+            ...progress.value,
+            entity: volumes.value.progress
+        };
+    });
+
+    const applyProgress = (prog: MbTypeProgress | undefined) => {
+        if (!prog) return;
+
+        mergeProgress(volumes.value, prog);
+        progress.value = prog;
+        triggered.value = !triggered.value;
+    }
+
     const throttled = throttle<boolean>((force) => refresh(force), 200);
 
     const favourited = computed({
@@ -149,8 +166,7 @@ export function useCurrentManga() {
             partialLoading.value = false;
             if (!api.isSuccess(res)) return;
 
-            mergeProgress(volumes.value, api.data(res));
-            progress.value = api.data(res);
+            applyProgress(api.data(res));
         }
     });
 
@@ -162,8 +178,7 @@ export function useCurrentManga() {
         partialLoading.value = false;
         if (!api.isSuccess(res)) return;
 
-        mergeProgress(volumes.value, api.data(res));
-        progress.value = api.data(res);
+        applyProgress(api.data(res));
     }
 
     const markAsRead = async () => {
@@ -174,8 +189,7 @@ export function useCurrentManga() {
         partialLoading.value = false;
         if (!api.isSuccess(res)) return;
 
-        mergeProgress(volumes.value, api.data(res));
-        progress.value = api.data(res);
+        applyProgress(api.data(res));
     }
 
     const forceRefresh = () => refresh(true, true);
@@ -194,7 +208,7 @@ export function useCurrentManga() {
         bookmarks: computed(() => Object.entries(volumes.value?.chapters ?? {})
             .map(([_, chapter]) => chapter)
             .filter(progress => progress && progress.progress && progress.progress.bookmarks.length > 0)),
-        progress: computed(() => progress.value),
+        progress: currentProgress,
         error: computed(() => error.value),
         params: computed(() => params.value),
         pending: computed(() => pending.value),
@@ -208,6 +222,7 @@ export function useCurrentManga() {
         favourited,
         resetProgress,
         markAsRead,
+        applyProgress,
         getChapter,
         throttled,
         refresh,

@@ -64,15 +64,50 @@
                         :link="manga.url"
                         external
                     />
-                    <IconBtn
-                        v-if="canRead"
-                        :icon="favourited ? 'heart_minus' : 'favorite'"
-                        :fill="favourited"
-                        :text="favourited ? 'Unfavourite' : 'Favourite'"
+                    <IconBtnDropdown
+                        icon="more_vert"
+                        title="More manga actions"
                         color="shade"
-                        :loading="partialLoading"
-                        @click="favourited = !favourited"
-                    />
+                    >
+                        <template #default="{ close }">
+                            <button @click="copyUrl">
+                                <Icon>{{ copiedUrl ? 'check' : 'content_copy' }}</Icon>
+                                <span>{{ copiedUrl ? 'Copied URL' : 'Copy URL' }}</span>
+                            </button>
+                            <button
+                                v-if="canRead"
+                                :disabled="partialLoading"
+                                @click="() => showListPopup(close)"
+                            >
+                                <Icon>list</Icon>
+                                <span>Add to List</span>
+                            </button>
+                            <button
+                                v-if="canRead"
+                                :disabled="partialLoading"
+                                @click="() => toggleFavourite(close)"
+                            >
+                                <Icon :fill="favourited">{{ favourited ? 'heart_minus' : 'favorite' }}</Icon>
+                                <span>{{ favourited ? 'Unfavourite' : 'Favourite' }}</span>
+                            </button>
+                            <button
+                                v-if="canRead"
+                                :disabled="partialLoading"
+                                @click="() => markAllRead(close)"
+                            >
+                                <Icon>visibility</Icon>
+                                <span>Mark All Read</span>
+                            </button>
+                            <button
+                                v-if="canRead && progressPercent > 0"
+                                :disabled="partialLoading"
+                                @click="() => resetAllProgress(close)"
+                            >
+                                <Icon>delete</Icon>
+                                <span>Reset Progress</span>
+                            </button>
+                        </template>
+                    </IconBtnDropdown>
                 </div>
 
                 <div class="progress-card" v-if="canRead">
@@ -95,14 +130,15 @@
                     </div>
                     <div class="progress-footer">
                         <span>{{ progressFooter }}</span>
-                        <span>{{ progressPercent.toFixed(0) }}%</span>
+                        <span v-if="progress?.entity.lastReadAt">
+                            Last read <Date :date="progress.entity.lastReadAt" utc format="r" />
+                        </span>
+                        <span v-else>Not started</span>
                     </div>
-                    <p v-if="progress?.entity.lastReadAt">
-                        Last read <Date :date="progress.entity.lastReadAt" utc format="r" />
-                    </p>
                 </div>
             </div>
         </div>
+        <ListPopup v-if="canRead" v-model="popupIds" />
     </section>
 </template>
 
@@ -111,12 +147,15 @@ import type { MangaVolumes, MbImage, MbManga, MbMangaExt, MbRelatedPerson, MbSou
 
 const { canRead } = useAuthHelper();
 const { chapterTitle } = useMangaUtils();
+const { writeToClipboard } = useUtils();
 const {
     progress,
     progressData,
     favourited,
     partialLoading,
-    chapters
+    chapters,
+    resetProgress,
+    markAsRead
 } = useCurrentManga();
 
 const props = defineProps<{
@@ -132,6 +171,9 @@ const props = defineProps<{
 
 const titleElement = ref<HTMLElement>();
 const titleFontSize = ref<string>();
+const popupIds = ref<string[]>();
+const copiedUrl = ref(false);
+let copiedTimeout: ReturnType<typeof setTimeout> | undefined;
 const title = computed(() => props.extended?.displayTitle ?? props.manga.title);
 const titleSizeClass = computed(() => {
     const length = title.value.length;
@@ -157,6 +199,39 @@ const continueLink = computed(() => {
 const progressPercent = computed(() => progress.value?.entity.progressPercentage ?? progressData.value.total ?? 0);
 const currentLabel = computed(() => currentChapter.value ? chapterTitle(currentChapter.value.chapter) : 'Start from the first chapter');
 const progressFooter = computed(() => progressData.value.totalSlug || `${progressPercent.value.toFixed(0)}% complete`);
+
+const copyUrl = async () => {
+    if (!import.meta.client) return;
+
+    await writeToClipboard(window.location.href);
+    copiedUrl.value = true;
+    if (copiedTimeout) clearTimeout(copiedTimeout);
+    copiedTimeout = setTimeout(() => copiedUrl.value = false, 1500);
+};
+
+const showListPopup = (close: () => void) => {
+    if (!canRead.value) return;
+    close();
+    popupIds.value = [props.manga.id];
+};
+
+const toggleFavourite = (close: () => void) => {
+    if (!canRead.value) return;
+    favourited.value = !favourited.value;
+    close();
+};
+
+const markAllRead = async (close: () => void) => {
+    if (!canRead.value) return;
+    close();
+    await markAsRead();
+};
+
+const resetAllProgress = async (close: () => void) => {
+    if (!canRead.value) return;
+    close();
+    await resetProgress();
+};
 
 const maxTitleFontSize = () => {
     const width = window.innerWidth;
@@ -204,6 +279,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     window.removeEventListener('resize', fitTitle);
+    if (copiedTimeout) clearTimeout(copiedTimeout);
 });
 </script>
 
