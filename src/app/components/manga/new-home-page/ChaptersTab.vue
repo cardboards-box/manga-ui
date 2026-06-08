@@ -88,6 +88,12 @@
                             <span class="chapter-number">Ch.{{ part.chapter.ordinal }}</span>
                             <strong>{{ part.chapter.title || chapterTitle(part.chapter) }}</strong>
                             <small v-if="part.chapter.pageCount">{{ part.chapter.pageCount }}p</small>
+                            <Date
+                                class="version-date"
+                                :date="part.chapter.createdAt"
+                                utc
+                                format="r"
+                            />
                         </NuxtLink>
                     </div>
                 </template>
@@ -414,12 +420,12 @@ watch(
 }
 
 .version-list .chapter-row {
-    grid-template-columns: 20px 58px minmax(0, 1fr) auto;
+    grid-template-columns: 20px 58px minmax(0, 1fr) auto auto;
     min-height: 38px;
     padding: .5rem .9rem .5rem 3.25rem;
 
     &.without-status {
-        grid-template-columns: 58px minmax(0, 1fr) auto;
+        grid-template-columns: 58px minmax(0, 1fr) auto auto;
     }
 }
 
@@ -437,6 +443,10 @@ watch(
 
         .chapter-meta small,
         .chapter-meta :deep(time) {
+            display: none;
+        }
+
+        .version-list .version-date {
             display: none;
         }
     }

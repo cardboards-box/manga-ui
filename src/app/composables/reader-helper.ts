@@ -529,7 +529,7 @@ export function useReaderHelper() {
                     return {
                         route: 'chapter',
                         id: key,
-                        page: 1
+                        page: -1
                     }
                 }
             }
