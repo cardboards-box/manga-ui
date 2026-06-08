@@ -81,6 +81,13 @@
                             inline
                         />
                         <IconBtn
+                            icon="image"
+                            :link="`/chapter/${chapter.chapter.id}/images`"
+                            title="Manage Images"
+                            color="shade"
+                            inline
+                        />
+                        <IconBtn
                             icon="delete"
                             color="danger"
                             title="Delete chapter"

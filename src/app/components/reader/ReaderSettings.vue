@@ -129,6 +129,10 @@
                                 <Icon>split_scene</Icon>
                                 <p>Restitch Chapter</p>
                             </NuxtLink>
+                            <NuxtLink v-if="isAdmin" :to="`/chapter/${chapterId}/images`">
+                                <Icon>image</Icon>
+                                <p>Manage Images</p>
+                            </NuxtLink>
                         </div>
                     </div>
                 </Tab>
