@@ -219,6 +219,10 @@ export interface MangaSearchFilter extends SearchFiler<MangaOrderBy> {
     cFirstAfter?: Date | string;
     cFirstBefore?: Date | string;
     lists?: string[];
+    people?: string[];
+    peopleEx?: string[];
+    peopleAnd?: boolean;
+    peopleExAnd?: boolean;
 }
 
 export interface ListSearchFilter extends SearchFiler<ListOrderBy> {

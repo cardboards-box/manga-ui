@@ -26,8 +26,8 @@ import type {
     MbImage, ReqListImportMd, RespListImport,
     RespNotificationDevices, RespDeviceResult,
     RespNotificationSubscriptions, RespSubscriptionResult,
-    ReqNotificationSettings,
-    MbSlicedImage
+    ReqNotificationSettings, MbSlicedImage,
+    RespPersonSearch, RespPeople, RespPerson
 } from '../models';
 
 type NuxtApiHandle = ReturnType<typeof useApiHelper>;
@@ -157,6 +157,11 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
                     unsubscribe: (id: string) => del<RespSubscriptionResult>(`notification/person/${id}`),
                 }
             }
+        },
+        people: {
+            search: (query: string, page?: number, size?: number, asc?: boolean) => get<RespPersonSearch>('person', { query, page, size, asc }),
+            fetch: (id: string) => get<RespPerson>(`person/${id}`),
+            get: (ids: string[]) => post<RespPeople>(`person`, ids)
         }
     }
 }

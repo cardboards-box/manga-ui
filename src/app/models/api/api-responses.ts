@@ -1,9 +1,9 @@
 import type { Boxed, BoxedArray, BoxedPaged } from './base';
 import type {
     MbMangaExt, MbProfile,
-    MbTag, MbSource,
     MbList, MbApiKey,
     MbNotificationDevice, MbNotificationSubscription,
+    MbPerson, MbSource,
 } from './db';
 import type {
     MbTypeChapter, MbTypeImage,
@@ -54,6 +54,12 @@ export interface RespApiKeys extends BoxedArray<MbApiKey> { }
 export interface RespApiKey extends Boxed<MbApiKey> { }
 
 export interface RespApiKeyKey extends Boxed<string> { }
+
+export interface RespPersonSearch extends BoxedPaged<MbPerson> { }
+
+export interface RespPeople extends BoxedArray<MbPerson> { }
+
+export interface RespPerson extends Boxed<MbPerson> { }
 
 export interface RespNotificationDevices extends BoxedArray<MbNotificationDevice> { }
 

@@ -33,6 +33,46 @@
 
             <TagsFilter v-model="searchFilters" :tags="tags" :sources="sources" />
 
+            <Drawer title="People" storage-key="manga-filter-people" default-closed>
+                <div class="flex row">
+                    <label>Include People:</label>
+                    <PeopleSearch
+                        v-model="searchFilters.people"
+                        placeholder="Select people to include"
+                    />
+                </div>
+                <div class="flex row margin-top">
+                    <label>Exclude People:</label>
+                    <PeopleSearch
+                        v-model="searchFilters.peopleEx"
+                        placeholder="Select people to exclude"
+                    />
+                </div>
+
+                <div class="flex margin-top">
+                    <div class="margin-right">
+                        <label>People Inclusion Mode:</label>
+                        <ButtonGroupBool
+                            v-model="searchFilters.peopleAnd"
+                            on="And"
+                            off="Or"
+                            on-icon="join_inner"
+                            off-icon="orbit"
+                        />
+                    </div>
+                    <div class="margin-left">
+                        <label>People Exclusion Mode:</label>
+                        <ButtonGroupBool
+                            v-model="searchFilters.peopleExAnd"
+                            on="And"
+                            off="Or"
+                            on-icon="join_inner"
+                            off-icon="orbit"
+                        />
+                    </div>
+                </div>
+            </Drawer>
+
             <Drawer title="Manga Status" storage-key="manga-filter-states" default-closed>
                 <label v-if="mangaStateText === 'All'">Show All Manga</label>
                 <label v-else-if="mangaStateText === 'Custom Filter'">Show Based on my Filters</label>
@@ -166,6 +206,10 @@ const DEFAULT_FILTERS : MangaSearchFilter = {
     sources: [],
     tagsAnd: true,
     tagsExAnd: false,
+    people: [],
+    peopleEx: [],
+    peopleAnd: true,
+    peopleExAnd: false,
     states: [],
     statesInclude: true,
     statesAnd: false,
@@ -222,7 +266,7 @@ const mangaStateText = computed(() => {
 const srcs = computed(() => sources.value.map(t => ({ name: t.name, value: t.id, description: t.baseUrl })));
 
 const updateRoute = (merge?: Partial<MangaSearchFilter>) => {
-    const fil = { ...filter.value, ...merge };
+    const fil = normalizeFilters({ ...filter.value, ...merge });
 
     const uri = props.state
         ? STATE_ROLLUP.find(s => s.get(fil))!.routes
@@ -242,14 +286,30 @@ const clearFilters = () => {
 }
 
 const doSearch = () => {
-    updateRoute(searchFilters.value);
+    updateRoute(normalizeFilters(searchFilters.value));
+}
+
+function normalizeFilters(value: MangaSearchFilter): MangaSearchFilter {
+    return {
+        ...value,
+        ratings: [...(value.ratings ?? [])],
+        tags: [...(value.tags ?? [])],
+        tagsEx: [...(value.tagsEx ?? [])],
+        sources: [...(value.sources ?? [])],
+        states: [...(value.states ?? [])],
+        lists: value.lists ? [...value.lists] : undefined,
+        people: [...(value.people ?? [])],
+        peopleEx: [...(value.peopleEx ?? [])],
+        peopleAnd: value.peopleAnd ?? true,
+        peopleExAnd: value.peopleExAnd ?? false
+    };
 }
 
 function parseFilters(): MangaSearchFilter {
-    const getArray = <T = string>(value: LocationQueryValue | LocationQueryValue[], func?: (v: string) => T): T[] => {
+    const getArray = <T = string>(value: LocationQueryValue | LocationQueryValue[], func?: (v: string) => T, preserveCase = false): T[] => {
         const values =  Array.isArray(value)
-            ? value.map(v => v?.toString()?.toLowerCase()!).filter(t => !!t)
-            : value ? [value.toString().toLowerCase()!] : [];
+            ? value.map(v => preserveCase ? v?.toString()! : v?.toString()?.toLowerCase()!).filter(t => !!t)
+            : value ? [preserveCase ? value.toString() : value.toString().toLowerCase()!] : [];
 
         if (func) return values.map(func);
         return <any>values;
@@ -282,6 +342,10 @@ function parseFilters(): MangaSearchFilter {
         'sources': { prop: 'sources', massage: (v) => getArray(v) },
         'tagsand': { prop: 'tagsAnd', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
         'tagsexand': { prop: 'tagsExAnd', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
+        'people': { prop: 'people', massage: (v) => getArray(v, undefined, true) },
+        'peopleex': { prop: 'peopleEx', massage: (v) => getArray(v, undefined, true) },
+        'peopleand': { prop: 'peopleAnd', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
+        'peopleexand': { prop: 'peopleExAnd', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
         'states': { prop: 'states', massage: (v) => getArray(v, t => +t) },
         'statesinclude': { prop: 'statesInclude', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
         'statesand': { prop: 'statesAnd', massage: (v) => v?.toString().toLocaleLowerCase() === 'true' },
@@ -309,7 +373,7 @@ function parseFilters(): MangaSearchFilter {
         props.state.set(filter);
     }
 
-    return filter;
+    return normalizeFilters(filter);
 }
 
 const tRefresh = throttle<void>(() => {
