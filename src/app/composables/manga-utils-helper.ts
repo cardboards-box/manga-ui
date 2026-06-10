@@ -218,58 +218,6 @@ export function useMangaUtils() {
         const currentChapId = mangaProgress?.lastReadChapterId;
         if (!volumes || !extended || !mangaProgress || !currentChapId) return DEFAULT;
 
-        for(let v = 0; v < volumes.volumes.length; v++) {
-            const vol = volumes.volumes[v]!;
-
-            for(let c = 0; c < vol.chapters.length; c++) {
-                const chap = vol.chapters[c]!;
-
-                for(let w = 0; w < chap.whole.length; w++) {
-                    const chapId = chap.whole[w]!;
-                    if (chapId !== currentChapId) continue;
-
-                    const chapter = volumes.chapters[chapId];
-                    const volumePercent = formatPercent(v, volumes.volumes.length, 'manga');
-                    const chapterPercent = formatPercent(c, vol.chapters.length, 'volume');
-                    const pagePercent = formatPage(chapter);
-                    const totalPercent = volumePercent.manga / 100 * chapterPercent.volume / 100 * pagePercent.chapter / 100;
-                    const chapterProg = (extended.uniqueChapterCount * totalPercent).toFixed(0);
-
-                    return {
-                        ...volumePercent,
-                        ...chapterPercent,
-                        ...pagePercent,
-                        total: totalPercent * 100,
-                        totalSlug: `${chapterProg}/${extended.uniqueChapterCount} (${(totalPercent * 100).toFixed(2)}%)`
-                    } as Progress;
-                }
-
-                for(let p = 0; p < chap.partial.length; p++) {
-                    const part = chap.partial[p]!;
-
-                    for(let w = 0; w < part.versions.length; w++) {
-                        const chapId = part.versions[w]!;
-                        if (chapId !== currentChapId) continue;
-
-                        const chapter = volumes.chapters[chapId];
-                        const volumePercent = formatPercent(v, volumes.volumes.length, 'manga');
-                        const chapterPercent = formatPercent(c, vol.chapters.length, 'volume');
-                        const pagePercent = formatPage(chapter);
-                        const totalPercent = volumePercent.manga / 100 * chapterPercent.volume / 100 * pagePercent.chapter / 100;
-                        const chapterProg = (extended.uniqueChapterCount * totalPercent).toFixed(0);
-
-                        return {
-                            ...volumePercent,
-                            ...chapterPercent,
-                            ...pagePercent,
-                            total: totalPercent * 100,
-                            totalSlug: `${chapterProg}/${extended.uniqueChapterCount} (${(totalPercent * 100).toFixed(2)}%)`
-                        } as Progress;
-                    }
-                }
-            }
-        }
-
         const chapter = volumes.chapters[currentChapId];
         const currentVolume = volumes.volumes.find(t => t.chapters.some(c => [...c.whole, ...c.partial.flatMap(t => t.versions)].includes(currentChapId)));
         const currentChapter = currentVolume?.chapters.find(c => [...c.whole, ...c.partial.flatMap(t => t.versions)].includes(currentChapId));
