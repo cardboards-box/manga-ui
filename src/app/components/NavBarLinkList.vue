@@ -66,6 +66,11 @@
     <p>DB Stats</p>
 </NuxtLink>
 
+<NuxtLink to="/admin" active-class="active" @click="clicked" v-if="isAdmin">
+    <Icon>admin_panel_settings</Icon>
+    <p>Admin</p>
+</NuxtLink>
+
 <NuxtLink to="/about" active-class="active" @click="clicked">
     <Icon>description</Icon>
     <p>About</p>
@@ -135,7 +140,8 @@ const {
     currentUser: user,
     login,
     logout: doLogout,
-    canRead
+    canRead,
+    isAdmin
 } = useAuthHelper();
 
 const emits = defineEmits<{ (e: 'naved'): void }>();

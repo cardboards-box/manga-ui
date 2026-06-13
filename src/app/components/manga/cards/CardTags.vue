@@ -1,6 +1,6 @@
 <template>
     <div class="card-tags" :class="style">
-        <div class="header">{{ title }}: </div>
+        <div class="header margin-right">{{ title }}: </div>
         <slot />
     </div>
 </template>
