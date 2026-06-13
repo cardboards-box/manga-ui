@@ -196,7 +196,7 @@ export const useApiHelper = () => {
         postFile: <T>(url: string, file: File, param?: Params) => {
             const data = new FormData();
             data.append('file', file);
-            return post<T>(url, file, param);
+            return post<T>(url, data, param);
         },
         put,
         del: deletefn,

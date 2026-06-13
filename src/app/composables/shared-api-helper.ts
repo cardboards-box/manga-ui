@@ -27,7 +27,12 @@ import type {
     RespNotificationDevices, RespDeviceResult,
     RespNotificationSubscriptions, RespSubscriptionResult,
     ReqNotificationSettings, MbSlicedImage,
-    RespPersonSearch, RespPeople, RespPerson
+    RespPersonSearch, RespPeople, RespPerson,
+    RespInt32, RespBoxed,
+    RespLog, RespLogSearch, RespLogMetaData, LogSearchFilter,
+    RespProfileSearch, RespProfileProviders, ProfileSearchFilter,
+    UpdateBooleanRequest, ImportRequest, RespTagGraph,
+    LogOrderBy, ProfileOrderBy
 } from '../models';
 
 type NuxtApiHandle = ReturnType<typeof useApiHelper>;
@@ -63,7 +68,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
         },
         chapter: {
             fetch: (id: string, refetch?: boolean) => get<RespChapter>(`chapter/${id}`, { refetch }),
-            delete: (id: string) => del<BoxedEmpty>(`chapter/${id}`),
+            delete: (id: string) => del<RespInt32>(`chapter/${id}`),
             download: (id: string, format: ComicFormat) => wrapUrl(apiUrl, `chapter/${id}/download`, { format }),
             bookmark: (id: string, pages: number[]) => put<RespProgress>('chapter/bookmarks', { chapterId: id, bookmarks: pages }),
             restitch: (id: string, slices: MbSlicedImage[]) => post<RespChapter>(`chapter/${id}/restitch`, slices)
@@ -78,7 +83,16 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
                 }
                 return wrapUrl(apiUrl, `image/strip`, pars);
             },
-            del: (id: string) => del<BoxedEmpty>(`image/${id}`)
+            del: (id: string) => del<RespInt32>(`image/${id}`),
+            reindex: (id: string) => get<RespInt32>(`image/${id}/reindex`),
+            bust: (id: string) => get<RespBoxed>(`image/${id}/bust`),
+            bustMany: (ids: string[]) => post<RespBoxed>('image/bust', ids)
+        },
+        log: {
+            fetch: (id: string) => get<RespLog>(`log/${id}`),
+            search: (filter: LogSearchFilter) => post<RespLogSearch>('log', filter),
+            searchUrl: (filter: LogSearchFilter) => get<RespLogSearch>('log', filter),
+            metaData: () => get<RespLogMetaData>('log/metadata')
         },
         manga: {
             search: (filter: MangaSearchFilter) => post<RespMangaSearch>('manga', filter),
@@ -86,10 +100,12 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             fetch: (id: string) => get<RespManga>(`manga/${id}`),
             recommendations: (id: string, filters?: RecommendationFilter) => get<RespMangaRecommendations>(`manga/${id}/recommended`, filters),
             personalRecs: (filters?: RecommendationFilter) => get<RespMangaRecommendations>(`manga/recommended`, filters),
-            delete: (id: string) => del<BoxedEmpty>(`manga/${id}`),
+            delete: (id: string) => del<RespInt32>(`manga/${id}`),
             chapters: (id: string, order?: ChapterOrderBy, asc?: boolean) => get<RespMangaChapters>(`manga/${id}/chapters`, { order, asc }),
             refresh: (id: string) => get<RespManga>(`manga/${id}/refresh`),
+            refreshChapters: (id: string) => get<RespMangaChapters>(`manga/${id}/chapters/refresh`),
             load: (url: string, force?: boolean) => post<RespManga>('manga/load', { url, force }),
+            import: (req: ImportRequest) => post<RespManga>('manga/import', req),
             favorite: (id: string) => get<RespProgress>(`manga/${id}/favorite`),
             unfavorite: (id: string) => del<RespProgress>(`manga/${id}/favorite`),
             recompute: (ids?: string[], since?: number) => get<RespMangaRecompute>(`manga/recompute`, { ids, since }),
@@ -107,6 +123,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             downloadFormat: () => get<RespMetadataEnums<ComicFormat>>('metadata/download-format'),
             listType: () => get<RespMetadataEnums<ListType>>('metadata/list-type'),
             listOrderBy: () => get<RespMetadataEnums<ListOrderBy>>('metadata/list-order-by'),
+            logOrderBy: () => get<RespMetadataEnums<LogOrderBy>>('metadata/log-order-by'),
             tags: () => get<RespMetadataTags>('metadata/manga-tag'),
             sources: () => get<RespMetadataSource>('metadata/sources'),
             stats: () => get<RespStats>(`metadata/stats`)
@@ -116,7 +133,8 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             read: (id: string) => get<RespProgress>(`progress/${id}/read`),
             fetch: (id: string) => get<RespProgress>(`progress/${id}`),
             get: (ids: string[]) => post<RespProgresses>(`progress`, ids),
-            update: (id: string, ordinal?: number) => put<RespProgress>(`progress`, { chapterId: id, pageOrdinal: ordinal })
+            update: (id: string, ordinal?: number) => put<RespProgress>(`progress`, { chapterId: id, pageOrdinal: ordinal }),
+            graph: () => get<RespTagGraph>('progress/graph')
         },
         reverse: {
             url: (url: string) => get<RespReverseResult>('reverse-search', { url }),
@@ -144,7 +162,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             devices: {
                 get: () => get<RespNotificationDevices>('notification/device'),
                 add: (token: string, name: string) => post<RespDeviceResult>('notification/device', { token, name }),
-                remove: (id: string) => del<BoxedEmpty>(`notification/device/${id}`),
+                remove: (id: string) => del<RespDeviceResult>(`notification/device/${id}`),
             },
             subscriptions: {
                 get: () => get<RespNotificationSubscriptions>('notification/subscription'),
@@ -162,6 +180,13 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             search: (query: string, page?: number, size?: number, asc?: boolean) => get<RespPersonSearch>('person', { query, page, size, asc }),
             fetch: (id: string) => get<RespPerson>(`person/${id}`),
             get: (ids: string[]) => post<RespPeople>(`person`, ids)
+        },
+        profile: {
+            search: (filter: ProfileSearchFilter) => post<RespProfileSearch>('profile/search', filter),
+            searchUrl: (filter: ProfileSearchFilter) => get<RespProfileSearch>('profile/search', filter),
+            providers: () => get<RespProfileProviders>('profile/providers'),
+            canRead: (id: string, value: boolean | UpdateBooleanRequest) => put<RespAuthMe>(`profile/${id}/can-read`, typeof value === 'boolean' ? { value } : value),
+            admin: (id: string, value: boolean | UpdateBooleanRequest) => put<RespAuthMe>(`profile/${id}/admin`, typeof value === 'boolean' ? { value } : value),
         }
     }
 }
