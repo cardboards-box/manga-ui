@@ -87,7 +87,7 @@ const outputResult = computed(() => {
     if (state.value === 'loading') return props.default;
     if (state.value === 'error') return props.error || DEFAULT_IMAGE;
     if (typeof actSrc.value === 'string') return actSrc.value;
-    return actSrc.value.url;
+    return props.default;
 });
 
 const getClampValue = (target: HTMLElement) => {
