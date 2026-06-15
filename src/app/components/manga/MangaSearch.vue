@@ -31,7 +31,10 @@
 
             <h3 class="margin-bottom">Advanced Search Options:</h3>
 
-            <TagsFilter v-model="searchFilters" :tags="tags" :sources="sources" />
+            <div class="flex row">
+                <label>Manga Tags:</label>
+                <TagSearch v-model="searchFilters" :tags="tags" :sources="sources" />
+            </div>
 
             <Drawer title="People" storage-key="manga-filter-people" default-closed>
                 <div class="flex row">
@@ -138,14 +141,38 @@
                 <input type="number" v-model="searchFilters.chapMax" />
             </div>
 
-            <label>Manga Sources:</label>
-            <ButtonGroup :options="srcs" v-model="searchFilters.sources" />
+            <div class="flex row margin-top">
+                <label>Manga Sources:</label>
+                <FilterSearch
+                    v-model="searchFilters.sources"
+                    :options="sourceOptions"
+                    placeholder="Search sources"
+                    search-placeholder="Search sources"
+                    multi
+                />
+            </div>
 
-            <label>Content Ratings:</label>
-            <ButtonGroup :options="contentRatings" v-model="searchFilters.ratings" />
+            <div class="flex row margin-top">
+                <label>Content Ratings:</label>
+                <FilterSearch
+                    v-model="searchFilters.ratings"
+                    :options="contentRatingOptions"
+                    placeholder="Search ratings"
+                    search-placeholder="Search ratings"
+                    multi
+                />
+            </div>
 
-            <label class="margin-top">Order By:</label>
-            <ButtonGroupOne :options="mangaOrderBy" v-model="searchFilters.order" />
+            <div class="flex row margin-top">
+                <label>Order By:</label>
+                <FilterSearch
+                    v-model="searchFilters.order"
+                    :options="mangaOrderByOptions"
+                    placeholder="Search order options"
+                    search-placeholder="Search order options"
+                    :clearable="false"
+                />
+            </div>
 
             <label class="margin-top">Order Direction:</label>
             <ButtonGroupBool v-model="searchFilters.asc" on="Ascending" off="Descending" />
@@ -263,7 +290,21 @@ const mangaStateText = computed(() => {
     return STATE_ROLLUP.find(s => s.get(searchFilters.value))!.text;
 })
 
-const srcs = computed(() => sources.value.map(t => ({ name: t.name, value: t.id, description: t.baseUrl })));
+const sourceOptions = computed(() => sources.value.map(source => ({
+    name: source.name,
+    value: source.id,
+    description: source.baseUrl
+})));
+const contentRatingOptions = computed(() => contentRatings.value.map(rating => ({
+    name: rating.name,
+    value: rating.value,
+    description: rating.description
+})));
+const mangaOrderByOptions = computed(() => mangaOrderBy.value.map(order => ({
+    name: order.name,
+    value: order.value,
+    description: order.description
+})));
 
 const updateRoute = (merge?: Partial<MangaSearchFilter>) => {
     const fil = normalizeFilters({ ...filter.value, ...merge });

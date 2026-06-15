@@ -19,7 +19,7 @@
 
         <div class="flex row filter-drawer" v-if="showFilter">
 
-            <TagsFilter
+            <TagSearch
                 v-model="searchFilters"
                 :tags="tags"
                 :sources="sources"
