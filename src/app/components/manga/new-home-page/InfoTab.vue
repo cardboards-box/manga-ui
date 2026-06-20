@@ -50,14 +50,24 @@
             <div v-if="authors.length">
                 <h2>Authors</h2>
                 <div class="tag-row">
-                    <span v-for="person in authors" :key="person.id">{{ person.name }}</span>
+                    <NuxtLink
+                        v-for="person in authors"
+                        :key="person.id"
+                        :to="'/search/all?people=' + person.id"
+                        :title="person.name"
+                    >{{ person.name }}</NuxtLink>
                 </div>
             </div>
 
             <div v-if="artists.length">
                 <h2>Artists</h2>
                 <div class="tag-row">
-                    <span v-for="person in artists" :key="person.id">{{ person.name }}</span>
+                    <NuxtLink
+                        v-for="person in artists"
+                        :key="person.id"
+                        :to="'/search/all?people=' + person.id"
+                        :title="person.name"
+                    >{{ person.name }}</NuxtLink>
                 </div>
             </div>
         </div>
@@ -68,7 +78,7 @@
                 <NuxtLink
                     v-for="tag in tags"
                     :key="tag.id"
-                    :to="'/search/all?include=' + tag.id"
+                    :to="'/search/all?tags=' + tag.id"
                     :title="tag.description"
                 >
                     {{ tag.name }}

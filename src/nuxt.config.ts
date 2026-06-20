@@ -120,6 +120,7 @@ export default defineNuxtConfig({
                 'marked',
                 'highlight.js',
                 'colortranslator',
+                'fuse.js'
             ]
         }
     }
