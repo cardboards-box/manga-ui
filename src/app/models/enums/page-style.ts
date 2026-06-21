@@ -6,7 +6,11 @@ export enum PageStyle {
     SinglePageFitToHeight = 'single-page fit-to-height',
     SinglePageNaturalSize = 'single-page natural-size',
     SinglePageMaxSize = 'single-page max-size',
-    DoublePage = 'double-page',
+    DoublePage = 'double-page fit',
+    DoublePageFitToWidth = 'double-page fit-to-width',
+    DoublePageFitToHeight = 'double-page fit-to-height',
+    DoublePageNaturalSize = 'double-page natural-size',
+    DoublePageMaxSize = 'double-page max-size',
     LongStrip = 'long-strip',
     LongStripFit = 'long-strip fit',
     LongStripNaturalSize = 'long-strip natural-size',
@@ -39,11 +43,31 @@ export const PAGE_STYLES: EnumDescription<PageStyle>[] = [
         name: 'Single Page (Custom Image Size)',
         description: 'Displays the page at a custom image size'
     },
-    // {
-    //     value: PageStyle.DoublePage,
-    //     name: '2 Pages Side-by-Side',
-    //     description: 'Displays two pages side by side'
-    // },
+    {
+        value: PageStyle.DoublePage,
+        name: 'Double Page (Fit to browser size)',
+        description: 'Fits the pages to the browser size'
+    },
+    {
+        value: PageStyle.DoublePageFitToWidth,
+        name: 'Double Page (Fit to browser width)',
+        description: 'Fits the pages to the browser width'
+    },
+    {
+        value: PageStyle.DoublePageFitToHeight,
+        name: 'Double Page (Fit to browser height)',
+        description: 'Fits the pages to the browser height'
+    },
+    {
+        value: PageStyle.DoublePageNaturalSize,
+        name: 'Double Page (Natural Image Size)',
+        description: 'Displays the pages at their natural image size'
+    },
+    {
+        value: PageStyle.DoublePageMaxSize,
+        name: 'Double Page (Custom Image Size)',
+        description: 'Displays the pages at a custom image size'
+    },
     {
         value: PageStyle.LongStrip,
         name: 'Long Strip (Fit to browser width)',

@@ -59,7 +59,11 @@
                         </div>
                         <template
                             v-if="
-                                [PageStyle.SinglePageMaxSize, PageStyle.LongStripMaxSize].includes(pageStyle) ||
+                                [
+                                    PageStyle.SinglePageMaxSize,
+                                    PageStyle.DoublePageMaxSize,
+                                    PageStyle.LongStripMaxSize
+                                ].includes(pageStyle) ||
                                 (autoLongStrip && PageStyle.LongStripMaxSize === autoLongStripStyle)
                             "
                         >

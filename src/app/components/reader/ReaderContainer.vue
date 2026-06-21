@@ -23,6 +23,13 @@
             :open="menuOpen"
             :style="pageStyle"
         />
+        <ReaderDoublePage
+            v-else-if="mode === 'double-page'"
+            :images="images"
+            :current="currentPage"
+            :open="menuOpen"
+            :style="curPageStyle"
+        />
         <ReaderLongStrip
             v-else-if="mode === 'long-strip'"
             :images="images"
@@ -154,6 +161,7 @@ const curPageStyle = computed(() => {
 const mode = computed<'single-page' | 'long-strip' | 'double-page'>(() => <any>curPageStyle.value?.split(' ')[0] ?? 'single-page');
 
 const isLongStrip = computed(() => mode.value === 'long-strip');
+const isDoublePage = computed(() => mode.value === 'double-page');
 const fullPercent = computed(() => `${percentage.value}%`);
 
 const imageFilter = computed(() => {
@@ -196,7 +204,9 @@ const determineStateClass = (page: PageImage): ClassMap => {
 const classes = computed(() => serClasses(props.class, curPageStyle.value));
 const { top: scrollUp, bottom: scrollDown } = scrollers(clickArea, scrollAmount, scrollAmount);
 
-const moveToRoute = (route: { route: string; id?: string; page?: number }) => {
+type ReaderRoute = { route: string; id?: string; page?: number };
+
+const moveToRoute = (route: ReaderRoute) => {
     if (!isLongStrip.value
         || route.route !== 'chapter'
         || chapter.value?.id !== route.id) {
@@ -211,9 +221,40 @@ const moveToRoute = (route: { route: string; id?: string; page?: number }) => {
     tagPage.value = page;
 }
 
+const findPageOffset = (offset: number): ReaderRoute => {
+    const currentIndex = images.value.findIndex(i => i.image.id === currentPage.value?.id);
+    if (currentIndex < 0)
+        return offset > 0 ? findNext('page') : findPrev('page');
+
+    const targetIndex = currentIndex + offset;
+    if (targetIndex >= images.value.length)
+        return findNext('chapter');
+
+    if (targetIndex < 0) {
+        if (currentIndex === 0)
+            return findPrev('chapter');
+
+        const firstPage = images.value[0]?.image;
+        return firstPage && chapter.value?.id
+            ? { route: 'chapter', id: chapter.value.id, page: firstPage.ordinal }
+            : findPrev('chapter');
+    }
+
+    const targetPage = images.value[targetIndex]?.image;
+    if (!targetPage || !chapter.value?.id)
+        return offset > 0 ? findNext('page') : findPrev('page');
+
+    return {
+        route: 'chapter',
+        id: chapter.value.id,
+        page: targetPage.ordinal
+    };
+}
+
 const move = (forward: boolean) => {
-    const pp = () => findNext('page');
-    const pn = () => findPrev('page');
+    const pageOffset = isDoublePage.value ? 2 : 1;
+    const pp = () => findPageOffset(pageOffset);
+    const pn = () => findPageOffset(pageOffset * -1);
     const n = invertControls.value ? pn: pp;
     const b = invertControls.value ? pp: pn;
     const route = (forward ? n : b)();
@@ -230,8 +271,7 @@ const pageClick = (event: MouseEvent) => {
     }
 
     if (forwardOnly.value) {
-        const route = findNext('page');
-        moveToRoute(route);
+        move(true);
         return;
     }
 
@@ -253,7 +293,10 @@ const arrowKeyHandler = (ev: KeyboardEvent, down: boolean) => {
     const scrollabled = [
         PageStyle.LongStrip,
         PageStyle.SinglePageFitToWidth,
-        PageStyle.SinglePageNaturalSize
+        PageStyle.SinglePageNaturalSize,
+        PageStyle.DoublePageFitToWidth,
+        PageStyle.DoublePageNaturalSize,
+        PageStyle.DoublePageMaxSize
     ].indexOf(curPageStyle.value) !== -1;
 
     switch(ev.key) {
