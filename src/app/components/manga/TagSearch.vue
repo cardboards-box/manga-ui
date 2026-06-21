@@ -202,6 +202,7 @@ type SearchableTag = {
     tag: MbTypeTag;
     name: string;
     slug: string;
+    aliases: string;
     description: string;
     rating: string;
     source: string;
@@ -317,6 +318,7 @@ const searchableTags = computed<SearchableTag[]>(() => filteredTags.value.map(ta
         tag,
         name: tag.entity.name,
         slug: tag.entity.slug,
+        aliases: (tag.entity.aliases ?? []).join(' '),
         description: tag.entity.description ?? '',
         rating: ext.rating === undefined ? '' : ratingText(ext.rating),
         source: source ? `${source.name} ${source.slug} ${source.id}` : (sourceId ?? '')
@@ -330,6 +332,7 @@ const fuse = computed(() => new Fuse(searchableTags.value, {
     keys: [
         { name: 'name', weight: 4 },
         { name: 'slug', weight: 3 },
+        { name: 'aliases', weight: 3 },
         { name: 'description', weight: 2 },
         { name: 'rating', weight: 2 },
         { name: 'source', weight: 2 }
@@ -387,6 +390,7 @@ function fallbackTag(id: string): MbTag {
         name: id,
         slug: id,
         sourceId: '',
+        aliases: [],
     };
 }
 

@@ -292,6 +292,8 @@ export interface MbTag extends MbDbObject {
     description?: string;
     /** The source that originally loaded this tag */
     sourceId: string;
+    /** Alternate slugs that resolve to this tag */
+    aliases: string[];
 }
 
 /** Extended tag metadata used by MangaBox relationships */

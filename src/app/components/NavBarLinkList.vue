@@ -66,9 +66,14 @@
     <p>DB Stats</p>
 </NuxtLink>
 
-<NuxtLink to="/admin" active-class="active" @click="clicked" v-if="isAdmin">
+<NuxtLink to="/admin/profiles" active-class="active" @click="clicked" v-if="isAdmin">
     <Icon>admin_panel_settings</Icon>
-    <p>Admin</p>
+    <p>Admin Profiles</p>
+</NuxtLink>
+
+<NuxtLink class="sub" to="/admin/tags" active-class="active" @click="clicked" v-if="isAdmin">
+    <Icon>sell</Icon>
+    <p>Admin Tags</p>
 </NuxtLink>
 
 <NuxtLink to="/about" active-class="active" @click="clicked">
