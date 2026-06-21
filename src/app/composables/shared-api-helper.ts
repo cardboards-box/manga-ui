@@ -32,7 +32,7 @@ import type {
     RespLog, RespLogSearch, RespLogMetaData, LogSearchFilter,
     RespProfileSearch, RespProfileProviders, ProfileSearchFilter,
     UpdateBooleanRequest, ImportRequest, RespTagGraph,
-    LogOrderBy, ProfileOrderBy
+    LogOrderBy, MbTag, RespTagMerge
 } from '../models';
 
 type NuxtApiHandle = ReturnType<typeof useApiHelper>;
@@ -124,7 +124,6 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             listType: () => get<RespMetadataEnums<ListType>>('metadata/list-type'),
             listOrderBy: () => get<RespMetadataEnums<ListOrderBy>>('metadata/list-order-by'),
             logOrderBy: () => get<RespMetadataEnums<LogOrderBy>>('metadata/log-order-by'),
-            tags: () => get<RespMetadataTags>('metadata/manga-tag'),
             sources: () => get<RespMetadataSource>('metadata/sources'),
             stats: () => get<RespStats>(`metadata/stats`)
         },
@@ -187,6 +186,11 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             providers: () => get<RespProfileProviders>('profile/providers'),
             canRead: (id: string, value: boolean | UpdateBooleanRequest) => put<RespAuthMe>(`profile/${id}/can-read`, typeof value === 'boolean' ? { value } : value),
             admin: (id: string, value: boolean | UpdateBooleanRequest) => put<RespAuthMe>(`profile/${id}/admin`, typeof value === 'boolean' ? { value } : value),
+        },
+        tag: {
+            get: () => get<RespMetadataTags>('tag'),
+            upsert: (tag: MbTag[]) => post<RespMetadataTags>('tag', tag),
+            merge: (id: string, aliases: string[]) => post<RespTagMerge>(`tag/merge/${id}`, aliases)
         }
     }
 }

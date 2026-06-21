@@ -11,7 +11,7 @@ export function useCacheHelper() {
     const api = useMangaApi();
 
     const CACHE_ITEMS = {
-        'tags': () => api.promise.metaData.tags(),
+        'tags': () => api.promise.tag.get(),
         'sources': () => api.promise.metaData.sources(),
         'contentRatings': () => api.promise.metaData.contentRating(),
         'mangaOrderBy': () => api.promise.metaData.mangaOrderBy(),

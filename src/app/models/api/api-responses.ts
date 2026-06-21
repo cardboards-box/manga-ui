@@ -225,3 +225,11 @@ export interface RespInt32 extends Boxed<number> { }
 
 /** Returns an empty boxed result */
 export interface RespBoxed extends BoxedEmpty { }
+
+/** The response of the merge tag requests */
+export interface RespTagMerge extends Boxed<{
+    /** The merged tag */
+    tag: MbTypeTag;
+    /** The IDs of the deleted tags */
+    deleted: string[];
+}> { }
