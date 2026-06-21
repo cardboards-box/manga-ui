@@ -7,6 +7,10 @@ export default defineNuxtPlugin(app => {
 
             let isSwipe = false;
 
+            el.addEventListener('dragstart', (ev) => {
+                ev.preventDefault();
+            });
+
             el.addEventListener('click', (ev) => {
                 if (!isSwipe) el.dispatchEvent(new MouseEvent('tap', ev));
             });

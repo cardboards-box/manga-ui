@@ -1,7 +1,9 @@
 <template>
     <div
         class="reader-long-strip flex fill fill-parent"
+        v-swipe
         ref="container"
+        @tap="pageClick"
     >
         <div
             class="img-container center scrollable-y"
@@ -44,6 +46,12 @@
                 </div>
             </template>
         </div>
+        <ReaderProgressBar
+            :pages="images"
+            :current-ids="currentPage ? [currentPage.image.id] : []"
+            :percentage="currentPercentage"
+            :style="progressBar"
+        />
     </div>
 </template>
 
@@ -62,21 +70,28 @@ type SizeR = {
 
 const {
     maxImageHeight,
-    maxImageWidth
+    maxImageWidth,
+    invertControls,
+    progressBarStyle: progressBar,
+    regionMargin,
+    scrollAmount
 } = useAppSettings();
+const {
+    findNext,
+    findPrev
+} = useReaderHelper();
 
 const props = defineProps<{
     images: PageImage[];
     open: boolean;
     current: MbImage | undefined;
-    percentage: number;
     tagPage: number;
     style: PageStyle;
 }>();
 
 const emits = defineEmits<{
     (e: 'update:current', value: MbImage | undefined): void;
-    (e: 'update:percentage', value: number | undefined): void;
+    (e: 'update:open', value: boolean): void;
 }>();
 
 /** The container the image should be displayed in */
@@ -89,6 +104,8 @@ const imageContainer = ref<HTMLDivElement>();
 const resizeTrigger = ref(true);
 /** Whether or not the initial scroll has been performed */
 const didInitialScroll = ref(false);
+/** Current progress through the chapter */
+const percentage = ref(0);
 /** The observer for watching the container's size */
 const resize = ref<ResizeObserver>();
 /** The available space for the image */
@@ -104,10 +121,15 @@ const currentPage = computed({
     get: () => props.images.find(i => i.image === props.current),
     set: (value) => emits('update:current', value?.image)
 });
+/** Whether the settings menu is open */
+const menuOpen = computed({
+    get: () => props.open,
+    set: (value: boolean) => emits('update:open', value)
+});
 /** The current percentage indicating how far through the chapter the user is */
 const currentPercentage = computed({
-    get: () => props.percentage,
-    set: (value) => emits('update:percentage', value)
+    get: () => percentage.value,
+    set: (value) => percentage.value = value ?? 0
 });
 
 /** All of the images with their calculated bounds */
@@ -206,10 +228,11 @@ function getCurrentVisibleOrdinal(): { ordinal: number, percent: number } | unde
 
     const imageHeight = closestElement.offsetHeight;
     const imageTop = closestElement.offsetTop;
+    const centerY = scroller.scrollTop + (scroller.clientHeight / 2);
     const percent = imageHeight <= 0
         ? 0
         : Math.min(100, Math.max(0,
-            ((scroller.scrollTop - imageTop) / imageHeight) * 100));
+            ((centerY - imageTop) / imageHeight) * 100));
 
     return {
         ordinal: closestOrdinal,
@@ -278,6 +301,110 @@ const onImageContainerScroll = () => {
     syncProgressFromScroll();
 };
 
+type ReaderRoute = { route: string; id?: string; page?: number };
+
+/** Navigates to a reader route, preserving the target page when provided. */
+const moveToRoute = (route: ReaderRoute) => {
+    let next = `/${route.route}/${route.id}`;
+    if (route.page) next += `?page=${route.page}`;
+    navigateTo(next);
+}
+
+/** Moves directly to the next or previous chapter, applying inverted controls when requested. */
+const moveChapter = (forward: boolean, applyInvert: boolean = true) => {
+    const next = () => findNext('chapter');
+    const prev = () => findPrev('chapter');
+    const goForward = applyInvert && invertControls.value ? prev : next;
+    const goBack = applyInvert && invertControls.value ? next : prev;
+
+    moveToRoute((forward ? goForward : goBack)());
+}
+
+/** Splits the viewport into the center settings region and the scrolling regions. */
+const getClickRegions = (event: MouseEvent) => {
+    const margin = regionMargin.value;
+    const edge = (100 / 2) - (margin / 2);
+    const x = event.clientX / window.innerWidth * 100;
+    const y = event.clientY / window.innerHeight * 100;
+
+    return {
+        center: x > edge && x < 100 - edge && y > edge && y < 100 - edge
+    };
+}
+
+/** Checks whether the long strip is scrolled to its top edge. */
+const isAtScrollTop = () => {
+    const scroller = imageContainer.value;
+    return !scroller || scroller.scrollTop <= 0;
+}
+
+/** Checks whether the long strip is scrolled to its bottom edge. */
+const isAtScrollBottom = () => {
+    const scroller = imageContainer.value;
+    if (!scroller) return true;
+
+    return scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
+}
+
+/** Smoothly scrolls the long strip by the configured viewport percentage. */
+const scrollChapter = (up: boolean = false) => {
+    const scroller = imageContainer.value;
+    if (!scroller) return;
+
+    scroller.scrollBy({
+        top: (up ? -1 : 1) * scroller.clientHeight * (scrollAmount.value / 100),
+        behavior: 'smooth'
+    });
+}
+
+/** Handles reader taps by toggling settings, scrolling, or moving to the next chapter. */
+const pageClick = (event: MouseEvent) => {
+    const regions = getClickRegions(event);
+    if (regions.center) {
+        menuOpen.value = !menuOpen.value;
+        return;
+    }
+
+    if (isAtScrollBottom()) {
+        moveChapter(true, false);
+        return;
+    }
+
+    scrollChapter();
+}
+
+/** Handles arrow key scrolling and chapter navigation for the long strip reader. */
+const arrowKeyHandler = (ev: KeyboardEvent) => {
+    switch(ev.key) {
+        case 'ArrowLeft':
+            ev.preventDefault();
+            moveChapter(false);
+            return;
+        case 'ArrowRight':
+            ev.preventDefault();
+            moveChapter(true);
+            return;
+        case 'ArrowUp':
+            ev.preventDefault();
+            if (isAtScrollTop()) {
+                moveChapter(false, false);
+                return;
+            }
+
+            scrollChapter(true);
+            return;
+        case 'ArrowDown':
+            ev.preventDefault();
+            if (isAtScrollBottom()) {
+                moveChapter(true, false);
+                return;
+            }
+
+            scrollChapter();
+            return;
+    }
+}
+
 /**
  * Makes sure the image fits within the given max bounds while maintaining aspect ratio.
  * Max bounds always win so the image cannot overflow the available space.
@@ -317,6 +444,8 @@ watch(() => props.tagPage, () => scrollToCurrentPage());
 
 /** Sets the observer to watch the container's size */
 onMounted(() => {
+    window.addEventListener('keydown', arrowKeyHandler);
+
     if (container.value) {
         resize.value = new ResizeObserver(onResize);
         resize.value.observe(container.value);
@@ -337,6 +466,8 @@ onMounted(() => {
 
 /** Cleans up the observer when the component is unmounted */
 onUnmounted(() => {
+    window.removeEventListener('keydown', arrowKeyHandler);
+
     if (imageContainer.value) {
         imageContainer.value.removeEventListener('scroll', onImageContainerScroll);
     }
@@ -372,7 +503,7 @@ onUnmounted(() => {
         }
 
         &.scrollable-y {
-            overflow-y: auto;
+            overflow-y: scroll;
         }
 
         .image-placeholder {

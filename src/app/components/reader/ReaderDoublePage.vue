@@ -1,6 +1,10 @@
 <template>
     <div
         class="reader-double-page flex fill fill-parent"
+        v-swipe
+        @tap="pageClick"
+        @swipe-left="swipe(false)"
+        @swipe-right="swipe(true)"
         ref="container"
     >
         <div
@@ -9,6 +13,7 @@
                 'scrollable-x': spreadSize.scrollX,
                 'scrollable-y': spreadSize.scrollY
             }"
+            ref="imageContainer"
         >
             <template v-for="page of spreadPages" :key="page.ordinal">
                 <img
@@ -16,6 +21,7 @@
                     :src="page.url"
                     :width="page.width"
                     :height="page.height"
+                    draggable="false"
                 />
                 <div
                     v-else
@@ -42,6 +48,11 @@
                 </div>
             </template>
         </div>
+        <ReaderProgressBar
+            :pages="images"
+            :current-ids="spreadPages.map(i => i.id)"
+            :style="progressBar"
+        />
     </div>
 </template>
 
@@ -59,6 +70,7 @@ type SizeR = {
 }
 
 type SpreadPage = {
+    id: string;
     ordinal: number;
     state: PageImage['state'];
     url: string | undefined;
@@ -71,8 +83,18 @@ const placeholderHeight = 600;
 
 const {
     maxImageHeight,
-    maxImageWidth
+    maxImageWidth,
+    invertControls,
+    forwardOnly,
+    progressBarStyle: progressBar,
+    regionMargin,
+    scrollAmount
 } = useAppSettings();
+const {
+    chapter,
+    findNext,
+    findPrev
+} = useReaderHelper();
 
 const props = defineProps<{
     images: PageImage[];
@@ -81,14 +103,25 @@ const props = defineProps<{
     style: PageStyle;
 }>();
 
+const emits = defineEmits<{
+    (e: 'update:open', value: boolean): void;
+}>();
+
 /** The container the image spread should be displayed in */
 const container = ref<HTMLDivElement>();
+/** The full-width image scroll container */
+const imageContainer = ref<HTMLDivElement>();
 /** Trigger for resizing the image spread */
 const resizeTrigger = ref(true);
 /** The observer for watching the container's size */
 const resize = ref<ResizeObserver>();
 /** The page style for the reader */
 const pageStyle = computed(() => props.style);
+/** Whether the settings menu is open */
+const menuOpen = computed({
+    get: () => props.open,
+    set: (value: boolean) => emits('update:open', value)
+});
 /** The available space for the image spread */
 const space = computed(() => {
     resizeTrigger.value;
@@ -102,14 +135,19 @@ const sourcePages = computed(() => {
     const currentIndex = props.images.findIndex(i => i.image === props.current);
     if (currentIndex < 0) return [];
 
-    return props.images.slice(currentIndex, currentIndex + 2);
+    const currentOrdinal = props.images[currentIndex]?.image.ordinal;
+    const spreadStart = currentOrdinal !== undefined && currentOrdinal % 2 === 0
+        ? Math.max(0, currentIndex - 1)
+        : currentIndex;
+
+    return props.images.slice(spreadStart, spreadStart + 2);
 });
 /** The calculated dimensions and scroll state for the spread */
 const spreadSize = computed(() => {
     resizeTrigger.value;
 
     const imageSizes = sourcePages.value.map(i => i.response?.image);
-    const loadedSizes = imageSizes.filter((i): i is SizeR & { blob: Blob } => !!i);
+    const loadedSizes = imageSizes.filter((i) => !!i);
 
     if (!loadedSizes.length) {
         return {
@@ -192,6 +230,7 @@ const spreadPages = computed<SpreadPage[]>(() => {
         const size = spreadSize.value.pages[index];
 
         return {
+            id: i.image.id,
             ordinal: i.image.ordinal,
             state: i.state,
             url: current?.blob ? URL.createObjectURL(current.blob) : undefined,
@@ -204,6 +243,200 @@ const spreadPages = computed<SpreadPage[]>(() => {
 /** Triggers the image resize variable */
 const onResize = () => {
     resizeTrigger.value = !resizeTrigger.value;
+};
+
+type ReaderRoute = { route: string; id?: string; page?: number };
+
+/** Navigates to a reader route, preserving the target page when provided. */
+const moveToRoute = (route: ReaderRoute) => {
+    let next = `/${route.route}/${route.id}`;
+    if (route.page) next += `?page=${route.page}`;
+    navigateTo(next);
+}
+
+/** Finds the index of the left page in the currently visible spread. */
+const spreadStartIndex = computed(() => {
+    const firstVisibleId = sourcePages.value[0]?.image.id;
+    return props.images.findIndex(i => i.image.id === firstVisibleId);
+});
+
+/** Finds the route for a page offset from the current spread, crossing chapters at the edges. */
+const findPageOffset = (offset: number): ReaderRoute => {
+    if (spreadStartIndex.value < 0)
+        return offset > 0 ? findNext('page') : findPrev('page');
+
+    const targetIndex = spreadStartIndex.value + offset;
+    if (targetIndex >= props.images.length)
+        return findNext('chapter');
+
+    if (targetIndex < 0) {
+        if (spreadStartIndex.value === 0)
+            return findPrev('chapter');
+
+        const firstPage = props.images[0]?.image;
+        return firstPage && chapter.value?.id
+            ? { route: 'chapter', id: chapter.value.id, page: firstPage.ordinal }
+            : findPrev('chapter');
+    }
+
+    const targetPage = props.images[targetIndex]?.image;
+    if (!targetPage || !chapter.value?.id)
+        return offset > 0 ? findNext('page') : findPrev('page');
+
+    return {
+        route: 'chapter',
+        id: chapter.value.id,
+        page: targetPage.ordinal
+    };
+}
+
+/** Moves to the next or previous spread, applying inverted controls when requested. */
+const move = (forward: boolean, applyInvert: boolean = true) => {
+    const next = () => findPageOffset(2);
+    const prev = () => findPageOffset(-2);
+    const goForward = applyInvert && invertControls.value ? prev : next;
+    const goBack = applyInvert && invertControls.value ? next : prev;
+
+    moveToRoute((forward ? goForward : goBack)());
+}
+
+/** Moves directly to the next or previous chapter. */
+const moveChapter = (forward: boolean) => {
+    moveToRoute(forward ? findNext('chapter') : findPrev('chapter'));
+}
+
+/** Handles horizontal swipe gestures as spread navigation. */
+const swipe = (right: boolean) => {
+    move(right, true);
+}
+
+/** Splits the viewport into center, edge, and corner click regions. */
+const getClickRegions = (event: MouseEvent) => {
+    const margin = regionMargin.value;
+    const edge = (100 / 2) - (margin / 2);
+    const x = event.clientX / window.innerWidth * 100;
+    const y = event.clientY / window.innerHeight * 100;
+
+    return {
+        center: x > edge && x < 100 - edge && y > edge && y < 100 - edge,
+        left: x <= edge,
+        right: x >= 100 - edge,
+        top: y <= edge,
+        bottom: y >= 100 - edge
+    };
+}
+
+/** Checks whether the current spread is taller than the visible reader area. */
+const hasVerticalScroll = () => {
+    const scroller = imageContainer.value;
+    return !!scroller && spreadSize.value.scrollY && scroller.scrollHeight > scroller.clientHeight + 1;
+}
+
+/** Checks whether the current spread is scrolled to its top edge. */
+const isAtScrollTop = () => {
+    const scroller = imageContainer.value;
+    return !scroller || scroller.scrollTop <= 1;
+}
+
+/** Checks whether the current spread is scrolled to its bottom edge. */
+const isAtScrollBottom = () => {
+    const scroller = imageContainer.value;
+    if (!scroller) return true;
+
+    return scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
+}
+
+/** Smoothly scrolls the visible spread by the configured viewport percentage. */
+const scrollVisiblePage = (up: boolean = false) => {
+    const scroller = imageContainer.value;
+    if (!scroller) return;
+
+    scroller.scrollBy({
+        top: (up ? -1 : 1) * scroller.clientHeight * (scrollAmount.value / 100),
+        behavior: 'smooth'
+    });
+}
+
+/** Handles reader taps by toggling settings, scrolling, or moving between spreads. */
+const pageClick = (event: MouseEvent) => {
+    const regions = getClickRegions(event);
+    if (regions.center) {
+        menuOpen.value = !menuOpen.value;
+        return;
+    }
+
+    if (hasVerticalScroll()) {
+        if (isAtScrollBottom()) {
+            move(true, false);
+            return;
+        }
+
+        scrollVisiblePage();
+        return;
+    }
+
+    if (forwardOnly.value) {
+        move(true, false);
+        return;
+    }
+
+    const isBack = regions.left || (regions.top && !regions.right);
+    const isForward = regions.right || (regions.bottom && !regions.left);
+
+    if (isBack) {
+        move(false);
+        return;
+    }
+
+    if (isForward) {
+        move(true);
+    }
+}
+
+/** Handles arrow key navigation for scrollable and non-scrollable double-page spreads. */
+const arrowKeyHandler = (ev: KeyboardEvent) => {
+    const scrollable = hasVerticalScroll();
+
+    switch(ev.key) {
+        case 'ArrowLeft':
+            if (scrollable) return;
+            ev.preventDefault();
+            move(false);
+            return;
+        case 'ArrowRight':
+            if (scrollable) return;
+            ev.preventDefault();
+            move(true);
+            return;
+        case 'ArrowUp':
+            ev.preventDefault();
+            if (scrollable) {
+                if (isAtScrollTop()) {
+                    moveChapter(false);
+                    return;
+                }
+
+                scrollVisiblePage(true);
+                return;
+            }
+
+            move(false);
+            return;
+        case 'ArrowDown':
+            ev.preventDefault();
+            if (scrollable) {
+                if (isAtScrollBottom()) {
+                    moveChapter(true);
+                    return;
+                }
+
+                scrollVisiblePage();
+                return;
+            }
+
+            move(true);
+            return;
+    }
 };
 
 /**
@@ -243,6 +476,8 @@ function boundRatio(
 
 /** Sets the observer to watch the container's size */
 onMounted(() => {
+    window.addEventListener('keydown', arrowKeyHandler);
+
     if (!container.value) return;
 
     resize.value = new ResizeObserver(onResize);
@@ -251,6 +486,8 @@ onMounted(() => {
 
 /** Cleans up the observer when the component is unmounted */
 onUnmounted(() => {
+    window.removeEventListener('keydown', arrowKeyHandler);
+
     if (!container.value || !resize.value) return;
 
     resize.value.unobserve(container.value);
@@ -261,10 +498,12 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .reader-double-page {
     overflow: hidden;
+    touch-action: pan-y;
+    user-select: none;
 
     .img-container {
-        max-width: min(100%, 100vw);
-        max-height: min(100%, 100vh);
+        width: 100%;
+        height: 100%;
         overflow: hidden;
         display: flex;
         flex-direction: row;
@@ -274,13 +513,14 @@ onUnmounted(() => {
         img {
             display: block;
             filter: var(--manga-filter);
+            -webkit-user-drag: none;
+            user-select: none;
+            pointer-events: none;
         }
 
         &.scrollable-x {
             overflow-x: auto;
             justify-content: flex-start;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
         }
 
         &.scrollable-y {
