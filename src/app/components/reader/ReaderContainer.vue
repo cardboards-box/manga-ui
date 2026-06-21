@@ -122,7 +122,7 @@ const loadImage = async (image: PageImage) => {
     image.state = 'loading';
     try {
         image.response = await get(image.image);
-        image.state = 'loaded';
+        image.state = image.response.image ? 'loaded' : 'error';
     } catch (error) {
         image.state = 'error';
         console.error(`Failed to load image ${image.image.id}`, {
