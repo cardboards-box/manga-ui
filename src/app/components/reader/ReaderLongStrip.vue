@@ -320,15 +320,18 @@ const moveChapter = (forward: boolean, applyInvert: boolean = true) => {
     moveToRoute((forward ? goForward : goBack)());
 }
 
-/** Splits the viewport into the center settings region and the scrolling regions. */
+/** Splits the reader container into the center settings region and the scrolling regions. */
 const getClickRegions = (event: MouseEvent) => {
     const margin = regionMargin.value;
     const edge = (100 / 2) - (margin / 2);
-    const x = event.clientX / window.innerWidth * 100;
-    const y = event.clientY / window.innerHeight * 100;
+    const rect = container.value?.getBoundingClientRect();
+    const width = rect?.width || window.innerWidth;
+    const height = rect?.height || window.innerHeight;
+    const x = ((event.clientX - (rect?.left ?? 0)) / width) * 100;
+    const y = ((event.clientY - (rect?.top ?? 0)) / height) * 100;
 
     return {
-        center: x > edge && x < 100 - edge && y > edge && y < 100 - edge
+        center: x >= edge && x <= 100 - edge && y >= edge && y <= 100 - edge
     };
 }
 
