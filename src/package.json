@@ -5,6 +5,7 @@
     "scripts": {
         "build": "nuxt build",
         "dev": "npx nuxi cleanup && nuxt dev",
+        "dev-local": "cross-env NUXT_PUBLIC_API_URL=http://localhost:7115 nuxt dev",
         "generate": "nuxt generate",
         "preview": "nuxt preview",
         "postinstall": "nuxt prepare"
@@ -35,6 +36,7 @@
         "@types/luxon": "^3.7.1",
         "@types/marked": "^6.0.0",
         "sass-embedded": "^1.99.0",
+        "cross-env": "^10.1.0",
         "workbox-core": "^7.4.1",
         "workbox-precaching": "^7.4.1",
         "workbox-routing": "^7.4.1"

@@ -1,5 +1,5 @@
 import type { ThemeColor, SiteBackground } from "~/models";
-import { FilterStyle, ListStyle, PageStyle, ProgressBarStyle, THEME_DEFAULTS } from '~/models';
+import { FilterStyle, ListStyle, PageStyle, ProgressBarStyle, THEME_DEFAULTS, ChapterStyle } from '~/models';
 
 type Dic = { [key: string]: string };
 interface MangaSettings {
@@ -14,6 +14,7 @@ interface MangaSettings {
     progressBarStyle: ProgressBarStyle;
     customFilter: string | undefined;
     listStyle: ListStyle;
+    chapterStyle: ChapterStyle;
     blurPornCovers: boolean;
     showTutorial: boolean;
     showPorn: boolean;
@@ -47,6 +48,7 @@ const DEFAULTS: MangaSettings = {
     progressBarStyle: ProgressBarStyle.Left,
     customFilter: undefined,
     listStyle: ListStyle.Expanded,
+    chapterStyle: ChapterStyle.Volumes,
     blurPornCovers: true,
     showTutorial: true,
     showPorn: true,
@@ -84,6 +86,7 @@ export const useAppSettings = () => {
             progressBarStyle: getSet<ProgressBarStyle>('progress-bar', DEFAULTS.progressBarStyle, () => commit()),
             customFilter: getSet<string>('custom-filter', DEFAULTS.customFilter, () => commit()),
             listStyle: getSet<ListStyle>('list-style', DEFAULTS.listStyle, () => commit()),
+            chapterStyle: getSet<ChapterStyle>('chapter-style', DEFAULTS.chapterStyle, () => commit()),
             blurPornCovers: getSetBool('blur-porn-covers', DEFAULTS.blurPornCovers, () => commit()),
             showTutorial: getSetBool('show-read-tutorial', DEFAULTS.showTutorial, () => commit()),
             showPorn: getSetBool('show-porn', DEFAULTS.showPorn, () => commit()),
