@@ -44,7 +44,7 @@
                         v-for="tag in displayTags"
                         :key="tag.id"
                         class="pill"
-                        :to="'/search/all?include=' + tag.id"
+                        :to="'/search/all?tags=' + tag.id"
                         :title="tag.description"
                     >
                         {{ tag.name }}
@@ -189,7 +189,7 @@ const titleSizeClass = computed(() => {
     return 'title-md';
 });
 const subtitle = computed(() => props.extended?.displayTitle ? props.manga.title : props.manga.altTitles[0]);
-const displayTags = computed(() => props.tags.slice(0, 4));
+const displayTags = computed(() => props.tags);
 const contentRatingText = computed(() => ContentRating[props.manga.contentRating] ?? 'Safe');
 const contentRatingClass = computed(() => {
     if ([ContentRating.Pornographic, ContentRating.Erotica].includes(props.manga.contentRating)) return 'danger';

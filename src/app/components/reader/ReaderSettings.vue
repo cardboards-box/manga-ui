@@ -370,6 +370,7 @@ const resetPages = async () => {
 
     pageLoading.value = true;
     await forceReset();
+    window.location.reload();
     pageLoading.value = false;
 };
 
