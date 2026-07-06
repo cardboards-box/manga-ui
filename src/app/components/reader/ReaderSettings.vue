@@ -287,6 +287,14 @@
                                 <Icon :spin="pageLoading">sync</Icon>
                                 <p>Refresh Page Links</p>
                             </button>
+                            <button
+                                v-if="isAdmin"
+                                @click="bustCurrentImage"
+                                :disabled="imageBusting || !currentPage"
+                            >
+                                <Icon :spin="imageBusting">sync_problem</Icon>
+                                <p>Bust Current Image</p>
+                            </button>
                         </div>
                     </div>
                 </Tab>
@@ -316,6 +324,7 @@ const { isLongStripPageStyle } = usePageStyleHelper();
 const api = useMangaApi();
 const { download } = useApiHelper();
 const { isAdmin } = useAuthHelper();
+const { clearImage } = useImageCache();
 const {
     manga, mangaExtended, cover,
     chapter, progress: stats,
@@ -350,6 +359,7 @@ const menuOpen = computed({
 const downloading = ref(false);
 const bookmarking = ref(false);
 const pageLoading = ref(false);
+const imageBusting = ref(false);
 
 const id = computed(() => manga.value?.id);
 const chapterId = computed(() => chapter.value?.id);
@@ -373,6 +383,23 @@ const resetPages = async () => {
     await forceReset();
     window.location.reload();
     pageLoading.value = false;
+};
+
+const bustCurrentImage = async () => {
+    if (!currentPage.value || imageBusting.value) return;
+
+    imageBusting.value = true;
+    const image = currentPage.value;
+    const res = await api.promise.image.bust(image.id);
+
+    if (!api.isSuccess(res)) {
+        imageBusting.value = false;
+        alert('Failed to bust image: ' + api.errorMessage(res));
+        return;
+    }
+
+    await clearImage(image);
+    window.location.reload();
 };
 
 const toggleBookmark = async () => {

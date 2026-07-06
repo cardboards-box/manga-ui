@@ -85,7 +85,7 @@ export function useSharedApi<Handle extends Handles>(api: Handle) {
             },
             del: (id: string) => del<RespInt32>(`image/${id}`),
             reindex: (id: string) => get<RespInt32>(`image/${id}/reindex`),
-            bust: (id: string) => get<RespBoxed>(`image/${id}/bust`),
+            bust: (id: string) => get<RespImage>(`image/${id}/bust`),
             bustMany: (ids: string[]) => post<RespBoxed>('image/bust', ids)
         },
         log: {

@@ -293,10 +293,30 @@ export const useImageCache = () => {
         }
     }
 
+    /**
+     * Clears one image from the cache
+     * @param image The image or image URL to clear
+     */
+    async function clearImage(image: string | MbImage) {
+        try {
+            const url = typeof image === 'string' ? image : api.promise.image.downloadUrl(image);
+            const keys = createKeys(url);
+            delete activeRequests.value[url];
+            await Promise.all([
+                $db.removeItem(keys.image),
+                $db.removeItem(keys.meta)
+            ]);
+            await readMetadata();
+        } catch (error) {
+            console.error('Failed to clear image from cache', { image, error });
+        }
+    }
+
     return {
         get,
         meta: computed(() => currentMetaData.value),
         refreshMeta: readMetadata,
-        clear: clearCache
+        clear: clearCache,
+        clearImage
     }
 }
