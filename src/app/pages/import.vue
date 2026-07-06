@@ -1,6 +1,12 @@
 <template>
     <Loading v-if="loading" />
-    <Error v-else-if="!canRead || error" :message="error ?? 'Not found!'" />
+    <Error 
+        v-else-if="!canRead || error" 
+        :message="error ?? 'Not found!'" 
+        :show-reset="canRead"
+        reset-text="Try Again" 
+        @reset="clear"
+    />
     <div v-else class="center rounded bg-accent pad flex row import">
         <h2>Don't see your favourite manga? Add it!</h2>
         <div class="control fill">
@@ -55,6 +61,11 @@ const addManga = async () => {
 
     navigateTo(`/manga/${manga.entity.id}`);
 };
+
+const clear = () => {
+    url.value = '';
+    error.value = undefined;
+}
 
 onMounted(() => nextTick(() => {
     if (!routeUrl.value) return;
