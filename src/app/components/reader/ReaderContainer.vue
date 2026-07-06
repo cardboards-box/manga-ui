@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { FilterStyle, } from '~/models';
+import { FilterStyle } from '~/models';
 import type { ClassOptions, MbImage, booleanish } from '~/models';
 
 const { get } = useImageCache();
@@ -103,6 +103,7 @@ const {
     error, setPageNumber,
     hasLongStripTag, regions,
 } = useReaderHelper();
+const { isLongStripPageStyle } = usePageStyleHelper();
 
 const props = defineProps<{
     loading?: booleanish;
@@ -131,7 +132,7 @@ const menuOpen = computed({
 });
 
 const curPageStyle = computed(() => {
-    if (autoLongStrip.value && hasLongStripTag.value)
+    if (autoLongStrip.value && hasLongStripTag.value && !isLongStripPageStyle(pageStyle.value))
         return autoLongStripStyle.value;
 
     return pageStyle.value;

@@ -199,11 +199,11 @@
                             </SelectBox>
                         </div>
                         <div class="control checkbox">
-                            <CheckBox v-model="autoLongStrip">
+                            <CheckBox v-model="autoLongStrip" :disabled="isLongStripPageStyle(pageStyle)">
                                 Switch to Long-Strip Style Automatically
                             </CheckBox>
                         </div>
-                        <div class="control">
+                        <div class="control" v-if="!isLongStripPageStyle(pageStyle)">
                             <label class="no-bot">Auto Long-Strip Image Style</label>
                             <SelectBox v-model="autoLongStripStyle">
                                 <option v-for="style in PAGE_STYLES_LONGSTRIP" :value="style.value">
@@ -218,7 +218,7 @@
                                     PageStyle.DoublePageMaxSize,
                                     PageStyle.LongStripMaxSize
                                 ].includes(pageStyle) ||
-                                (autoLongStrip && PageStyle.LongStripMaxSize === autoLongStripStyle)
+                                (!isLongStripPageStyle(pageStyle) && autoLongStrip && PageStyle.LongStripMaxSize === autoLongStripStyle)
                             "
                         >
                             <div class="control">
@@ -312,6 +312,7 @@ import {
 } from '~/models';
 import type { ClassOptions } from '~/models';
 const { fullscreen, serClasses, getWidth, getHeight, resizeTrigger } = useUtils();
+const { isLongStripPageStyle } = usePageStyleHelper();
 const api = useMangaApi();
 const { download } = useApiHelper();
 const { isAdmin } = useAuthHelper();
