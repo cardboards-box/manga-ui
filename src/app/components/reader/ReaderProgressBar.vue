@@ -58,7 +58,7 @@ const determineStateClass = (page: PageImage): ClassMap => {
 $progress-height: 10px;
 $progress-margin: 1px;
 
-$loading-primary: var(--color-primary);
+$loading-primary: color-mix(in srgb, var(--color-primary) 55%, transparent);
 $loading-secondary: transparent;
 $loading-speed: 0.5s;
 $current-border-fade-speed: 1.25s;
@@ -74,7 +74,7 @@ $progress-percent-dot-size: 8px;
     .progress {
         flex: 1;
         box-sizing: border-box;
-        background-color: var(--color-primary);
+        background-color: color-mix(in srgb, var(--color-primary) 28%, transparent);
         transition: all 250ms;
         cursor: pointer;
 
@@ -83,16 +83,17 @@ $progress-percent-dot-size: 8px;
             animation: loading-animation #{$loading-speed} infinite linear;
         }
 
-        &.initial { background: color-mix(in srgb, var(--color-primary) 20%, transparent); }
-        &.error { background-color: var(--color-warning); }
-        &.loaded { background-color: var(--color-primary); }
+        &.initial { background: color-mix(in srgb, var(--color-primary) 14%, transparent); }
+        &.error { background-color: color-mix(in srgb, var(--color-warning) 55%, transparent); }
+        &.loaded { background-color: color-mix(in srgb, var(--color-primary) 30%, transparent); }
 
-        &.read { border: 1px solid var(--color-primary); }
+        &.read { border: 1px solid color-mix(in srgb, var(--color-primary) 55%, transparent); }
         &.current {
-            border: 3px solid var(--color);
+            background-color: color-mix(in srgb, var(--color-primary) 42%, transparent);
+            border: 3px solid color-mix(in srgb, var(--color) 70%, transparent);
             animation: current-border-fade #{$current-border-fade-speed} infinite ease-in-out;
         }
-        &.unread { border: 1px dashed var(--color); }
+        &.unread { border: 1px dashed color-mix(in srgb, var(--color) 45%, transparent); }
     }
 
     .progress-percent {
@@ -174,8 +175,8 @@ $progress-percent-dot-size: 8px;
 }
 
 @keyframes current-border-fade {
-    0% { border-color: var(--color); }
-    50% { border-color: var(--color-primary); }
-    100% { border-color: var(--color); }
+    0% { border-color: color-mix(in srgb, var(--color) 70%, transparent); }
+    50% { border-color: color-mix(in srgb, var(--color-primary) 70%, transparent); }
+    100% { border-color: color-mix(in srgb, var(--color) 70%, transparent); }
 }
 </style>
