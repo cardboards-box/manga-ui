@@ -85,13 +85,9 @@
                             </button>
                         </div>
                         <div class="btn-group-vert">
-                            <button @click="copyUrl(`chapter/${chapterId}?page=${currentPage?.ordinal ?? 1}`)">
-                                <Icon>auto_stories</Icon>
-                                <p>Copy Page Link</p>
-                            </button>
-                            <button @click="copyUrl('manga/' + id)">
-                                <Icon>share</Icon>
-                                <p>Copy Manga Link</p>
+                            <button @click="goStart">
+                                <Icon>restart_alt</Icon>
+                                <p>Restart Chapter</p>
                             </button>
                             <NuxtLink :to="'/manga/' + id">
                                 <Icon>menu_book</Icon>
@@ -101,6 +97,20 @@
                                 <Icon>home</Icon>
                                 <p>Manga Source Page</p>
                             </a>
+                        </div>
+                    </div>
+                </Tab>
+                <Tab icon="switches" scrollable keep-alive class-name="flex row">
+                    <div class="settings-tab flex row">
+                        <div class="btn-group-vert">
+                            <button @click="copyUrl(`chapter/${chapterId}?page=${currentPage?.ordinal ?? 1}`)">
+                                <Icon>auto_stories</Icon>
+                                <p>Copy Page Link</p>
+                            </button>
+                            <button @click="copyUrl('manga/' + id)">
+                                <Icon>share</Icon>
+                                <p>Copy Manga Link</p>
+                            </button>
                             <button :disabled="downloading" @click="downloadPage()">
                                 <Icon :spin="downloading">
                                     {{ !downloading ? 'download' : 'sync' }}
@@ -117,10 +127,6 @@
                                 <Icon>auto_fix</Icon>
                                 <p>Create Strip</p>
                             </NuxtLink>
-                            <button @click="goStart">
-                                <Icon>restart_alt</Icon>
-                                <p>Restart Chapter</p>
-                            </button>
                             <button :disabled="bookmarking" @click="toggleBookmark">
                                 <Icon :spin="bookmarking">bookmark</Icon>
                                 <p>Bookmark Page</p>
@@ -133,6 +139,22 @@
                                 <Icon>image</Icon>
                                 <p>Manage Images</p>
                             </NuxtLink>
+                            <button @click="fullscreen">
+                                <Icon>fullscreen</Icon>
+                                <p>Toggle Fullscreen</p>
+                            </button>
+                            <button @click="resetPages" :disabled="pageLoading">
+                                <Icon :spin="pageLoading">sync</Icon>
+                                <p>Refresh Page Links</p>
+                            </button>
+                            <button
+                                v-if="isAdmin"
+                                @click="bustCurrentImage"
+                                :disabled="imageBusting || !currentPage"
+                            >
+                                <Icon :spin="imageBusting">sync_problem</Icon>
+                                <p>Bust Current Image</p>
+                            </button>
                         </div>
                     </div>
                 </Tab>
@@ -277,24 +299,6 @@
                         <div class="control">
                             <label class="no-bot">Image Brightness ({{ brightness }}%)</label>
                             <input type="range" min="1" max="100" step="1" v-model="brightness" />
-                        </div>
-                        <div class="btn-group-vert">
-                            <button @click="fullscreen">
-                                <Icon>fullscreen</Icon>
-                                <p>Toggle Fullscreen</p>
-                            </button>
-                            <button @click="resetPages" :disabled="pageLoading">
-                                <Icon :spin="pageLoading">sync</Icon>
-                                <p>Refresh Page Links</p>
-                            </button>
-                            <button
-                                v-if="isAdmin"
-                                @click="bustCurrentImage"
-                                :disabled="imageBusting || !currentPage"
-                            >
-                                <Icon :spin="imageBusting">sync_problem</Icon>
-                                <p>Bust Current Image</p>
-                            </button>
                         </div>
                     </div>
                 </Tab>

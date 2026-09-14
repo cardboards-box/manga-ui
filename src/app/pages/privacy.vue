@@ -81,7 +81,6 @@
 
         </p>
         <ul>
-            <li>The Discord Server linked on the sidebar.</li>
             <li>The GitHub Repository (issues) linked on the sidebar.</li>
         </ul>
         <p>We do not have a dedicated email address for privacy concerns at this time (nor do we plan to).</p>

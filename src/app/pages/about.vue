@@ -46,7 +46,7 @@
 
         <h2 class="margin-top">Questions?</h2>
         <p class="margin-top">
-            If you have any questions, feel free to join <a href="https://discord.gg/RV9MvvYXsp" target="_blank">my discord server</a> or find me in the MangaDex one (I'm <a href="https://discord.com/users/191100926486904833" target="_blank">Cardboard</a>). <br>
+            If you have any questions, find me in the MangaDex Discord Server (I'm <a href="https://discord.com/users/191100926486904833" target="_blank">Cardboard</a>). <br>
             Almost everything about this project is open-source.
             You can find the code of this site <a href="https://github.com/cardboards-box/manga-reverse-img-search" target="_blank">here</a>. <br> <br>
 

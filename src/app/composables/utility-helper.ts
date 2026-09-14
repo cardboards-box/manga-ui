@@ -463,15 +463,11 @@ export const useUtils = () => {
         const elem = <any>document.documentElement;
         const doc = <any>document;
 
-        const isFullScreen = ((<any>window).fullScreen) || (
-                window.innerWidth == screen.width &&
-                window.innerHeight == screen.height
-            ) || (
-                !window.screenTop &&
-                !window.screenY
-            );
+        const fullscreenElement = document.fullscreenElement
+            || doc.webkitFullscreenElement
+            || doc.msFullscreenElement;
 
-        if (isFullScreen) {
+        if (fullscreenElement) {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
             } else if (doc.webkitExitFullscreen) { /* Safari */
