@@ -154,7 +154,7 @@ const headerStuck = ref(false);
 const updating = ref<Record<string, boolean>>({});
 const actionError = ref<Record<string, string>>({});
 const searchFilters = ref(parseFilters());
-const filter = computed<ProfileSearchFilter>(() => toApiFilter(parseFilters()));
+const filter = computed<ProfileSearchFilter>(() => toApiFilter(parseFilters()) ?? {});
 
 const { data: providerData } = useAsyncData(
     'admin-profile-providers',
@@ -204,7 +204,7 @@ const updateRoute = (merge: Partial<ProfileSearchDraft>) => {
     };
 
     router.push({
-        path: '/admin',
+        path: '/admin/profiles',
         query: toQuery(next),
     });
 };
@@ -254,16 +254,18 @@ const replaceProfile = (profile: MbProfile) => {
 const isUpdating = (id: string) => updating.value[id] ?? false;
 const isSelf = (profile: MbProfile) => currentUser.value?.id === profile.id;
 
-const toApiFilter = (draft: ProfileSearchDraft): ProfileSearchFilter => ({
-    page: draft.page,
-    size: draft.size,
-    search: draft.search,
-    providers: draft.provider ? [draft.provider] : undefined,
-    admin: draft.admin,
-    canRead: draft.canRead,
-    order: ProfileOrderBy.CreatedAt,
-    asc: false,
-});
+function toApiFilter(draft: ProfileSearchDraft): ProfileSearchFilter {
+    return {
+        page: draft.page,
+        size: draft.size,
+        search: draft.search,
+        providers: draft.provider ? [draft.provider] : undefined,
+        admin: draft.admin,
+        canRead: draft.canRead,
+        order: ProfileOrderBy.CreatedAt,
+        asc: false,
+    };
+}
 
 function parseFilters(): ProfileSearchDraft {
     return {
