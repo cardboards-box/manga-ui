@@ -1,4 +1,5 @@
 export * from './chapter-style';
+export * from './chapter-read-filter';
 export * from './filter-style';
 export * from './image-style';
 export * from './list-style';

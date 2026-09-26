@@ -64,20 +64,24 @@
 </template>
 
 <script setup lang="ts">
+import { ChapterReadFilter } from '~/models';
 import type { MangaVolumes, ProgressChapter, VolumeChapter } from '~/models';
 
 const { chapterTitle } = useMangaUtils();
 const { progress } = useCurrentManga();
 const { canRead } = useAuthHelper();
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     chapters: VolumeChapter[];
     chapterMap?: MangaVolumes['chapters'];
     reverse?: boolean;
-}>();
+    readFilter?: ChapterReadFilter;
+}>(), {
+    readFilter: ChapterReadFilter.All,
+});
 
 const displayedChapters = computed(() => {
-    const chapters = [...props.chapters];
+    const chapters = props.chapters.filter(matchesReadFilter);
     return props.reverse ? chapters.reverse() : chapters;
 });
 
@@ -117,6 +121,12 @@ const status = (chapter: VolumeChapter) => {
     if (chapter.progress >= 100 || fullChapters(chapter).some(t => partStatus(t) === 'read')) return 'read';
     return 'unread';
 };
+
+function matchesReadFilter(chapter: VolumeChapter) {
+    if (props.readFilter === ChapterReadFilter.All) return true;
+    const isRead = ['read', 'current'].includes(status(chapter));
+    return isRead === (props.readFilter === ChapterReadFilter.Read);
+}
 </script>
 
 <style scoped lang="scss">

@@ -28,29 +28,33 @@
             :chapters="volume.chapters"
             :chapter-map="volumes?.chapters"
             :reverse="reverse"
+            :read-filter="readFilter"
         />
     </article>
 </template>
 
 <script setup lang="ts">
-import { VolumeState } from '~/models';
+import { ChapterReadFilter, VolumeState } from '~/models';
 import type { MangaVolume, MangaVolumes, MbImage, ProgressChapter, VolumeChapter } from '~/models';
 import ChapterRows from './ChapterRows.vue';
 
 const { progress } = useCurrentManga();
 const { canRead } = useAuthHelper();
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     volumes?: MangaVolumes;
     cover?: MbImage;
     covers?: MbImage[];
     reverse?: boolean;
-}>();
+    readFilter?: ChapterReadFilter;
+}>(), {
+    readFilter: ChapterReadFilter.All,
+});
 
 const initializedKey = ref<string>();
 
 const displayedVolumes = computed(() => {
-    const volumes = [...(props.volumes?.volumes ?? [])];
+    const volumes = (props.volumes?.volumes ?? []).filter(volume => volume.chapters.some(matchesReadFilter));
     return props.reverse ? volumes.reverse() : volumes;
 });
 
@@ -77,6 +81,12 @@ const status = (chapter: VolumeChapter) => {
     return 'unread';
 };
 
+function matchesReadFilter(chapter: VolumeChapter) {
+    if (props.readFilter === ChapterReadFilter.All) return true;
+    const isRead = ['read', 'current'].includes(status(chapter));
+    return isRead === (props.readFilter === ChapterReadFilter.Read);
+}
+
 const volumeHasChapter = (volume: MangaVolume, id?: string) => !!id && volume.chapters
     .some(chapter => chapterIds(chapter).includes(id));
 const volumeCover = (volume: MangaVolume) => props.covers?.find(cover => cover.ordinal === volume.ordinal)
@@ -91,11 +101,12 @@ const initializeOpenVolume = () => {
     const key = [
         lastReadChapterId ?? 'first',
         props.reverse ? 'reversed' : 'normal',
+        props.readFilter,
         vols.map((volume, index) => `${volume.ordinal ?? index}:${volume.chapters.length}`).join('|')
     ].join(':');
     if (initializedKey.value === key) return;
 
-    const currentVolume = vols.find(volume => volumeHasChapter(volume, lastReadChapterId));
+    const currentVolume = displayedVolumes.value.find(volume => volumeHasChapter(volume, lastReadChapterId));
     const openVolume = currentVolume ?? displayedVolumes.value[0];
 
     for (const volume of vols)
@@ -109,7 +120,7 @@ const volumeReadCount = (volume: MangaVolume) => volume.chapters.filter(isChapte
 const volumePercent = (volume: MangaVolume) => volume.chapters.length ? (volumeReadCount(volume) / volume.chapters.length) * 100 : 0;
 
 watch(
-    [() => props.volumes, () => props.reverse, () => progress.value?.entity.lastReadChapterId],
+    [() => props.volumes, () => props.reverse, () => props.readFilter, () => progress.value?.entity.lastReadChapterId],
     () => initializeOpenVolume(),
     { immediate: true }
 );

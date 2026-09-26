@@ -10,19 +10,35 @@
                 </span>
                 <span>{{ percentRead.toFixed(0) }}%</span>
             </div>
-            <SelectBox v-model="chapterStyle" transparent>
-                <option v-for="style in CHAPTER_STYLES" :key="style.value" :value="style.value">
-                    {{ style.name }}
-                </option>
-            </SelectBox>
+            <div class="chapter-list-controls">
+                <IconBtn
+                    v-if="canRead"
+                    class="chapter-read-filter"
+                    :icon="activeReadFilter.icon"
+                    :title="activeReadFilter.title"
+                    :class="{ active: chapterReadFilter !== ChapterReadFilter.All }"
+                    icon-size="20px"
+                    @click="cycleReadFilter"
+                />
+                <SelectBox v-model="chapterStyle" transparent>
+                    <option v-for="style in CHAPTER_STYLES" :key="style.value" :value="style.value">
+                        {{ style.name }}
+                    </option>
+                </SelectBox>
+            </div>
         </header>
 
         <Error v-if="!volumes || volumes.volumes.length === 0" message="Manga has no chapters!" />
+        <Error
+            v-else-if="chapterReadFilter !== ChapterReadFilter.All && filteredChapterCount === 0"
+            :message="`No ${chapterReadFilter} chapters found.`"
+        />
 
         <ChapterList
             v-else-if="isFlatList"
             :volumes="volumes"
             :reverse="isReversed"
+            :read-filter="chapterReadFilter"
         />
         <ChapterVolumeList
             v-else
@@ -30,12 +46,13 @@
             :cover="cover"
             :covers="covers"
             :reverse="isReversed"
+            :read-filter="chapterReadFilter"
         />
     </section>
 </template>
 
 <script setup lang="ts">
-import { CHAPTER_STYLES, ChapterStyle } from '~/models';
+import { CHAPTER_STYLES, ChapterReadFilter, ChapterStyle } from '~/models';
 import type { MangaVolume, MangaVolumes, MbImage, ProgressChapter, VolumeChapter } from '~/models';
 import ChapterList from './ChapterList.vue';
 import ChapterVolumeList from './ChapterVolumeList.vue';
@@ -49,6 +66,30 @@ const props = defineProps<{
     cover?: MbImage;
     covers?: MbImage[];
 }>();
+
+const readFilters = [
+    {
+        value: ChapterReadFilter.All,
+        icon: 'filter_alt',
+        title: 'Showing all chapters',
+    }, {
+        value: ChapterReadFilter.Read,
+        icon: 'check_circle',
+        title: 'Showing read chapters only',
+    }, {
+        value: ChapterReadFilter.Unread,
+        icon: 'radio_button_unchecked',
+        title: 'Showing unread chapters only',
+    }
+];
+
+const chapterReadFilter = ref<ChapterReadFilter>(ChapterReadFilter.All);
+const activeReadFilter = computed(() => readFilters.find(filter => filter.value === chapterReadFilter.value) ?? readFilters[0]!);
+
+const cycleReadFilter = () => {
+    const index = readFilters.findIndex(filter => filter.value === chapterReadFilter.value);
+    chapterReadFilter.value = readFilters[(index + 1) % readFilters.length]!.value;
+};
 
 const chapterIds = (chapter: VolumeChapter) => [
     ...chapter.whole,
@@ -78,8 +119,18 @@ const readCount = computed(() => props.volumes?.volumes.reduce((sum, volume) => 
 const percentRead = computed(() => totalCount.value ? (readCount.value / totalCount.value) * 100 : 0);
 const isChapterStarted = (chapter: VolumeChapter) => ['read', 'current'].includes(status(chapter));
 const volumeReadCount = (volume: MangaVolume) => volume.chapters.filter(isChapterStarted).length;
+const filteredChapterCount = computed(() => props.volumes?.volumes.reduce((sum, volume) => sum + volume.chapters.filter(matchesReadFilter).length, 0) ?? 0);
 const isFlatList = computed(() => [ChapterStyle.Chapters, ChapterStyle.ChaptersReversed].includes(chapterStyle.value));
 const isReversed = computed(() => [ChapterStyle.VolumesReversed, ChapterStyle.ChaptersReversed].includes(chapterStyle.value));
+
+function matchesReadFilter(chapter: VolumeChapter) {
+    if (chapterReadFilter.value === ChapterReadFilter.All) return true;
+    return isChapterStarted(chapter) === (chapterReadFilter.value === ChapterReadFilter.Read);
+}
+
+watch(canRead, value => {
+    if (!value) chapterReadFilter.value = ChapterReadFilter.All;
+});
 </script>
 
 <style scoped lang="scss">
@@ -97,18 +148,29 @@ const isReversed = computed(() => [ChapterStyle.VolumesReversed, ChapterStyle.Ch
             justify-content: space-between;
             gap: 1rem;
             min-width: 0;
+
+            strong,
+            > span:last-child {
+                color: var(--color);
+            }
+
+            > span:last-child {
+                color: var(--color-primary);
+            }
         }
 
-        strong,
-        span:last-child {
-            color: var(--color);
+        .chapter-list-controls {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
         }
 
-        span:last-child {
-            color: var(--color-primary);
+        .chapter-read-filter.active {
+            outline: 1px solid var(--color-primary);
+            outline-offset: -1px;
         }
 
-        .select-styled {
+        .chapter-list-controls .select-styled {
             min-width: 180px;
         }
     }

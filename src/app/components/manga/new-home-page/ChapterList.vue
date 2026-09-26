@@ -4,18 +4,23 @@
             :chapters="chapters"
             :chapter-map="volumes?.chapters"
             :reverse="reverse"
+            :read-filter="readFilter"
         />
     </div>
 </template>
 
 <script setup lang="ts">
+import { ChapterReadFilter } from '~/models';
 import type { MangaVolumes } from '~/models';
 import ChapterRows from './ChapterRows.vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     volumes?: MangaVolumes;
     reverse?: boolean;
-}>();
+    readFilter?: ChapterReadFilter;
+}>(), {
+    readFilter: ChapterReadFilter.All,
+});
 
 const chapters = computed(() => props.volumes?.volumes.flatMap(volume => volume.chapters) ?? []);
 </script>
